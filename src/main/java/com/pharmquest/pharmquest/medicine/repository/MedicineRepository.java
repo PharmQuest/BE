@@ -6,7 +6,6 @@ import com.pharmquest.pharmquest.medicine.dto.MedicineResponseDTO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,12 +42,17 @@ public class MedicineRepository {
             List<MedicineResponseDTO> medicines = new ArrayList<>();
             if (results != null && results.isArray()) {
                 for (JsonNode result : results) {
+                    JsonNode openFda = result.path("openfda");
                     medicines.add(new MedicineResponseDTO(
-                            result.path("effective_time").asText("N/A"),
-                            result.path("purpose").toString(),
-                            result.path("warnings").toString(),
-                            result.path("dosage_and_administration").toString(),
-                            result.path("active_ingredient").toString()
+                            openFda.path("brand_name").isArray() ? openFda.path("brand_name").get(0).asText("Unknown") : "Unknown",
+                            openFda.path("generic_name").isArray() ? openFda.path("generic_name").get(0).asText("Unknown") : "Unknown",
+                            openFda.path("substance_name").isArray() ? openFda.path("substance_name").get(0).asText("Unknown") : "Unknown",
+                            result.path("active_ingredient").isArray() ? result.path("active_ingredient").get(0).asText("Unknown") : "Unknown",
+                            openFda.path("route").isArray() ? openFda.path("route").get(0).asText("Unknown") : "Unknown",
+                            result.path("purpose").isArray() ? result.path("purpose").get(0).asText("Unknown") : "Unknown",
+                            result.path("indications_and_usage").isArray() ? result.path("indications_and_usage").get(0).asText("Unknown") : "Unknown",
+                            result.path("dosage_and_administration").isArray() ? result.path("dosage_and_administration").get(0).asText("Unknown") : "Unknown",
+                            result.path("dosage_forms_and_strengths").isArray() ? result.path("dosage_forms_and_strengths").get(0).asText("Unknown") : "Unknown"
                     ));
                 }
             }
@@ -59,3 +63,4 @@ public class MedicineRepository {
         }
     }
 }
+

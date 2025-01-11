@@ -1,8 +1,8 @@
-package com.pharmquest.pharmquest.user.domain;
+package com.pharmquest.pharmquest.domain.user.domain;
 
-import com.pharmquest.pharmquest.mypage.domain.MedicineScrap;
-import com.pharmquest.pharmquest.mypage.domain.PharmacyScrap;
-import com.pharmquest.pharmquest.mypage.domain.SupplementScrap;
+import com.pharmquest.pharmquest.domain.mypage.domain.MedicineScrap;
+import com.pharmquest.pharmquest.domain.mypage.domain.PharmacyScrap;
+import com.pharmquest.pharmquest.domain.mypage.domain.SupplementScrap;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

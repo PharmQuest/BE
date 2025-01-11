@@ -1,4 +1,4 @@
-package com.pharmquest.pharmquest.pharmacy.domain;
+package com.pharmquest.pharmquest.domain.supplements.domain;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -9,9 +9,8 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class Pharmacy {
+public class Supplements {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 }
-

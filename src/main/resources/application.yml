@@ -2,9 +2,9 @@ spring:
   application:
     name: pharmquest # 애플리케이션 이름 설정
   datasource:
-    url: jdbc:mysql://localhost:3306/pharmquest?useSSL=false&serverTimezone=UTC
-    username: ""
-    password: ""
+    url: jdbc:mysql://localhost:3306/pharmquest?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: "root"
+    password: "heesun0419!"
   jpa:
     hibernate:
       ddl-auto: update # 테이블을 자동 생성/업데이트

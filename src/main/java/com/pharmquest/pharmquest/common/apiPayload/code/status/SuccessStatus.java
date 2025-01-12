@@ -12,6 +12,11 @@ public enum SuccessStatus implements BaseCode {
 
     //일반적 응답
     _OK(HttpStatus.OK, "COMMON200", "성공입니다."),
+
+    //홈
+    HOME_POSTS(HttpStatus.OK, "HOME201", "홈 게시글을 성공적으로 불러왔습니다."),
+
+
     ;
 
     private final HttpStatus httpStatus;

@@ -2,9 +2,9 @@ spring:
   application:
     name: pharmquest # 애플리케이션 이름 설정
   datasource:
-    url: jdbc:mysql://localhost:3306/pharmquest?useSSL=false&serverTimezone=UTC
-    username: ""
-    password: ""
+    url: ${DB_URL}
+    username: root
+    password: ${DB_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: update # 테이블을 자동 생성/업데이트
@@ -13,3 +13,10 @@ spring:
     properties:
       hibernate:
         format_sql: true # 출력되는 SQL 포맷팅
+
+naver:
+  client:
+    id: "aXVib8vKL2hoTW1R_Ta0"
+    secret: ${CLIENT_SECRET}
+  api:
+    url: https://openapi.naver.com/v1/search/shop.json

@@ -1,6 +1,7 @@
 package com.pharmquest.pharmquest.mypage.domain;
 
-import com.pharmquest.pharmquest.medicine.domain.Medicine;
+
+import com.pharmquest.pharmquest.domain.medicine.data.Medicine;
 import com.pharmquest.pharmquest.user.domain.User;
 import jakarta.persistence.*;
 import lombok.Getter;

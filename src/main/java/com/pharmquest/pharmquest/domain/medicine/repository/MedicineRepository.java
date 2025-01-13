@@ -1,8 +1,8 @@
-package com.pharmquest.pharmquest.medicine.repository;
+package com.pharmquest.pharmquest.domain.medicine.repository;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.pharmquest.pharmquest.medicine.dto.MedicineResponseDTO;
+import com.pharmquest.pharmquest.domain.medicine.web.dto.MedicineResponseDTO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.reactive.function.client.WebClient;

@@ -1,8 +1,7 @@
-package com.pharmquest.pharmquest.medicine.service;
+package com.pharmquest.pharmquest.domain.medicine.service;
 
-import com.pharmquest.pharmquest.medicine.dto.MedicineResponseDTO;
-import com.pharmquest.pharmquest.medicine.repository.MedicineRepository;
-import com.pharmquest.pharmquest.medicine.service.MedicineService;
+import com.pharmquest.pharmquest.domain.medicine.web.dto.MedicineResponseDTO;
+import com.pharmquest.pharmquest.domain.medicine.repository.MedicineRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

@@ -1,8 +1,11 @@
-package com.pharmquest.pharmquest.medicine.controller;
+package com.pharmquest.pharmquest.domain.medicine.web.controller;
 
-import com.pharmquest.pharmquest.medicine.dto.MedicineResponseDTO;
-import com.pharmquest.pharmquest.medicine.service.MedicineService;
-import org.springframework.web.bind.annotation.*;
+import com.pharmquest.pharmquest.domain.medicine.web.dto.MedicineResponseDTO;
+import com.pharmquest.pharmquest.domain.medicine.service.MedicineService;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 

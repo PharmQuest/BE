@@ -1,6 +1,5 @@
-package com.pharmquest.pharmquest.medicine.dto;
+package com.pharmquest.pharmquest.domain.medicine.web.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 

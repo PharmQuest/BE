@@ -1,0 +1,9 @@
+package com.pharmquest.pharmquest.domain.medicine.service;
+
+import com.pharmquest.pharmquest.domain.medicine.web.dto.MedicineResponseDTO;
+
+import java.util.List;
+
+public interface MedicineService {
+    List<MedicineResponseDTO> getMedicines(String query, int limit);
+}

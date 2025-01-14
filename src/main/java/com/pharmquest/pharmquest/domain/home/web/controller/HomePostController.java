@@ -2,7 +2,7 @@ package com.pharmquest.pharmquest.domain.home.web.controller;
 
 import com.pharmquest.pharmquest.domain.home.response.HomePostsResponse;
 import com.pharmquest.pharmquest.domain.home.service.HomePostService;
-import com.pharmquest.pharmquest.domain.post.domain.Post;
+import com.pharmquest.pharmquest.domain.post.data.Post;
 import com.pharmquest.pharmquest.global.apiPayload.ApiResponse;
 import com.pharmquest.pharmquest.global.apiPayload.code.status.SuccessStatus;
 import lombok.RequiredArgsConstructor;

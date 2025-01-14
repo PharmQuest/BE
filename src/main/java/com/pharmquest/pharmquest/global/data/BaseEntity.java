@@ -1,4 +1,4 @@
-package com.pharmquest.pharmquest.domain;
+package com.pharmquest.pharmquest.global.data;
 
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;

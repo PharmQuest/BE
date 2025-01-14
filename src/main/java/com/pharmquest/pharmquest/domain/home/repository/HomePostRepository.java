@@ -1,6 +1,6 @@
 package com.pharmquest.pharmquest.domain.home.repository;
 
-import com.pharmquest.pharmquest.domain.post.domain.Post;
+import com.pharmquest.pharmquest.domain.post.data.Post;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

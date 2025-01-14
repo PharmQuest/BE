@@ -1,6 +1,6 @@
-package com.pharmquest.pharmquest.domain.post.domain;
+package com.pharmquest.pharmquest.domain.post.data;
 
-import com.pharmquest.pharmquest.domain.BaseEntity;
+import com.pharmquest.pharmquest.global.data.BaseEntity;
 import com.pharmquest.pharmquest.domain.post.data.enums.Country;
 import com.pharmquest.pharmquest.domain.post.data.enums.PostCategory;
 import com.pharmquest.pharmquest.user.domain.User;

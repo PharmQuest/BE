@@ -1,7 +1,7 @@
 package com.pharmquest.pharmquest.domain.home.response;
 
 import com.pharmquest.pharmquest.domain.home.web.dto.HomePostResponseDTO;
-import com.pharmquest.pharmquest.domain.post.domain.Post;
+import com.pharmquest.pharmquest.domain.post.data.Post;
 import lombok.Getter;
 
 import java.util.List;

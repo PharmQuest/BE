@@ -1,7 +1,7 @@
 package com.pharmquest.pharmquest.domain.home.service;
 
 import com.pharmquest.pharmquest.domain.home.repository.HomePostRepository;
-import com.pharmquest.pharmquest.domain.post.domain.Post;
+import com.pharmquest.pharmquest.domain.post.data.Post;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

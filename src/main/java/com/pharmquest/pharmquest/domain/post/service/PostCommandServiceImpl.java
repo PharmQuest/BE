@@ -26,7 +26,12 @@ public class PostCommandServiceImpl implements PostCommandService{
 
     @Override
     public Page<Post> getAllPosts(PostCategory category, Integer page) {
-        Page<Post> PostPage = postRepository. findByCategory(category,PageRequest.of(page - 1, 10));
-        return PostPage;
+        if (category == PostCategory.ALL) {
+            // category가 ALL이면 전체 게시물 조회
+            return postRepository.findAll(PageRequest.of(page - 1, 10));
+        } else {
+            // 특정 category에 맞는 게시물 조회
+            return postRepository.findByCategory(category, PageRequest.of(page - 1, 10));
+        }
     }
 }

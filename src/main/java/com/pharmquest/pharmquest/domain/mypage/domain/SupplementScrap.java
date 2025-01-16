@@ -1,7 +1,7 @@
-package com.pharmquest.pharmquest.mypage.domain;
+package com.pharmquest.pharmquest.domain.mypage.domain;
 
-import com.pharmquest.pharmquest.pharmacy.domain.Pharmacy;
-import com.pharmquest.pharmquest.user.domain.User;
+import com.pharmquest.pharmquest.domain.supplements.domain.Supplements;
+import com.pharmquest.pharmquest.domain.user.data.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,7 +11,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class PharmacyScrap {
+public class SupplementScrap {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -21,6 +21,7 @@ public class PharmacyScrap {
     private User user;
 
     @ManyToOne
-    @JoinColumn(name = "pharmacy_id", referencedColumnName = "id", nullable = false)
-    private Pharmacy pharmacy;
+    @JoinColumn(name = "supplement_id", referencedColumnName = "id", nullable = false)
+    private Supplements supplement;
 }
+

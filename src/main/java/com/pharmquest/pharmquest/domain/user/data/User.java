@@ -1,19 +1,21 @@
-package com.pharmquest.pharmquest.user.domain;
+package com.pharmquest.pharmquest.domain.user.data;
 
-import com.pharmquest.pharmquest.mypage.domain.MedicineScrap;
-import com.pharmquest.pharmquest.mypage.domain.PharmacyScrap;
-import com.pharmquest.pharmquest.mypage.domain.SupplementScrap;
+import com.pharmquest.pharmquest.domain.mypage.domain.MedicineScrap;
+import com.pharmquest.pharmquest.domain.mypage.domain.PharmacyScrap;
+import com.pharmquest.pharmquest.domain.mypage.domain.SupplementScrap;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 @Entity
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,6 +26,13 @@ public class User {
 
     @Column(nullable = false, unique = true)
     private String email;
+
+    private String provider;
+
+    private String providerId;
+
+    @CreationTimestamp
+    private Timestamp createDate;
 
     // Relationships
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)

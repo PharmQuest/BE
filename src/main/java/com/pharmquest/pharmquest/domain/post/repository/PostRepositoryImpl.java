@@ -3,7 +3,7 @@ package com.pharmquest.pharmquest.domain.post.repository;
 import com.pharmquest.pharmquest.domain.post.data.Post;
 import com.pharmquest.pharmquest.domain.post.data.enums.Country;
 import com.pharmquest.pharmquest.domain.post.data.enums.PostCategory;
-import com.pharmquest.pharmquest.user.domain.User;
+import com.pharmquest.pharmquest.domain.user.data.User;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;

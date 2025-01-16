@@ -1,4 +1,4 @@
-package com.pharmquest.pharmquest.pharmacy.domain;
+package com.pharmquest.pharmquest.domain.pharmacy.domain;
 
 import jakarta.persistence.*;
 import lombok.Getter;

@@ -1,6 +1,7 @@
 package com.pharmquest.pharmquest.mypage.domain;
 
 import com.pharmquest.pharmquest.domain.post.data.Post;
+import com.pharmquest.pharmquest.global.data.BaseEntity;
 import com.pharmquest.pharmquest.user.domain.User;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -11,7 +12,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class PostScrap {
+public class PostScrap extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

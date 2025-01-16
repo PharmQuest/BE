@@ -1,14 +1,20 @@
 package com.pharmquest.pharmquest.domain.post.data;
 
+import com.pharmquest.pharmquest.domain.post.data.mapping.PostLike;
+import com.pharmquest.pharmquest.domain.post.data.mapping.PostReport;
 import com.pharmquest.pharmquest.global.data.BaseEntity;
 import com.pharmquest.pharmquest.domain.post.data.enums.Country;
 import com.pharmquest.pharmquest.domain.post.data.enums.PostCategory;
+import com.pharmquest.pharmquest.mypage.domain.PostScrap;
 import com.pharmquest.pharmquest.user.domain.User;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -42,12 +48,18 @@ public class Post extends BaseEntity {
     private Integer views;
 
     @ColumnDefault("0")
-    private Integer reports;
-
-    @ColumnDefault("0")
     private Integer scrapCount;
 
     // 매핑
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+    private List<PostLike> likes = new ArrayList<>();
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+    private List<PostScrap> scraps = new ArrayList<>();
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+    private List<PostReport> reports = new ArrayList<>();
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;

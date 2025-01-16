@@ -3,8 +3,12 @@ package com.pharmquest.pharmquest.domain.post.converter;
 import com.pharmquest.pharmquest.domain.post.data.Post;
 import com.pharmquest.pharmquest.domain.post.web.dto.PostRequestDTO;
 import com.pharmquest.pharmquest.domain.post.web.dto.PostResponseDTO;
+import org.springframework.data.domain.Page;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class PostConverter {
 
@@ -15,13 +19,38 @@ public class PostConverter {
                 .build();
     }
 
-    public static Post toPost(Long userId, PostRequestDTO.CreatePostDTO request) {
+    public static Post toPost(PostRequestDTO.CreatePostDTO request) {
 
         return Post.builder()
                 .title(request.getTitle())
                 .content(request.getContent())
                 .category(request.getCategory())
                 .country(request.getCountry())
+                .build();
+    }
+
+    public static PostResponseDTO.PostPreViewDTO postPreViewDTO(Post post) {
+        return PostResponseDTO.PostPreViewDTO.builder()
+              //  .user(post.getUser().getEmail())
+                .title(post.getTitle())
+                .content(post.getContent())
+                .category(post.getCategory().getKoreanName())
+                .scrapeCount(post.getScraps().size())
+                .likeCount(post.getLikes().size())
+                .createdAt(post.getCreatedAt())
+                .build();
+    }
+
+    public static PostResponseDTO.PostPreViewListDTO postPreViewListDTO(Page<Post> postList){
+        List<PostResponseDTO.PostPreViewDTO> postPreViewDTOList = postList.stream().map(PostConverter::postPreViewDTO).collect(Collectors.toList());
+
+        return PostResponseDTO.PostPreViewListDTO.builder()
+                .isFirst(postList.isFirst())
+                .isLast(postList.isLast())
+                .totalPage(postList.getTotalPages())
+                .totalElements(postList.getTotalElements())
+                .listSize(postPreViewDTOList.size())
+                .postList(postPreViewDTOList)
                 .build();
     }
 

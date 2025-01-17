@@ -54,4 +54,19 @@ public class PostConverter {
                 .build();
     }
 
+    public static PostResponseDTO.PostDetailDTO postDetailDTO(Post post, Boolean isLiked, Boolean isScraped, Boolean isReported) {
+        return PostResponseDTO.PostDetailDTO.builder()
+                //  .user(post.getUser().getEmail())
+                .title(post.getTitle())
+                .content(post.getContent())
+                .category(post.getCategory().getKoreanName())
+                .scrapeCount(post.getScraps().size())
+                .likeCount(post.getLikes().size())
+                .isLiked(isLiked)
+                .isScraped(isScraped)
+                .isReported(isReported)
+                .createdAt(post.getCreatedAt())
+                .build();
+    }
+
 }

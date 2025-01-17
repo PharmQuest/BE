@@ -52,5 +52,26 @@ public class PostResponseDTO {
 
     }
 
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class PostDetailDTO {
+        String user;
+        String title;
+        String content;
+        String category;
+        Integer scrapeCount;
+        Integer likeCount;
+        Integer commentCount;
+        LocalDateTime createdAt;
+        Boolean isBestPost;
+        Boolean isLiked;
+        Boolean isScraped;
+        Boolean isReported;
+        private List<String> comments;
+
+    }
+
 }
 

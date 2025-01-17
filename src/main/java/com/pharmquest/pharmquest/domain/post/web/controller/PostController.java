@@ -35,5 +35,13 @@ public class PostController {
         return ApiResponse.onSuccess(PostConverter.postPreViewListDTO(postList));
     }
 
+    @GetMapping("/posts/{post_id}")
+    @Operation(summary = "게시글 상세조회 API")
+    public ApiResponse<PostResponseDTO.PostDetailDTO> getPost(@PathVariable(name = "post_id")Long postId){
+        // 서비스 호출
+        PostResponseDTO.PostDetailDTO postDetail = postCommandService.getPost(postId);
+
+        return ApiResponse.onSuccess(postDetail);
+    }
 
 }

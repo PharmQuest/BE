@@ -1,6 +1,7 @@
 package com.pharmquest.pharmquest.global.config.oauth;
 
 import com.pharmquest.pharmquest.global.auth.PrincipalDetails;
+import com.pharmquest.pharmquest.global.config.oauth.provider.KakaoUserInfo;
 import com.pharmquest.pharmquest.global.config.oauth.provider.OAuth2UserInfo;
 import com.pharmquest.pharmquest.global.config.oauth.provider.GoogleUserInfo;
 import com.pharmquest.pharmquest.global.config.oauth.provider.NaverUserInfo;
@@ -31,8 +32,8 @@ public class PrincipalOauth2UserService extends DefaultOAuth2UserService {
             oAuth2UserInfo = new GoogleUserInfo(oAuth2User.getAttributes());
         } else if(userRequest.getClientRegistration().getRegistrationId().equals("naver")) {
             oAuth2UserInfo = new NaverUserInfo((Map)oAuth2User.getAttributes().get("response"));
-        } else{
-            System.out.println("우리는 구글과 네이버만 지원합니다");
+        }    else if(userRequest.getClientRegistration().getRegistrationId().equals("kakao")){	//추가
+            oAuth2UserInfo = new KakaoUserInfo(oAuth2User.getAttributes());
         }
 
         String provider = oAuth2UserInfo.getProvider();
@@ -40,7 +41,14 @@ public class PrincipalOauth2UserService extends DefaultOAuth2UserService {
         String username = oAuth2UserInfo.getName();
         String email = oAuth2UserInfo.getEmail();
 
-        User userEntity = userRepository.findByName(username);
+        System.out.println(userRequest.getAccessToken());
+        System.out.println("Provider ID: " + providerId);
+        System.out.println("Username: " + username);
+        System.out.println("Email: " + email);
+
+
+
+        User userEntity = userRepository.findByName(providerId);
 
         if(userEntity == null) {
             userEntity = User.builder()

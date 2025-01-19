@@ -46,7 +46,7 @@ public class PostController {
     }
 
     @GetMapping("/search")
-    @Operation(summary = "카테고리별 게시글 리스트 조회 API")
+    @Operation(summary = "게시글 키워드로 검색 API")
     public ApiResponse<PostResponseDTO.PostPreViewListDTO> searchPost(@RequestParam(name = "keyword")String keyword,@RequestParam(name = "country") Country country, @RequestParam(name = "category")PostCategory category, @RequestParam(name="page")Integer page){
         Page<Post> postList = postCommandService.searchPostsDynamically(keyword, country, category, page);
         return ApiResponse.onSuccess(PostConverter.postPreViewListDTO(postList));

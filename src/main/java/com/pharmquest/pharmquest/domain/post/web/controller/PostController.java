@@ -22,10 +22,10 @@ public class PostController {
 
     private final PostCommandService postCommandService;
 
-    @PostMapping("/posts")
-    public ApiResponse<PostResponseDTO.CreatePostResultDTO> postCommandService(@RequestBody @Valid PostRequestDTO.CreatePostDTO request){
+    @PostMapping("/{user_id}/posts")
+    public ApiResponse<PostResponseDTO.CreatePostResultDTO> postCommandService(@PathVariable(name = "user_id")Long userId, @RequestBody @Valid PostRequestDTO.CreatePostDTO request){
 
-        Post post = postCommandService.registerPost(request);
+        Post post = postCommandService.registerPost(userId, request);
         return ApiResponse.onSuccess(PostConverter.toCreatePostResultDTO(post));
     }
 

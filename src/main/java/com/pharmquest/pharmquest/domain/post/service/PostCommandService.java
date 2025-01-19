@@ -5,6 +5,7 @@ import com.pharmquest.pharmquest.domain.post.data.enums.Country;
 import com.pharmquest.pharmquest.domain.post.data.enums.PostCategory;
 import com.pharmquest.pharmquest.domain.post.web.dto.PostRequestDTO;
 import com.pharmquest.pharmquest.domain.post.web.dto.PostResponseDTO;
+import com.pharmquest.pharmquest.domain.user.data.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.repository.query.Param;
 
@@ -14,7 +15,7 @@ import java.util.List;
 
 public interface PostCommandService {
 
-    Post registerPost(PostRequestDTO.CreatePostDTO request);
+    Post registerPost(Long userId, PostRequestDTO.CreatePostDTO request);
 
     Page<Post> getAllPosts(PostCategory category, Integer page);
 

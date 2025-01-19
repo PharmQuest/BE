@@ -11,6 +11,8 @@ import com.pharmquest.pharmquest.domain.post.repository.scrap.PostScrapRepositor
 import com.pharmquest.pharmquest.domain.post.specification.PostSpecification;
 import com.pharmquest.pharmquest.domain.post.web.dto.PostRequestDTO;
 import com.pharmquest.pharmquest.domain.post.web.dto.PostResponseDTO;
+import com.pharmquest.pharmquest.domain.user.data.User;
+import com.pharmquest.pharmquest.domain.user.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -26,12 +28,18 @@ public class PostCommandServiceImpl implements PostCommandService{
     private final PostReportRepository reportRepository;
     private final PostScrapRepository scrapRepository;
 
+    private final UserRepository userRepository;
 
     //게시글 등록
     @Override
-    public Post registerPost(PostRequestDTO.CreatePostDTO request) {
+    public Post registerPost(Long userId, PostRequestDTO.CreatePostDTO request ) {
 
         Post newPost = PostConverter.toPost(request);
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("해당하는 유저를 찾을 수 없습니다. ID: " + userId));
+                newPost.setUser(user);
+
 
         return postRepository.save(newPost);
     }

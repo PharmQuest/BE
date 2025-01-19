@@ -66,8 +66,13 @@ public class PostCommandServiceImpl implements PostCommandService{
     //게시글 제목, 내용으로 검색(카테고리, 나라 별 필터링, 10개씩 페이징)
     @Override
     public Page<Post> searchPostsDynamically(String keyword, Country country, PostCategory category, Integer page) {
-        return postRepository.findAll(PostSpecification.dynamicQuery(keyword, category, country), PageRequest.of(page - 1, 10));
 
+        Page<Post> posts = postRepository.findAll(PostSpecification.dynamicQuery(keyword, category, country), PageRequest.of(page - 1, 10));
+
+        if (posts.isEmpty()) {
+            throw new EntityNotFoundException("검색어에 해당하는 게시글이 없습니다.");
+        }
+        return posts;
     }
 
 }

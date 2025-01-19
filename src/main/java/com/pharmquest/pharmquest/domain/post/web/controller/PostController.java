@@ -2,6 +2,7 @@ package com.pharmquest.pharmquest.domain.post.web.controller;
 
 import com.pharmquest.pharmquest.domain.post.converter.PostConverter;
 import com.pharmquest.pharmquest.domain.post.data.Post;
+import com.pharmquest.pharmquest.domain.post.data.enums.Country;
 import com.pharmquest.pharmquest.domain.post.data.enums.PostCategory;
 import com.pharmquest.pharmquest.domain.post.service.PostCommandService;
 import com.pharmquest.pharmquest.domain.post.web.dto.PostRequestDTO;
@@ -42,6 +43,13 @@ public class PostController {
         PostResponseDTO.PostDetailDTO postDetail = postCommandService.getPost(postId);
 
         return ApiResponse.onSuccess(postDetail);
+    }
+
+    @GetMapping("/post/search")
+    @Operation(summary = "카테고리별 게시글 리스트 조회 API")
+    public ApiResponse<PostResponseDTO.PostPreViewListDTO> searchPost(@RequestParam(name = "keyword")String keyword,@RequestParam(name = "country") Country country, @RequestParam(name = "category")PostCategory category, @RequestParam(name="page")Integer page){
+        Page<Post> postList = postCommandService.searchPostsDynamically(keyword, country, category, page);
+        return ApiResponse.onSuccess(PostConverter.postPreViewListDTO(postList));
     }
 
 }

@@ -21,7 +21,7 @@ public class MedicineController {
 
     @GetMapping("/search")
     public List<MedicineResponseDTO> searchMedicines(
-            @RequestParam String query,
+            @RequestParam(defaultValue="openfda.product_type:OTC") String query,
             @RequestParam(defaultValue = "10") int limit) {
         return medicineService.getMedicines(query, limit);
     }

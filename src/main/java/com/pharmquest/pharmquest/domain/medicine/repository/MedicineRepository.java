@@ -47,11 +47,14 @@ public class MedicineRepository {
                 for (JsonNode result : results) {
                     JsonNode openFda = result.path("openfda");
 
-                    // 모든 필드 번역
-                    String brandName = translateIfNeeded(openFda.path("brand_name").isArray()
-                            ? openFda.path("brand_name").get(0).asText("Unknown") : "Unknown");
-                    String genericName = translateIfNeeded(openFda.path("generic_name").isArray()
-                            ? openFda.path("generic_name").get(0).asText("Unknown") : "Unknown");
+                    // 원래 이름과 번역된 이름을 조합
+                    String brandName = combineWithTranslation(
+                            openFda.path("brand_name").isArray()
+                                    ? openFda.path("brand_name").get(0).asText("Unknown") : "Unknown");
+                    String genericName = combineWithTranslation(
+                            openFda.path("generic_name").isArray()
+                                    ? openFda.path("generic_name").get(0).asText("Unknown") : "Unknown");
+
                     String substanceName = translateIfNeeded(openFda.path("substance_name").isArray()
                             ? openFda.path("substance_name").get(0).asText("Unknown") : "Unknown");
                     String activeIngredient = translateIfNeeded(result.path("active_ingredient").isArray()
@@ -84,6 +87,18 @@ public class MedicineRepository {
 
         } catch (Exception e) {
             throw new RuntimeException("FDA API 요청 실패", e);
+        }
+    }
+
+    /**
+     * 원래 텍스트와 번역된 텍스트를 결합하여 반환.
+     */
+    private String combineWithTranslation(String text) {
+        try {
+            String translated = translationService.translateText(text, "ko");
+            return text + " / " + translated; // 원래 텍스트와 번역된 텍스트를 슬래시로 구분
+        } catch (Exception e) {
+            return text; // 번역 실패 시 원래 텍스트 반환
         }
     }
 

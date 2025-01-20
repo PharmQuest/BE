@@ -15,6 +15,9 @@ public enum SuccessStatus implements BaseCode {
 
     // home
     HOME_POSTS(HttpStatus.OK, "HOME201", "홈 게시글을 성공적으로 불러왔습니다."),
+
+    // pharmacy
+    PHARMACY_SCRAP(HttpStatus.OK, "PHARMACY201", "약국을 마이페이지에 성공적으로 스크랩했습니다."),
     ;
 
     private final HttpStatus httpStatus;

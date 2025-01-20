@@ -1,5 +1,6 @@
 package com.pharmquest.pharmquest.domain.pharmacy.web.dto;
 
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 
@@ -9,8 +10,8 @@ public class PharmacyRequestDTO {
     public static class ScrapDto{
         @NotNull
         private Long userId;
-        @NotNull
-        private Long pharmacyId;
+        @NotBlank
+        private String placeId;
     }
 
 }

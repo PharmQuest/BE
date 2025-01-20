@@ -18,6 +18,7 @@ public enum SuccessStatus implements BaseCode {
 
     // pharmacy
     PHARMACY_SCRAP(HttpStatus.OK, "PHARMACY201", "약국을 마이페이지에 성공적으로 스크랩했습니다."),
+
     ;
 
     private final HttpStatus httpStatus;

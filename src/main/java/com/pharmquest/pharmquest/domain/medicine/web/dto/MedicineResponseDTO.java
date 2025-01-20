@@ -16,5 +16,7 @@ public class MedicineResponseDTO {
     private String dosageAndAdministration; // dosage_and_administration
     private String dosageFormsAndStrengths; // dosage_forms_and_strengths
     private String  splSetId; //이미지 찾는 기준이 되는 약 코드
+    private String imgUrl; //
+
 
 }

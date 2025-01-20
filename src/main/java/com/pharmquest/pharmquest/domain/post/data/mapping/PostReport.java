@@ -1,9 +1,10 @@
 package com.pharmquest.pharmquest.domain.post.data.mapping;
 
 import com.pharmquest.pharmquest.domain.post.data.Post;
+import com.pharmquest.pharmquest.domain.post.data.enums.PostCategory;
+import com.pharmquest.pharmquest.domain.post.data.enums.ReportType;
 import com.pharmquest.pharmquest.domain.user.data.User;
 import com.pharmquest.pharmquest.global.data.BaseEntity;
-
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
@@ -22,6 +23,9 @@ public class PostReport extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Enumerated(EnumType.STRING)
+    private ReportType type;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id")

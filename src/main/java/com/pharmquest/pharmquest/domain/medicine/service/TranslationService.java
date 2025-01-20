@@ -14,6 +14,7 @@ public class TranslationService {
 
     private final Translate translate;
 
+    // Google Cloud Translation API 클라이언트를 초기화합니다.
     public TranslationService() throws IOException {
         // JSON 키 파일 경로를 지정
         String jsonKeyFilePath = "src/main/resources/skilful-card-445716-m2-6364abe85b4b.json";
@@ -24,6 +25,7 @@ public class TranslationService {
                 .getService();
     }
 
+    //주어진 텍스트를 지정된 언어로 번역합니다.
     public String translateText(String text, String targetLanguage) {
         // 텍스트 번역
         Translation translation = translate.translate(

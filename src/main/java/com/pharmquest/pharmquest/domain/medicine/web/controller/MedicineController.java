@@ -15,11 +15,9 @@ import java.util.List;
 public class MedicineController {
 
     private final MedicineService medicineService;
-    private final MedicineRepository medicineRepository;
 
-    public MedicineController(MedicineService medicineService, MedicineRepository medicineRepository) {
+    public MedicineController(MedicineService medicineService) {
         this.medicineService = medicineService;
-        this.medicineRepository = medicineRepository;
     }
 
     @GetMapping("/search")
@@ -33,7 +31,8 @@ public class MedicineController {
     public String viewTotal(
             @RequestParam(defaultValue = "openfda.product_type:OTC") String query,
             @RequestParam(defaultValue = "1") int limit) {
-        return medicineRepository.findTotal(query, limit);
+        return medicineService.getTotalData(query, limit); // Service에서 처리된 데이터 반환
     }
+
 }
 

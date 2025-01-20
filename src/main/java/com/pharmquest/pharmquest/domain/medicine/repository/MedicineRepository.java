@@ -69,6 +69,8 @@ public class MedicineRepository {
                             ? result.path("dosage_and_administration").get(0).asText("Unknown") : "Unknown");
                     String dosageFormsAndStrengths = translateIfNeeded(result.path("dosage_forms_and_strengths").isArray()
                             ? result.path("dosage_forms_and_strengths").get(0).asText("Unknown") : "Unknown");
+                    String splSetId = openFda.path("spl_set_id").isArray()
+                            ? openFda.path("spl_set_id").get(0).asText("Unknown") : "Unknown";
 
                     medicines.add(new MedicineResponseDTO(
                             brandName,
@@ -79,7 +81,8 @@ public class MedicineRepository {
                             purpose,
                             indications,
                             dosageAndAdministration,
-                            dosageFormsAndStrengths
+                            dosageFormsAndStrengths,
+                            splSetId
                     ));
                 }
             }

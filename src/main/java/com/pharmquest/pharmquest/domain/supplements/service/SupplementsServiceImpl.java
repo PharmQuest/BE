@@ -1,8 +1,8 @@
 package com.pharmquest.pharmquest.domain.supplements.service;
 
+import com.pharmquest.pharmquest.domain.post.data.enums.Country;
 import com.pharmquest.pharmquest.domain.supplements.converter.SupplementsConverter;
 import com.pharmquest.pharmquest.domain.supplements.data.Supplements;
-import com.pharmquest.pharmquest.domain.supplements.data.enums.Nation;
 import com.pharmquest.pharmquest.domain.supplements.repository.SupplementsRepository;
 import com.pharmquest.pharmquest.domain.supplements.web.dto.SupplementsResponseDTO;
 import jakarta.transaction.Transactional;
@@ -42,10 +42,10 @@ public class SupplementsServiceImpl implements SupplementsService {
     }
 
     @Override
-    public Page<SupplementsResponseDTO.SupplementsSearchResponseDto> searchSupplements(String keyword, Nation nation, Pageable pageable, Long userId) {
+    public Page<SupplementsResponseDTO.SupplementsSearchResponseDto> searchSupplements(String keyword, Country country, Pageable pageable, Long userId) {
         Page<Supplements> supplementsPage;
-        if (keyword != null && nation != null) {
-            supplementsPage = supplementsRepository.findByNameContainingAndNation(keyword, nation, pageable);
+        if (keyword != null && country != null) {
+            supplementsPage = supplementsRepository.findByNameContainingAndCountry(keyword, country, pageable);
         } else if (keyword != null) {
             supplementsPage = supplementsRepository.findByNameContaining(keyword, pageable);
         } else {
@@ -85,8 +85,8 @@ public class SupplementsServiceImpl implements SupplementsService {
             supplementsNames.forEach(searchKeyword ->
                     naverShoppingService.loadProducts(searchKeyword).stream()
                             .map(dto -> {
-                                Nation nation = getNationFromSearchKeyword(searchKeyword);
-                                String cleanedName = cleanProductName(dto.getName(), nation);
+                                Country country = getCountryFromSearchKeyword(searchKeyword);
+                                String cleanedName = cleanProductName(dto.getName(), country);
 
                                 if (supplementsRepository.existsByName(cleanedName)) {
                                     return null;
@@ -102,7 +102,7 @@ public class SupplementsServiceImpl implements SupplementsService {
                                         .category3(dto.getCategory3())
                                         .category4(dto.getCategory4())
                                         .description("")
-                                        .nation(nation)
+                                        .country(country)
                                         .scrapCount(0)
                                         .build();
                             })
@@ -118,7 +118,7 @@ public class SupplementsServiceImpl implements SupplementsService {
         }
     }
 
-    private String cleanProductName(String name, Nation nation) {
+    private String cleanProductName(String name, Country country) {
         String cleaned = name.replaceAll("\\[?(미국|일본|중국|한국|)\\]?", "")
                 .replaceAll("\\((미국|일본|중국|한국)\\)", "");
 
@@ -126,25 +126,25 @@ public class SupplementsServiceImpl implements SupplementsService {
 
         cleaned = cleaned.replaceAll("\\s+", " ").trim();
 
-        String prefix = switch (nation) {
+        String prefix = switch (country) {
             case USA -> "[미국]";
             case JAPAN -> "[일본]";
             case CHINA -> "[중국]";
-            case KOREA -> "[한국]";
+            default -> "";
         };
 
         return prefix + " " + cleaned;
     }
 
-    private Nation getNationFromSearchKeyword(String keyword) {
+    private Country getCountryFromSearchKeyword(String keyword) {
         if (keyword.contains("미국")) {
-            return Nation.USA;
+            return Country.USA;
         } else if (keyword.contains("일본")) {
-            return Nation.JAPAN;
+            return Country.JAPAN;
         } else if (keyword.contains("중국")) {
-            return Nation.CHINA;
+            return Country.CHINA;
         } else {
-            return Nation.KOREA;
+            return Country.NONE;
         }
     }
 }

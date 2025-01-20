@@ -1,6 +1,6 @@
 package com.pharmquest.pharmquest.domain.supplements.data;
 
-import com.pharmquest.pharmquest.domain.supplements.data.enums.Nation;
+import com.pharmquest.pharmquest.domain.post.data.enums.Country;
 import com.pharmquest.pharmquest.domain.supplements.data.mapping.SupplementsScrap;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -40,7 +40,7 @@ public class Supplements {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Nation nation;
+    private Country country;
 
     @Column(nullable = false, length = 255)
     private String image;

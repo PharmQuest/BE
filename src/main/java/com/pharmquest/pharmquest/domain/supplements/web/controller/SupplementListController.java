@@ -1,11 +1,12 @@
 package com.pharmquest.pharmquest.domain.supplements.web.controller;
 
-import com.pharmquest.pharmquest.domain.supplements.data.enums.Nation;
+import com.pharmquest.pharmquest.domain.post.data.enums.Country;
 import com.pharmquest.pharmquest.domain.supplements.service.SupplementsService;
 import com.pharmquest.pharmquest.domain.supplements.web.dto.SupplementsResponseDTO;
 import com.pharmquest.pharmquest.global.apiPayload.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -50,15 +51,15 @@ public class SupplementListController {
     @Operation(summary = "영양제 검색 API", description = "영양제 검색")
     public ApiResponse<List<SupplementsResponseDTO.SupplementsSearchResponseDto>> searchSupplements(
             @Parameter(description = "키워드") @RequestParam(required = true) String keyword,
-            @Parameter(description = "국가") @RequestParam(required = false) String nation,
+            @Parameter(description = "국가",schema = @Schema(allowableValues = {"USA", "JAPAN", "CHINA"}))
+            @RequestParam(required = false) Country country,
             @Parameter(description = "페이지 번호") @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "사용자 ID") @RequestParam(required = false) Long userId
     ) {
         Pageable pageable = PageRequest.of(page, 10);
-        Nation nationEnum = nation != null ? Nation.valueOf(nation.toUpperCase()) : null;
 
         Page<SupplementsResponseDTO.SupplementsSearchResponseDto> supplementsPage =
-                supplementsService.searchSupplements(keyword, nationEnum, pageable, userId);
+                supplementsService.searchSupplements(keyword, country, pageable, userId);
 
         return ApiResponse.onSuccess(supplementsPage.getContent());
     }

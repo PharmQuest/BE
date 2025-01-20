@@ -46,9 +46,6 @@ public class Supplements {
     private String image;
 
     @Column(nullable = false)
-    private Boolean isScrapped;
-
-    @Column(nullable = false)
     private int scrapCount;
 
     @Column(nullable = true, length = 100)

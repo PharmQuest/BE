@@ -21,6 +21,7 @@ configurations {
 
 repositories {
 	mavenCentral()
+	maven { url "https://maven.google.com" }
 }
 
 dependencies {
@@ -48,6 +49,8 @@ dependencies {
 	// Security (소셜 로그인 관련 의존성)
 	implementation 'org.springframework.boot:spring-boot-starter-mustache'
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+
+	implementation 'com.google.cloud:google-cloud-translate:2.55.0'
 }
 
 tasks.named('test') {

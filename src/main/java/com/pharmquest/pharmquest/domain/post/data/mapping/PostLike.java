@@ -11,8 +11,6 @@ import org.hibernate.annotations.DynamicUpdate;
 @Entity
 @Getter
 @Setter
-@DynamicUpdate
-@DynamicInsert
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor

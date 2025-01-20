@@ -112,4 +112,26 @@ public class MedicineRepository {
             return text; // 번역 실패 시 원래 텍스트 반환
         }
     }
+
+
+    public String findTotal(String query, int limit) {
+        try {
+            // FDA API 호출
+            String response = webClient.get()
+                    .uri(uriBuilder -> uriBuilder
+                            .path("/drug/label.json")
+                            .queryParam("search", query)
+                            .queryParam("limit", limit)
+                            .queryParam("api_key", apiKey)
+                            .build())
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .block();
+
+            // 원본 JSON 응답을 반환
+            return response;
+        } catch (Exception e) {
+            throw new RuntimeException("FDA API 요청 실패", e);
+        }
+    }
 }

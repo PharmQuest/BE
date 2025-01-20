@@ -5,12 +5,7 @@ import com.pharmquest.pharmquest.domain.post.data.enums.Country;
 import com.pharmquest.pharmquest.domain.post.data.enums.PostCategory;
 import com.pharmquest.pharmquest.domain.post.web.dto.PostRequestDTO;
 import com.pharmquest.pharmquest.domain.post.web.dto.PostResponseDTO;
-import com.pharmquest.pharmquest.domain.user.data.User;
 import org.springframework.data.domain.Page;
-import org.springframework.data.repository.query.Param;
-
-
-import java.util.List;
 
 
 public interface PostCommandService {

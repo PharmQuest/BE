@@ -1,12 +1,17 @@
 package com.pharmquest.pharmquest.global.jwt;
 
 
+import com.pharmquest.pharmquest.domain.user.data.User;
+import com.pharmquest.pharmquest.domain.user.repository.UserRepository;
 import com.pharmquest.pharmquest.global.apiPayload.exception.tokenException.TokenErrorResult;
 import com.pharmquest.pharmquest.global.apiPayload.exception.tokenException.TokenException;
+import com.pharmquest.pharmquest.global.apiPayload.exception.userException.UserErrorResult;
+import com.pharmquest.pharmquest.global.apiPayload.exception.userException.UserException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -17,9 +22,12 @@ import java.util.UUID;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class JwtUtil {
     @Value("${jwt.secret}")
     private String SECRET_KEY;
+    private final UserRepository userRepository;
+
 
     private SecretKey getSigningKey() {
         byte[] keyBytes = Decoders.BASE64.decode(this.SECRET_KEY);
@@ -71,6 +79,16 @@ public class JwtUtil {
             log.warn("유효하지 않은 토큰입니다.");
             throw new TokenException(TokenErrorResult.INVALID_TOKEN);
         }
+    }
+
+    // 토큰에서 유저를 반환하는 메서드
+    public User getUserFromHeader(String authorizationHeader) {
+        String token = getTokenFromHeader(authorizationHeader);
+        log.info("token:" + token);
+        UUID userId = UUID.fromString(getUserIdFromToken(token));
+
+        return userRepository.findByUserId(userId)
+                .orElseThrow(() -> new UserException(UserErrorResult.NOT_FOUND_USER));
     }
 
     // Jwt 토큰의 유효기간을 확인하는 메서드

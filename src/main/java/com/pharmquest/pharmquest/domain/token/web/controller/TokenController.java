@@ -6,6 +6,7 @@ import com.pharmquest.pharmquest.domain.token.service.TokenService;
 import com.pharmquest.pharmquest.domain.token.web.dto.TokenResponseDTO;
 import com.pharmquest.pharmquest.global.apiPayload.ApiResponse;
 import com.pharmquest.pharmquest.global.apiPayload.code.status.SuccessStatus;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -22,8 +23,10 @@ public class TokenController {
     @Qualifier("tokenServiceImpl")
     private final TokenService authService;
 
+
     // 액세스 토큰을 재발행하는 API
     @GetMapping("/reissue/access-token")
+    @Operation(summary = "액세스 토큰 재발행 API")
     public ResponseEntity<ApiResponse<Object>> reissueAccessToken(
             @RequestHeader("Authorization") String authorizationHeader) {
 

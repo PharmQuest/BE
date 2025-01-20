@@ -7,9 +7,10 @@ import com.pharmquest.pharmquest.domain.post.data.enums.PostCategory;
 import com.pharmquest.pharmquest.domain.post.service.PostCommandService;
 import com.pharmquest.pharmquest.domain.post.web.dto.PostRequestDTO;
 import com.pharmquest.pharmquest.domain.post.web.dto.PostResponseDTO;
+import com.pharmquest.pharmquest.domain.user.data.User;
 import com.pharmquest.pharmquest.global.apiPayload.ApiResponse;
+import com.pharmquest.pharmquest.global.jwt.JwtUtil;
 import io.swagger.v3.oas.annotations.Operation;
-import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -21,11 +22,13 @@ import org.springframework.web.bind.annotation.*;
 public class PostController {
 
     private final PostCommandService postCommandService;
+    private final JwtUtil jwtUtil;
+    @PostMapping("/posts")
+    public ApiResponse<PostResponseDTO.CreatePostResultDTO> postCommandService(String authorizationHeader, @RequestBody @Valid PostRequestDTO.CreatePostDTO request){
 
-    @PostMapping("/{user_id}/posts")
-    public ApiResponse<PostResponseDTO.CreatePostResultDTO> postCommandService(@PathVariable(name = "user_id")Long userId, @RequestBody @Valid PostRequestDTO.CreatePostDTO request){
+        User user = jwtUtil.getUserFromHeader(authorizationHeader);
 
-        Post post = postCommandService.registerPost(userId, request);
+        Post post = postCommandService.registerPost(user.getId(), request);
         return ApiResponse.onSuccess(PostConverter.toCreatePostResultDTO(post));
     }
 

@@ -1,10 +1,16 @@
 package com.pharmquest.pharmquest.domain.post.web.controller;
 
+import com.pharmquest.pharmquest.domain.mypage.domain.PostScrap;
 import com.pharmquest.pharmquest.domain.post.converter.PostConverter;
+import com.pharmquest.pharmquest.domain.post.converter.PostLikeConverter;
+import com.pharmquest.pharmquest.domain.post.converter.PostScrapConverter;
 import com.pharmquest.pharmquest.domain.post.data.Post;
 import com.pharmquest.pharmquest.domain.post.data.enums.Country;
 import com.pharmquest.pharmquest.domain.post.data.enums.PostCategory;
+import com.pharmquest.pharmquest.domain.post.data.mapping.PostLike;
 import com.pharmquest.pharmquest.domain.post.service.PostCommandService;
+import com.pharmquest.pharmquest.domain.post.service.like.PostLikeService;
+import com.pharmquest.pharmquest.domain.post.service.scrap.PostScrapService;
 import com.pharmquest.pharmquest.domain.post.web.dto.PostRequestDTO;
 import com.pharmquest.pharmquest.domain.post.web.dto.PostResponseDTO;
 import com.pharmquest.pharmquest.global.apiPayload.ApiResponse;
@@ -21,9 +27,11 @@ import org.springframework.web.bind.annotation.*;
 public class PostController {
 
     private final PostCommandService postCommandService;
+    private final PostLikeService postLikeService;
+    private final PostScrapService postScrapService;
 
     @PostMapping("/{user_id}/posts")
-    public ApiResponse<PostResponseDTO.CreatePostResultDTO> postCommandService(@PathVariable(name = "user_id")Long userId, @RequestBody @Valid PostRequestDTO.CreatePostDTO request){
+    public ApiResponse<PostResponseDTO.CreatePostResultDTO> createPost(@PathVariable(name = "user_id")Long userId, @RequestBody @Valid PostRequestDTO.CreatePostDTO request){
 
         Post post = postCommandService.registerPost(userId, request);
         return ApiResponse.onSuccess(PostConverter.toCreatePostResultDTO(post));
@@ -50,6 +58,38 @@ public class PostController {
     public ApiResponse<PostResponseDTO.PostPreViewListDTO> searchPost(@RequestParam(name = "keyword")String keyword,@RequestParam(name = "country") Country country, @RequestParam(name = "category")PostCategory category, @RequestParam(name="page")Integer page){
         Page<Post> postList = postCommandService.searchPostsDynamically(keyword, country, category, page);
         return ApiResponse.onSuccess(PostConverter.postPreViewListDTO(postList));
+    }
+
+    @PostMapping("/posts/{user_id}/{post_id}/likes")
+    @Operation(summary = "게시글 좋아요 API")
+    public ApiResponse<PostResponseDTO.CreatePostLikeResponseDTO> createPostLike(@PathVariable(name = "user_id")Long userId, @PathVariable(name = "post_id")Long postId){
+
+        PostLike postLike = postLikeService.createPostLike(userId, postId);
+        return ApiResponse.onSuccess(PostLikeConverter.toPostLikeDTO(postLike));
+    }
+
+    @DeleteMapping("/posts/{user_id}/{post_id}/likes")
+    @Operation(summary = "게시글 좋아요 취소 API")
+    public ApiResponse<String> deletePostLike(@PathVariable(name = "user_id")Long userId, @PathVariable(name = "post_id")Long postId){
+
+        postLikeService.deletePostLike(userId, postId);
+        return ApiResponse.onSuccess("좋아요가 삭제되었습니다");
+    }
+
+    @PostMapping("/posts/{user_id}/{post_id}/scraps")
+    @Operation(summary = "게시글 스크랩 API")
+    public ApiResponse<PostResponseDTO.CreatePostScrapResponseDTO> createPostScrap(@PathVariable(name = "user_id")Long userId, @PathVariable(name = "post_id")Long postId){
+
+        PostScrap postScrap = postScrapService.createPostScrap(userId, postId);
+        return ApiResponse.onSuccess(PostScrapConverter.toPostScrapDTO(postScrap));
+    }
+
+    @DeleteMapping("/posts/{user_id}/{post_id}/scraps")
+    @Operation(summary = "게시글 스크랩 취소 API")
+    public ApiResponse<String> deletePostScraps(@PathVariable(name = "user_id")Long userId, @PathVariable(name = "post_id")Long postId){
+
+        postScrapService.deletePostScrap(userId, postId);
+        return ApiResponse.onSuccess("스크랩이 취소되었습니다");
     }
 
 }

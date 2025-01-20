@@ -10,13 +10,13 @@ import java.util.Arrays;
 @Getter
 public enum PostCategory {
 
-    ALL("전체"),
     FORUM("자유"),
     PHARMACY("약국"),
     HOSPITAL("병원"),
     MEDICATION("약"),
     SYMPTOM("증상"),
-    SUPPLEMENT("영양제");
+    SUPPLEMENT("영양제"),
+    ALL("전체");
 
     private final String koreanName;
 

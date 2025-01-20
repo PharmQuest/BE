@@ -46,8 +46,22 @@ dependencies {
 	runtimeOnly 'io.netty:netty-resolver-dns-native-macos:4.1.104.Final:osx-aarch_64'
 
 	// Security (소셜 로그인 관련 의존성)
-	implementation 'org.springframework.boot:spring-boot-starter-mustache'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
+	testImplementation 'org.springframework.security:spring-security-test'
+
+	// Jwt
+	implementation 'io.jsonwebtoken:jjwt-api:0.12.2'
+	implementation 'io.jsonwebtoken:jjwt-impl:0.12.2'
+	implementation 'io.jsonwebtoken:jjwt-jackson:0.12.2'
+
+	// OAuth 2.0
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+
+	implementation 'org.springframework.boot:spring-boot-starter-mustache'
+
+
+
 }
 
 tasks.named('test') {

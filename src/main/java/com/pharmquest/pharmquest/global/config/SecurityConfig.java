@@ -1,10 +1,9 @@
 package com.pharmquest.pharmquest.global.config;
 
 
-import com.pharmquest.pharmquest.global.config.oauth.PrincipalOauth2UserService;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import com.pharmquest.pharmquest.global.apiPayload.exception.handler.OAuthLoginFailureHandler;
+import com.pharmquest.pharmquest.global.apiPayload.exception.handler.OAuthLoginSuccessHandler;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,11 +12,15 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
+import org.springframework.security.config.annotation.web.configurers.HttpBasicConfigurer;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
 
 import java.io.IOException;
+import java.util.Collections;
 
 @Configuration
 @EnableWebSecurity
@@ -25,44 +28,38 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final PrincipalOauth2UserService principalOauth2UserService;
+    private final OAuthLoginSuccessHandler oAuthLoginSuccessHandler;
+    private final OAuthLoginFailureHandler oAuthLoginFailureHandler;
+
+    // CORS 설정
+    CorsConfigurationSource corsConfigurationSource() {
+        return request -> {
+            CorsConfiguration config = new CorsConfiguration();
+            config.setAllowedHeaders(Collections.singletonList("*"));
+            config.setAllowedMethods(Collections.singletonList("*"));
+            config.setAllowedOriginPatterns(Collections.singletonList("*")); // 허용할 origin
+            config.setAllowCredentials(true);
+            return config;
+        };
+    }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
+    public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
+        httpSecurity.
+                httpBasic(HttpBasicConfigurer::disable)
+                .cors(corsConfigurer -> corsConfigurer.configurationSource(corsConfigurationSource())) // CORS 설정 추가
                 .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(authorizeRequest ->
-                        authorizeRequest
-                                //.requestMatchers("/").authenticated() 경로에 접근할 때 인증이 필요한 사이트들 설정. 나중에 추가 예정
-                                .anyRequest().permitAll()
+                .authorizeHttpRequests(authorize ->
+                        authorize
+                                .requestMatchers("/**").permitAll()
                 )
-                .exceptionHandling(handler -> handler.authenticationEntryPoint(new AuthenticationEntryPoint() {
-                    @Override
-                    public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException, IOException {
-                        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "UnAuthorized");
-                    }
-                }))
-                .headers(
-                        headersConfigurer ->
-                                headersConfigurer
-                                        .frameOptions(
-                                                HeadersConfigurer.FrameOptionsConfig::sameOrigin
-                                        )
+
+                .oauth2Login(oauth -> // OAuth2 로그인 기능에 대한 여러 설정의 진입점
+                        oauth
+                                .successHandler(oAuthLoginSuccessHandler) // 로그인 성공 시 핸들러
+                                .failureHandler(oAuthLoginFailureHandler) // 로그인 실패 시 핸들러
                 );
 
-        http
-                .formLogin(form -> form
-                                .loginPage("/loginForm")
-                                .loginProcessingUrl("/login")//login 주소가 호출이 되면 시큐리티가 낚아채서 대신 로그인을 해줌
-                                .defaultSuccessUrl("/"));//로그인 성공시 기본 페이지
-        http
-                .oauth2Login(oauth2-> oauth2
-                        .loginPage("/loginForm")
-                        .userInfoEndpoint(userInfoEndpointConfig -> userInfoEndpointConfig
-                                .userService(principalOauth2UserService)));
-
-
-
-        return http.build();
+        return httpSecurity.build();
     }
 }

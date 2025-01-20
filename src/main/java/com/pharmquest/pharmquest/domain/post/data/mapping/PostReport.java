@@ -1,7 +1,6 @@
 package com.pharmquest.pharmquest.domain.post.data.mapping;
 
 import com.pharmquest.pharmquest.domain.post.data.Post;
-import com.pharmquest.pharmquest.domain.post.data.enums.PostCategory;
 import com.pharmquest.pharmquest.domain.post.data.enums.ReportType;
 import com.pharmquest.pharmquest.domain.user.data.User;
 import com.pharmquest.pharmquest.global.data.BaseEntity;

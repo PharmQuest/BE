@@ -69,6 +69,10 @@ public class MedicineRepository {
                             ? result.path("dosage_and_administration").get(0).asText("Unknown") : "Unknown");
                     String dosageFormsAndStrengths = translateIfNeeded(result.path("dosage_forms_and_strengths").isArray()
                             ? result.path("dosage_forms_and_strengths").get(0).asText("Unknown") : "Unknown");
+                    String splSetId = openFda.path("spl_set_id").isArray()
+                            ? openFda.path("spl_set_id").get(0).asText("Unknown") : "Unknown";
+
+                    String imgUrl = fetchImageFromDailyMed(splSetId);
 
                     medicines.add(new MedicineResponseDTO(
                             brandName,
@@ -79,7 +83,9 @@ public class MedicineRepository {
                             purpose,
                             indications,
                             dosageAndAdministration,
-                            dosageFormsAndStrengths
+                            dosageFormsAndStrengths,
+                            splSetId,
+                            imgUrl
                     ));
                 }
             }
@@ -134,4 +140,32 @@ public class MedicineRepository {
             throw new RuntimeException("FDA API 요청 실패", e);
         }
     }
+    /**
+     * DailyMed에서 SPL Set ID로 이미지를 가져옵니다.
+     */
+    private String fetchImageFromDailyMed(String splSetId) {
+        if (splSetId == null || splSetId.equals("Unknown")) {
+            return null;
+        }
+        try {
+            String mediaResponse = webClient.get()
+                    .uri("https://dailymed.nlm.nih.gov/dailymed/services/v2/spls/" + splSetId + "/media.json")
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .block();
+
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode rootNode = mapper.readTree(mediaResponse);
+            JsonNode mediaArray = rootNode.path("data").path("media");
+
+            if (mediaArray.isArray() && mediaArray.size() > 0) {
+                return mediaArray.get(0).path("url").asText();
+            }
+        } catch (Exception e) {
+            // 에러가 발생하면 로그를 남기고 null을 반환
+            System.err.println("DailyMed에서 이미지 가져오기 실패: " + e.getMessage());
+        }
+        return null;
+    }
+
 }

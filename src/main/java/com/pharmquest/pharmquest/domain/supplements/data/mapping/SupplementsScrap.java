@@ -1,10 +1,18 @@
 package com.pharmquest.pharmquest.domain.supplements.data.mapping;
 
 import com.pharmquest.pharmquest.domain.supplements.data.Supplements;
+import com.pharmquest.pharmquest.domain.user.data.User;
 import com.pharmquest.pharmquest.global.data.BaseEntity;
 import jakarta.persistence.*;
+import lombok.*;
 
 import java.time.LocalDateTime;
+
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 
 @Entity
 public class SupplementsScrap extends BaseEntity {
@@ -12,9 +20,9 @@ public class SupplementsScrap extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-//    @ManyToOne
-//    @JoinColumn(name = "user_id", nullable = false)
-//    private User user;
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @ManyToOne
     @JoinColumn(name = "sup_id", nullable = false)

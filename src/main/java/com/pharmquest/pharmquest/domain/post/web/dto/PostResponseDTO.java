@@ -73,5 +73,23 @@ public class PostResponseDTO {
 
     }
 
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static  class CreatePostLikeResponseDTO{
+        Long postLikeId;
+        LocalDateTime createdAt;
+    }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static  class CreatePostScrapResponseDTO{
+        Long postLikeId;
+        LocalDateTime createdAt;
+    }
+
 }
 

@@ -40,7 +40,6 @@ public class PostCommandServiceImpl implements PostCommandService{
                 .orElseThrow(() -> new EntityNotFoundException("해당하는 유저를 찾을 수 없습니다. ID: " + userId));
                 newPost.setUser(user);
 
-
         return postRepository.save(newPost);
     }
 

@@ -32,6 +32,7 @@ public class SupplementsResponseDTO {
         private String name;
         private String image;
         private String brand;
+        private boolean isScrapped;
         private int scrapCount;
         private String category4;
     }
@@ -44,8 +45,9 @@ public class SupplementsResponseDTO {
         private String name;
         private String image;
         private String brand;
-        private String category4;
         private boolean isScrapped;
+        private int scrapCount;
+        private String category4;
     }
 
     @Builder

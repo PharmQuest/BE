@@ -5,6 +5,7 @@ import com.pharmquest.pharmquest.domain.post.data.enums.PostCategory;
 import com.pharmquest.pharmquest.domain.user.data.User;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.Getter;
 import lombok.NonNull;
 
@@ -23,4 +24,5 @@ public class PostRequestDTO {
 
 
     }
+
 }

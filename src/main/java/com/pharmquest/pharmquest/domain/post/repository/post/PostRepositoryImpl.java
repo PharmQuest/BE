@@ -1,4 +1,4 @@
-package com.pharmquest.pharmquest.domain.post.repository;
+package com.pharmquest.pharmquest.domain.post.repository.post;
 
 import com.pharmquest.pharmquest.domain.post.data.Post;
 import com.pharmquest.pharmquest.domain.post.data.enums.Country;

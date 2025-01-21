@@ -20,25 +20,33 @@ public class PharmacyCommandServiceImpl implements PharmacyCommandService {
     private final PharmacyDetailsService pharmacyDetailsService;
 
     @Override
-    public void scrapPharmacy(Long userId, String placeId) {
+    public Boolean scrapPharmacy(Long userId, String placeId) {
 
         System.out.println("service");
         User user = userRepository.findById(userId).orElseThrow(() -> new CommonExceptionHandler(ErrorStatus.USER_NOT_FOUND));
         List<String> pharmacyScraps = user.getPharmacyScraps();
-
-        // placeId 검증
-        if(placeId == null || placeId.isEmpty()) { // 값이 잘못됨
-            throw new CommonExceptionHandler(ErrorStatus.PHARMACY_BAD_PLACE_ID);
-        }else if(!pharmacyDetailsService.isPharmacyByPlaceId(placeId)) { // placeId에 해당하는 장소가 약국이 아님
-            throw new CommonExceptionHandler(ErrorStatus.NOT_A_PHARMACY);
-        }
+        List<String> updatedPharmacyScraps = new ArrayList<>(pharmacyScraps);
 
         // 해당 약국이 이미 스크랩되어있는지 체크.
-        // 스크랩되지 않았어야 저장.
-        if (!pharmacyScraps.contains(placeId)) {
-            List<String> updatedPharmacyScraps = new ArrayList<>(pharmacyScraps);
+        // 스크랩되지 않았다면 저장.
+        if(!pharmacyScraps.contains(placeId)) {
+
+            // placeId 검증
+            if(placeId == null || placeId.isEmpty()) { // 값이 잘못됨
+                throw new CommonExceptionHandler(ErrorStatus.PHARMACY_BAD_PLACE_ID);
+            }else if(!pharmacyDetailsService.isPharmacyByPlaceId(placeId)) { // placeId에 해당하는 장소가 약국이 아님
+                throw new CommonExceptionHandler(ErrorStatus.NOT_A_PHARMACY);
+            }
+
+            // 스크랩 목록에 placeId 추가
             updatedPharmacyScraps.add(placeId);
             user.setPharmacyScraps(updatedPharmacyScraps);
+            return true;
+        // 스크랩 되어있다면 스크랩 취소
+        }else{
+            updatedPharmacyScraps.remove(placeId);
+            user.setPharmacyScraps(updatedPharmacyScraps);
+            return false;
         }
     }
 }

@@ -1,9 +1,7 @@
 package com.pharmquest.pharmquest.domain.pharmacy.web.controller;
 
 import com.pharmquest.pharmquest.domain.pharmacy.service.PharmacyCommandService;
-import com.pharmquest.pharmquest.domain.pharmacy.service.PharmacyDetailsService;
 import com.pharmquest.pharmquest.domain.pharmacy.web.dto.PharmacyRequestDTO;
-import com.pharmquest.pharmquest.domain.pharmacy.web.dto.PharmacyResponseDTO;
 import com.pharmquest.pharmquest.global.apiPayload.ApiResponse;
 import com.pharmquest.pharmquest.global.apiPayload.code.status.SuccessStatus;
 import io.swagger.v3.oas.annotations.Operation;
@@ -13,8 +11,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -31,8 +27,14 @@ public class PharmacyController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "PHARMACY4001", description = "약국의 place_id가 올바르지 않습니다.", content = @Content(schema = @Schema(implementation = ApiResponse.class))),
     })
     public ApiResponse<Void> scrapPharmacy(@RequestBody @Valid PharmacyRequestDTO.ScrapDto request){
-        pharmacyCommandService.scrapPharmacy(request.getUserId(), request.getPlaceId());
-        return ApiResponse.noResultSuccess(SuccessStatus.PHARMACY_SCRAP);
+
+        Boolean scrap = pharmacyCommandService.scrapPharmacy(request.getUserId(), request.getPlaceId());
+
+        if (scrap) { // scrap이 true면 스크랩 동작 성공, scrap이 false면 스크랩 취소 동작 성공
+            return ApiResponse.noResultSuccess(SuccessStatus.PHARMACY_SCRAP);
+        }else{
+            return ApiResponse.noResultSuccess(SuccessStatus.PHARMACY_UNSCRAP);
+        }
     }
 
 }

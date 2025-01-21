@@ -16,8 +16,13 @@ public enum SuccessStatus implements BaseCode {
     // home
     HOME_POSTS(HttpStatus.OK, "HOME201", "홈 게시글을 성공적으로 불러왔습니다."),
     // 커스텀 응답 코드
-    _CREATED_ACCESS_TOKEN(HttpStatus.CREATED, "201", "액세스 토큰 재발행에 성공했습니다.");
+    _CREATED_ACCESS_TOKEN(HttpStatus.CREATED, "201", "액세스 토큰 재발행에 성공했습니다."),
 
+    // pharmacy
+    PHARMACY_SCRAP(HttpStatus.OK, "PHARMACY201", "약국을 마이페이지에 스크랩했습니다."),
+    PHARMACY_UNSCRAP(HttpStatus.OK, "PHARMACY202", "약국을 스크랩을 해제했습니다."),
+
+    ;
     private final HttpStatus httpStatus;
     private final String code;
     private final String message;

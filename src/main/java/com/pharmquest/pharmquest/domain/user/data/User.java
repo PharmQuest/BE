@@ -1,9 +1,9 @@
 package com.pharmquest.pharmquest.domain.user.data;
 
 import com.pharmquest.pharmquest.domain.mypage.domain.MedicineScrap;
-import com.pharmquest.pharmquest.domain.mypage.domain.PharmacyScrap;
 import com.pharmquest.pharmquest.domain.mypage.domain.SupplementScrap;
 import com.pharmquest.pharmquest.domain.mypage.domain.PostScrap;
+import com.pharmquest.pharmquest.domain.pharmacy.converter.ListStringConverter;
 import com.pharmquest.pharmquest.domain.post.data.mapping.PostLike;
 import com.pharmquest.pharmquest.domain.post.data.mapping.PostReport;
 import jakarta.persistence.*;
@@ -40,12 +40,13 @@ public class User {
     @CreationTimestamp
     private Timestamp createDate;
 
+    @Convert(converter = ListStringConverter.class)
+    @Column(columnDefinition = "varchar(100) default '{}'")
+    private List<String> pharmacyScraps; // 스크랩한 약국 목록을 문자열로 저장
+
     // Relationships
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MedicineScrap> medicineScraps;
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<PharmacyScrap> pharmacyScraps;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SupplementScrap> supplementScraps;
@@ -58,4 +59,5 @@ public class User {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostReport> postReports;
+
 }

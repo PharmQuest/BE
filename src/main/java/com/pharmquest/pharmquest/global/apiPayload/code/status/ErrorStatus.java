@@ -22,7 +22,11 @@ public enum ErrorStatus implements BaseErrorCode {
 
     // pharmacy
     PHARMACY_BAD_PLACE_ID(HttpStatus.BAD_REQUEST, "PHARMACY4001", "약국의 place_id가 올바르지 않습니다."),
+    PLACE_NO_RESULT(HttpStatus.BAD_REQUEST, "PHARMACY4001", "해당 place_id에 해당하는 장소가 없습니다"),
+    NOT_A_PHARMACY(HttpStatus.BAD_REQUEST, "PHARMACY4002", "해당 place_id에 해당하는 장소가 약국이 아닙니다."),
 
+    PHARMACY_UNKNOWN_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "PHARMACY5000", "알 수 없는 오류입니다."),
+    PHARMACY_REQUEST_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "PHARMACY5001", "서버에서의 API 요청이 잘못되었습니다."),
     ;
 
 

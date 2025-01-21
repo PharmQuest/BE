@@ -17,17 +17,20 @@ import java.util.List;
 public class PharmacyCommandServiceImpl implements PharmacyCommandService {
 
     private final UserRepository userRepository;
+    private final PharmacyDetailsService pharmacyDetailsService;
 
     @Override
-    public Boolean scrapPharmacy(Long userId, String placeId) {
+    public void scrapPharmacy(Long userId, String placeId) {
 
         System.out.println("service");
         User user = userRepository.findById(userId).orElseThrow(() -> new CommonExceptionHandler(ErrorStatus.USER_NOT_FOUND));
         List<String> pharmacyScraps = user.getPharmacyScraps();
 
         // placeId 검증
-        if(placeId == null || placeId.isEmpty()) {
+        if(placeId == null || placeId.isEmpty()) { // 값이 잘못됨
             throw new CommonExceptionHandler(ErrorStatus.PHARMACY_BAD_PLACE_ID);
+        }else if(!pharmacyDetailsService.isPharmacyByPlaceId(placeId)) { // placeId에 해당하는 장소가 약국이 아님
+            throw new CommonExceptionHandler(ErrorStatus.NOT_A_PHARMACY);
         }
 
         // 해당 약국이 이미 스크랩되어있는지 체크.
@@ -36,8 +39,6 @@ public class PharmacyCommandServiceImpl implements PharmacyCommandService {
             List<String> updatedPharmacyScraps = new ArrayList<>(pharmacyScraps);
             updatedPharmacyScraps.add(placeId);
             user.setPharmacyScraps(updatedPharmacyScraps);
-            return true;
         }
-        return false;
     }
 }

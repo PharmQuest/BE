@@ -1,5 +1,6 @@
-package com.pharmquest.pharmquest.global.jwt;
+package com.pharmquest.pharmquest.domain.token.repository;
 
+import com.pharmquest.pharmquest.domain.token.data.RefreshToken;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;

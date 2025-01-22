@@ -1,15 +1,21 @@
 package com.pharmquest.pharmquest.domain.supplements.converter;
 
 import com.pharmquest.pharmquest.domain.supplements.data.Supplements;
+import com.pharmquest.pharmquest.domain.supplements.repository.SupplementsCategoryRepository;
 import com.pharmquest.pharmquest.domain.supplements.web.dto.SupplementsResponseDTO;
 import com.pharmquest.pharmquest.domain.supplements.repository.SupplementsScrapRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class SupplementsConverter {
     private final SupplementsScrapRepository supplementsScrapRepository;
+    private final SupplementsCategoryRepository supplementsCategoryRepository;
 
     public static SupplementsResponseDTO.SupplementsDto toSupplementsDto(Supplements supplements) {
         return SupplementsResponseDTO.SupplementsDto.builder()
@@ -36,6 +42,7 @@ public class SupplementsConverter {
     }
 
     public SupplementsResponseDTO.SupplementsSearchResponseDto toSearchDto(Supplements supplement, Long userId) {
+        List<String> categories = supplementsCategoryRepository.findCategoryNamesBySupplementId(supplement.getId());
         return SupplementsResponseDTO.SupplementsSearchResponseDto.builder()
                 .name(supplement.getName())
                 .image(supplement.getImage())
@@ -43,10 +50,12 @@ public class SupplementsConverter {
                 .isScrapped(isSupplementScrappedByUser(supplement, userId))
                 .scrapCount(supplement.getScrapCount())
                 .category4(supplement.getCategory4())
+                .categories(categories)
                 .build();
     }
 
     public SupplementsResponseDTO.SupplementsDetailResponseDto toDetailDto(Supplements supplement, Long userId) {
+        List<String> categories = supplementsCategoryRepository.findCategoryNamesBySupplementId(supplement.getId());
         return SupplementsResponseDTO.SupplementsDetailResponseDto.builder()
                 .name(supplement.getName())
                 .image(supplement.getImage())
@@ -58,6 +67,7 @@ public class SupplementsConverter {
                 .category2(supplement.getCategory2())
                 .category3(supplement.getCategory3())
                 .category4(supplement.getCategory4())
+                .categories(categories)
                 .build();
     }
 }

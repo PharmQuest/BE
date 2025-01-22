@@ -42,7 +42,7 @@ public class DailyMedServiceImpl implements DailyMedService {
 
             if (response.getBody() != null && response.getBody().getData() != null) {
                 return response.getBody().getData().stream()
-                        .limit(10)
+                        .limit(30)
                         .map(item -> DailyMedResponseDTO.ExtractedInfo.builder()
                                 .setid(item.getSetid())
                                 .title(item.getTitle())

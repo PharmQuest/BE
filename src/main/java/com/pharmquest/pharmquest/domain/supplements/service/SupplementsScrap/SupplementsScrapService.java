@@ -1,4 +1,4 @@
-package com.pharmquest.pharmquest.domain.supplements.service;
+package com.pharmquest.pharmquest.domain.supplements.service.SupplementsScrap;
 
 import com.pharmquest.pharmquest.domain.supplements.web.dto.SupplementsScrapResponseDTO;
 

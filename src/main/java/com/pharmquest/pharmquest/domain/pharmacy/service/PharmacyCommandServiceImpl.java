@@ -4,6 +4,7 @@ import com.pharmquest.pharmquest.domain.user.data.User;
 import com.pharmquest.pharmquest.global.apiPayload.code.status.ErrorStatus;
 import com.pharmquest.pharmquest.global.apiPayload.exception.handler.CommonExceptionHandler;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,8 +37,12 @@ public class PharmacyCommandServiceImpl implements PharmacyCommandService {
             }
 
             // 스크랩 목록에 placeId 추가
-            updatedPharmacyScraps.add(placeId);
-            user.setPharmacyScraps(updatedPharmacyScraps);
+            try {
+                updatedPharmacyScraps.add(placeId);
+                user.setPharmacyScraps(updatedPharmacyScraps);
+            } catch (DataIntegrityViolationException e) { // 저장 최대 수 초과 시
+                throw new CommonExceptionHandler(ErrorStatus.PHARMACY_SCRAP_MAX_EXCEED);
+            }
             return true;
         // 스크랩 되어있다면 스크랩 취소
         }else{

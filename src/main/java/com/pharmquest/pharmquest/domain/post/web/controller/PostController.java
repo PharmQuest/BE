@@ -27,7 +27,6 @@ public class PostController {
     public ApiResponse<PostResponseDTO.CreatePostResultDTO> postCommandService(String authorizationHeader, @RequestBody @Valid PostRequestDTO.CreatePostDTO request){
 
         User user = jwtUtil.getUserFromHeader(authorizationHeader);
-
         Post post = postCommandService.registerPost(user.getId(), request);
         return ApiResponse.onSuccess(PostConverter.toCreatePostResultDTO(post));
     }

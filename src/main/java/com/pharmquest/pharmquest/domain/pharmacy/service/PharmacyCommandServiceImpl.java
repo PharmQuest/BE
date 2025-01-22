@@ -1,7 +1,6 @@
 package com.pharmquest.pharmquest.domain.pharmacy.service;
 
 import com.pharmquest.pharmquest.domain.user.data.User;
-import com.pharmquest.pharmquest.domain.user.repository.UserRepository;
 import com.pharmquest.pharmquest.global.apiPayload.code.status.ErrorStatus;
 import com.pharmquest.pharmquest.global.apiPayload.exception.handler.CommonExceptionHandler;
 import lombok.RequiredArgsConstructor;
@@ -16,14 +15,12 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PharmacyCommandServiceImpl implements PharmacyCommandService {
 
-    private final UserRepository userRepository;
     private final PharmacyDetailsService pharmacyDetailsService;
 
     @Override
-    public Boolean scrapPharmacy(Long userId, String placeId) {
+    public Boolean scrapPharmacy(User user, String placeId) {
 
         System.out.println("service");
-        User user = userRepository.findById(userId).orElseThrow(() -> new CommonExceptionHandler(ErrorStatus.USER_NOT_FOUND));
         List<String> pharmacyScraps = user.getPharmacyScraps();
         List<String> updatedPharmacyScraps = new ArrayList<>(pharmacyScraps);
 

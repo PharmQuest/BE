@@ -1,4 +1,4 @@
-package com.pharmquest.pharmquest.global.jwt;
+package com.pharmquest.pharmquest.domain.token;
 
 
 import com.pharmquest.pharmquest.domain.user.data.User;

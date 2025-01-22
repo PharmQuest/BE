@@ -7,4 +7,5 @@ import java.util.List;
 public interface MedicineService {
     List<MedicineResponseDTO> getMedicines(String query, int limit);
     String getTotalData(String query, int limit);
+    MedicineResponseDTO getMedicineBySplSetId(String splSetId);
 }

@@ -34,5 +34,10 @@ public class MedicineController {
         return medicineService.getTotalData(query, limit); // Service에서 처리된 데이터 반환
     }
 
+    @GetMapping("/detail")
+    public MedicineResponseDTO searchBySplSetId(@RequestParam String splSetId) {
+        return medicineService.getMedicineBySplSetId(splSetId);
+    }
+
 }
 

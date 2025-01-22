@@ -49,6 +49,28 @@ public class MedicineServiceImpl implements MedicineService {
         }
     }
 
+    @Override
+    public MedicineResponseDTO getMedicineBySplSetId(String splSetId) {
+        try {
+            // spl_set_id로 검색 요청
+            String query = "openfda.spl_set_id:" + splSetId;
+            String response = medicineRepository.fetchMedicineData(query, 1); // limit 고정
+
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode rootNode = mapper.readTree(response);
+            JsonNode results = rootNode.path("results");
+
+            if (results.isArray() && results.size() > 0) {
+                JsonNode result = results.get(0); // 첫 번째 결과만 사용
+                return parseMedicine(result);
+            } else {
+                throw new IllegalArgumentException("해당 spl_set_id를 가진 약물이 없습니다: " + splSetId);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("spl_set_id로 약물 검색 중 오류 발생", e);
+        }
+    }
+
     //약물 데이터를 JSON에서 파싱하여 DTO로 변환합니다.
     private MedicineResponseDTO parseMedicine(JsonNode result) {
         JsonNode openFda = result.path("openfda");
@@ -131,4 +153,6 @@ public class MedicineServiceImpl implements MedicineService {
             return text;
         }
     }
+
+
 }

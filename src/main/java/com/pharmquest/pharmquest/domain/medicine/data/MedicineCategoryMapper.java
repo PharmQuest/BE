@@ -1,8 +1,5 @@
 package com.pharmquest.pharmquest.domain.medicine.data;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class MedicineCategoryMapper {
 
     public static String getCategory(String purpose, String activeIngredient, String pharmClassEpc, String route) {

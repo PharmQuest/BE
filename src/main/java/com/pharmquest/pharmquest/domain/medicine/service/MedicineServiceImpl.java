@@ -2,6 +2,7 @@ package com.pharmquest.pharmquest.domain.medicine.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.pharmquest.pharmquest.domain.medicine.data.MedicineCategoryMapper;
 import com.pharmquest.pharmquest.domain.medicine.repository.MedicineRepository;
 import com.pharmquest.pharmquest.domain.medicine.web.dto.MedicineResponseDTO;
 import org.springframework.stereotype.Service;
@@ -49,6 +50,70 @@ public class MedicineServiceImpl implements MedicineService {
         }
     }
 
+
+    //번역 전
+    @Override
+    public List<MedicineResponseDTO> getEnMedicines(String query, int limit) {
+        try {
+            String response = medicineRepository.fetchMedicineData(query, limit);
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode rootNode = mapper.readTree(response);
+            JsonNode results = rootNode.get("results");
+
+            List<MedicineResponseDTO> medicines = new ArrayList<>();
+            if (results != null && results.isArray()) {
+                for (JsonNode result : results) {
+                    medicines.add(parseMedicineWithoutTranslation(result));
+                }
+            }
+            return medicines;
+        } catch (Exception e) {
+            throw new RuntimeException("FDA API 요청 실패", e);
+        }
+    }
+    private MedicineResponseDTO parseMedicineWithoutTranslation(JsonNode result) {
+        JsonNode openFda = result.path("openfda");
+
+        String brandName = openFda.path("brand_name").isArray()
+                ? openFda.path("brand_name").get(0).asText("Unknown") : "Unknown";
+        String genericName = openFda.path("generic_name").isArray()
+                ? openFda.path("generic_name").get(0).asText("Unknown") : "Unknown";
+        String substanceName = openFda.path("substance_name").isArray()
+                ? openFda.path("substance_name").get(0).asText("Unknown") : "Unknown";
+        String activeIngredient = result.path("active_ingredient").isArray()
+                ? result.path("active_ingredient").get(0).asText("Unknown") : "Unknown";
+        String route = openFda.path("route").isArray()
+                ? openFda.path("route").get(0).asText("Unknown") : "Unknown";
+        String purpose = result.path("purpose").isArray()
+                ? result.path("purpose").get(0).asText("Unknown") : "Unknown";
+        String indicationsAndUsage = result.path("indications_and_usage").isArray()
+                ? result.path("indications_and_usage").get(0).asText("Unknown") : "Unknown";
+        String dosageAndAdministration = result.path("dosage_and_administration").isArray()
+                ? result.path("dosage_and_administration").get(0).asText("Unknown") : "Unknown";
+        String dosageFormsAndStrengths = result.path("dosage_forms_and_strengths").isArray()
+                ? result.path("dosage_forms_and_strengths").get(0).asText("Unknown") : "Unknown";
+        String splSetId = openFda.path("spl_set_id").isArray()
+                ? openFda.path("spl_set_id").get(0).asText("Unknown") : "Unknown";
+
+        String imgUrl = fetchImageUrl(splSetId);
+        String category = MedicineCategoryMapper.getCategory(purpose, activeIngredient, "", route);
+
+        return new MedicineResponseDTO(
+                brandName,
+                genericName,
+                substanceName,
+                activeIngredient,
+                route,
+                purpose,
+                indicationsAndUsage,
+                dosageAndAdministration,
+                dosageFormsAndStrengths,
+                splSetId,
+                imgUrl,
+                category
+        );
+    }
+
     @Override
     public MedicineResponseDTO getMedicineBySplSetId(String splSetId) {
         try {
@@ -75,43 +140,64 @@ public class MedicineServiceImpl implements MedicineService {
     private MedicineResponseDTO parseMedicine(JsonNode result) {
         JsonNode openFda = result.path("openfda");
 
-        String brandName = combineWithTranslation(
-                openFda.path("brand_name").isArray()
-                        ? openFda.path("brand_name").get(0).asText("Unknown") : "Unknown");
-        String genericName = combineWithTranslation(
-                openFda.path("generic_name").isArray()
-                        ? openFda.path("generic_name").get(0).asText("Unknown") : "Unknown");
-        String substanceName = translateIfNeeded(openFda.path("substance_name").isArray()
-                ? openFda.path("substance_name").get(0).asText("Unknown") : "Unknown");
-        String activeIngredient = translateIfNeeded(result.path("active_ingredient").isArray()
-                ? result.path("active_ingredient").get(0).asText("Unknown") : "Unknown");
-        String route = translateIfNeeded(openFda.path("route").isArray()
-                ? openFda.path("route").get(0).asText("Unknown") : "Unknown");
-        String purpose = translateIfNeeded(result.path("purpose").isArray()
-                ? result.path("purpose").get(0).asText("Unknown") : "Unknown");
-        String indicationsAndUsage = translateIfNeeded(result.path("indications_and_usage").isArray()
-                ? result.path("indications_and_usage").get(0).asText("Unknown") : "Unknown");
-        String dosageAndAdministration = translateIfNeeded(result.path("dosage_and_administration").isArray()
-                ? result.path("dosage_and_administration").get(0).asText("Unknown") : "Unknown");
-        String dosageFormsAndStrengths = translateIfNeeded(result.path("dosage_forms_and_strengths").isArray()
-                ? result.path("dosage_forms_and_strengths").get(0).asText("Unknown") : "Unknown");
+        // 번역 전 원본 데이터 추출
+        String brandName = openFda.path("brand_name").isArray()
+                ? openFda.path("brand_name").get(0).asText("Unknown") : "Unknown";
+        String genericName = openFda.path("generic_name").isArray()
+                ? openFda.path("generic_name").get(0).asText("Unknown") : "Unknown";
+        String substanceName = openFda.path("substance_name").isArray()
+                ? openFda.path("substance_name").get(0).asText("Unknown") : "Unknown";
+        String activeIngredient = result.path("active_ingredient").isArray()
+                ? result.path("active_ingredient").get(0).asText("Unknown") : "Unknown";
+        String route = openFda.path("route").isArray()
+                ? openFda.path("route").get(0).asText("Unknown") : "Unknown";
+        String purpose = result.path("purpose").isArray()
+                ? result.path("purpose").get(0).asText("Unknown") : "Unknown";
+
+        // 카테고리 계산 (번역 전에 수행)
+        String category = MedicineCategoryMapper.getCategory(purpose, activeIngredient, "", route);
+
+        // 번역 수행
+        String translatedBrandName = combineWithTranslation(brandName);
+        String translatedGenericName = combineWithTranslation(genericName);
+        String translatedSubstanceName = translateIfNeeded(substanceName);
+        String translatedActiveIngredient = translateIfNeeded(activeIngredient);
+        String translatedRoute = translateIfNeeded(route);
+        String translatedPurpose = translateIfNeeded(purpose);
+        String translatedIndicationsAndUsage = translateIfNeeded(
+                result.path("indications_and_usage").isArray()
+                        ? result.path("indications_and_usage").get(0).asText("Unknown")
+                        : result.path("indications_and_usage").asText("Unknown")
+        );
+        String translatedDosageAndAdministration = translateIfNeeded(
+                result.path("dosage_and_administration").isArray()
+                        ? result.path("dosage_and_administration").get(0).asText("Unknown")
+                        : result.path("dosage_and_administration").asText("Unknown")
+        );
+        String translatedDosageFormsAndStrengths = translateIfNeeded(
+                result.path("dosage_forms_and_strengths").isArray()
+                        ? result.path("dosage_forms_and_strengths").get(0).asText("Unknown")
+                        : result.path("dosage_forms_and_strengths").asText("Unknown")
+        );
         String splSetId = openFda.path("spl_set_id").isArray()
                 ? openFda.path("spl_set_id").get(0).asText("Unknown") : "Unknown";
 
         String imgUrl = fetchImageUrl(splSetId);
 
+        // DTO 생성
         return new MedicineResponseDTO(
-                brandName,
-                genericName,
-                substanceName,
-                activeIngredient,
-                route,
-                purpose,
-                indicationsAndUsage,
-                dosageAndAdministration,
-                dosageFormsAndStrengths,
+                translatedBrandName,
+                translatedGenericName,
+                translatedSubstanceName,
+                translatedActiveIngredient,
+                translatedRoute,
+                translatedPurpose,
+                translatedIndicationsAndUsage,
+                translatedDosageAndAdministration,
+                translatedDosageFormsAndStrengths,
                 splSetId,
-                imgUrl
+                imgUrl,
+                category
         );
     }
 
@@ -153,6 +239,9 @@ public class MedicineServiceImpl implements MedicineService {
             return text;
         }
     }
+
+
+
 
 
 }

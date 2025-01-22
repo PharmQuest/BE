@@ -27,6 +27,15 @@ public class MedicineController {
         return medicineService.getMedicines(query, limit);
     }
 
+    @GetMapping("/search/english")
+    public List<MedicineResponseDTO> searchEnMedicines(
+            @RequestParam(defaultValue="openfda.product_type:OTC") String query,
+            @RequestParam(defaultValue = "10") int limit) {
+        return medicineService.getEnMedicines(query, limit);
+    }
+
+
+
     @GetMapping("/total")
     public String viewTotal(
             @RequestParam(defaultValue = "openfda.product_type:OTC") String query,

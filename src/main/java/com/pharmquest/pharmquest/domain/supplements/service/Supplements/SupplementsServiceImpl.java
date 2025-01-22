@@ -1,16 +1,19 @@
-package com.pharmquest.pharmquest.domain.supplements.service;
+package com.pharmquest.pharmquest.domain.supplements.service.Supplements;
 
 import com.pharmquest.pharmquest.domain.post.data.enums.Country;
 import com.pharmquest.pharmquest.domain.supplements.converter.SupplementsConverter;
 import com.pharmquest.pharmquest.domain.supplements.data.Supplements;
 import com.pharmquest.pharmquest.domain.supplements.repository.SupplementsRepository;
+import com.pharmquest.pharmquest.domain.supplements.service.DailyMed.DailyMedService;
+import com.pharmquest.pharmquest.domain.supplements.service.Naver.NaverShoppingService;
+import com.pharmquest.pharmquest.domain.supplements.web.dto.DailyMedResponseDTO;
 import com.pharmquest.pharmquest.domain.supplements.web.dto.SupplementsResponseDTO;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,6 +24,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class SupplementsServiceImpl implements SupplementsService {
 
+    private final DailyMedService dailyMedService;
     private final NaverShoppingService naverShoppingService;
     private final SupplementsRepository supplementsRepository;
     private final SupplementsConverter supplementsConverter;
@@ -77,7 +81,6 @@ public class SupplementsServiceImpl implements SupplementsService {
     public boolean saveSupplements() {
         try {
             List<String> supplementsNames = Arrays.asList(
-                    "미국 인기 영양제",
                     "일본 인기 영양제",
                     "중국 인기 영양제"
             );
@@ -85,26 +88,31 @@ public class SupplementsServiceImpl implements SupplementsService {
             supplementsNames.forEach(searchKeyword ->
                     naverShoppingService.loadProducts(searchKeyword).stream()
                             .map(dto -> {
-                                Country country = getCountryFromSearchKeyword(searchKeyword);
-                                String cleanedName = cleanProductName(dto.getName(), country);
+                                try {
+                                    Country country = getCountryFromSearchKeyword(searchKeyword);
+                                    String cleanedName = cleanProductName(dto.getName(), country);
 
-                                if (supplementsRepository.existsByName(cleanedName)) {
+                                    if (supplementsRepository.existsByName(cleanedName)) {
+                                        return null;
+                                    }
+                                    return Supplements.builder()
+                                            .name(cleanedName)
+                                            .image(dto.getImage())
+                                            .brand(dto.getBrand())
+                                            .maker(dto.getMaker())
+                                            .category1(dto.getCategory1())
+                                            .category2(dto.getCategory2())
+                                            .category3(dto.getCategory3())
+                                            .category4(dto.getCategory4())
+                                            .dosage("")
+                                            .purpose("")
+                                            .warning("")
+                                            .country(country)
+                                            .scrapCount(0)
+                                            .build();
+                                } catch (Exception e) {
                                     return null;
                                 }
-                                return Supplements.builder()
-                                        .name(cleanedName)
-                                        .image(dto.getImage())
-                                        .brand(dto.getBrand())
-                                        .maker(dto.getMaker())
-                                        .link(dto.getLink())
-                                        .category1(dto.getCategory1())
-                                        .category2(dto.getCategory2())
-                                        .category3(dto.getCategory3())
-                                        .category4(dto.getCategory4())
-                                        .description("")
-                                        .country(country)
-                                        .scrapCount(0)
-                                        .build();
                             })
                             .forEach(supplement -> {
                                 if (supplement != null) {
@@ -112,6 +120,42 @@ public class SupplementsServiceImpl implements SupplementsService {
                                 }
                             })
             );
+
+            List<DailyMedResponseDTO.ExtractedInfo> extractedInfoList = dailyMedService.extractSupplementInfo();
+            extractedInfoList.stream()
+                    .map(info -> {
+                        try {
+                            DailyMedResponseDTO.DetailInfo detailInfo = dailyMedService.getDetailInfo(info.getSetid(), info.getTitle());
+                            String cleanedName = cleanProductName(detailInfo.getTitle(), Country.USA);
+
+                            if (supplementsRepository.existsByName(cleanedName)) {
+                                return null;
+                            }
+
+                            return Supplements.builder()
+                                    .name(cleanedName)
+                                    .image(detailInfo.getImageUrl())
+                                    .brand(detailInfo.getManufacturer())
+                                    .maker(detailInfo.getManufacturer())
+                                    .category1("")
+                                    .category2("")
+                                    .category3("")
+                                    .category4("기타건강보조식품")
+                                    .dosage(detailInfo.getDosage())
+                                    .purpose(detailInfo.getPurpose())
+                                    .warning(detailInfo.getWarning())
+                                    .country(Country.USA)
+                                    .scrapCount(0)
+                                    .build();
+                        } catch (Exception e) {
+                            return null;
+                        }
+                    })
+                    .forEach(supplements -> {
+                        if (supplements != null) {
+                            supplementsRepository.save(supplements);
+                        }
+                    });
             return true;
         } catch (Exception e) {
             return false;

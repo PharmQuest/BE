@@ -23,20 +23,14 @@ public class Supplements {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 100)
+    @Column(nullable = false, length = 255)
     private String name;
-
-    @Column(nullable = true, length = 255)
-    private String description;
 
     @Column(nullable = false, length = 100)
     private String maker;
 
     @Column(nullable = false, length = 100)
     private String brand;
-
-    @Column(nullable = false, length = 255)
-    private String link;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -56,6 +50,12 @@ public class Supplements {
     private String category3;
     @Column(nullable = true, length = 100)
     private String category4;
+    @Column(nullable = true, columnDefinition = "TEXT")
+    private String dosage;
+    @Column(nullable = true, columnDefinition = "TEXT")
+    private String warning;
+    @Column(nullable = true, columnDefinition = "TEXT")
+    private String purpose;
 
     @OneToMany(mappedBy = "supplements", cascade = CascadeType.ALL)
     private List<SupplementsScrap> supplementsScrapList = new ArrayList<>();

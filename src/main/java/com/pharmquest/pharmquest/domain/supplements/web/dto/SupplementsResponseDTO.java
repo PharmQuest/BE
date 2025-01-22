@@ -16,7 +16,6 @@ public class SupplementsResponseDTO {
         private String image;
         private String brand;
         private String maker;
-        private String link;
         private String category1;
         private String category2;
         private String category3;
@@ -59,7 +58,6 @@ public class SupplementsResponseDTO {
         private String image;
         private String brand;
         private String maker;
-        private String link;
         private boolean isScrapped;
         private int scrapCount;
         private String category1;

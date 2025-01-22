@@ -52,7 +52,6 @@ public class SupplementsConverter {
                 .image(supplement.getImage())
                 .brand(supplement.getBrand())
                 .maker(supplement.getMaker())
-                .link(supplement.getLink())
                 .isScrapped(isSupplementScrappedByUser(supplement, userId))
                 .scrapCount(supplement.getScrapCount())
                 .category1(supplement.getCategory1())

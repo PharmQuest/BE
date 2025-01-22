@@ -9,7 +9,7 @@ import com.pharmquest.pharmquest.domain.post.web.dto.PostRequestDTO;
 import com.pharmquest.pharmquest.domain.post.web.dto.PostResponseDTO;
 import com.pharmquest.pharmquest.domain.user.data.User;
 import com.pharmquest.pharmquest.global.apiPayload.ApiResponse;
-import com.pharmquest.pharmquest.global.jwt.JwtUtil;
+import com.pharmquest.pharmquest.domain.token.JwtUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +24,8 @@ public class PostController {
     private final PostCommandService postCommandService;
     private final JwtUtil jwtUtil;
     @PostMapping("/posts")
-    public ApiResponse<PostResponseDTO.CreatePostResultDTO> postCommandService(String authorizationHeader, @RequestBody @Valid PostRequestDTO.CreatePostDTO request){
+    public ApiResponse<PostResponseDTO.CreatePostResultDTO> postCommandService(@RequestHeader(value = "Authorization") String authorizationHeader,
+                                                                               @RequestBody @Valid PostRequestDTO.CreatePostDTO request){
 
         User user = jwtUtil.getUserFromHeader(authorizationHeader);
 

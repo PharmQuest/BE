@@ -1,4 +1,4 @@
-package com.pharmquest.pharmquest.global.jwt;
+package com.pharmquest.pharmquest.domain.token.data;
 
 import jakarta.persistence.*;
 import lombok.*;

@@ -33,6 +33,7 @@ public class PostController {
     private final PostLikeService postLikeService;
     private final PostScrapService postScrapService;
     private final JwtUtil jwtUtil;
+
     @PostMapping("/posts")
     public ApiResponse<PostResponseDTO.CreatePostResultDTO> postCommandService(
             @Parameter (hidden = true) @RequestHeader("Authorization") String authorizationHeader,

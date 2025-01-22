@@ -3,10 +3,10 @@ package com.pharmquest.pharmquest.domain.token.service;
 import com.pharmquest.pharmquest.domain.token.web.dto.TokenResponseDTO;
 import com.pharmquest.pharmquest.global.apiPayload.exception.tokenException.TokenErrorResult;
 import com.pharmquest.pharmquest.global.apiPayload.exception.tokenException.TokenException;
-import com.pharmquest.pharmquest.global.jwt.JwtUtil;
-import com.pharmquest.pharmquest.global.jwt.RefreshToken;
+import com.pharmquest.pharmquest.domain.token.JwtUtil;
+import com.pharmquest.pharmquest.domain.token.data.RefreshToken;
 
-import com.pharmquest.pharmquest.global.jwt.RefreshTokenRepository;
+import com.pharmquest.pharmquest.domain.token.repository.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.beans.factory.annotation.Value;

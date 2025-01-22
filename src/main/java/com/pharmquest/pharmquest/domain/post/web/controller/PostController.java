@@ -15,7 +15,7 @@ import com.pharmquest.pharmquest.domain.post.web.dto.PostRequestDTO;
 import com.pharmquest.pharmquest.domain.post.web.dto.PostResponseDTO;
 import com.pharmquest.pharmquest.domain.user.data.User;
 import com.pharmquest.pharmquest.global.apiPayload.ApiResponse;
-import com.pharmquest.pharmquest.global.jwt.JwtUtil;
+import com.pharmquest.pharmquest.domain.token.JwtUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.headers.Header;
@@ -55,7 +55,7 @@ public class PostController {
     @GetMapping("/posts/{post_id}")
     @Operation(summary = "게시글 상세조회 API")
     public ApiResponse<PostResponseDTO.PostDetailDTO> getPost(@Parameter (hidden = true) @RequestHeader("Authorization") String authorizationHeader,@PathVariable(name = "post_id")Long postId){
-        // 서비스 호출
+     
         User user = jwtUtil.getUserFromHeader(authorizationHeader);
 
         PostResponseDTO.PostDetailDTO postDetail = postCommandService.getPost(user.getId(), postId);

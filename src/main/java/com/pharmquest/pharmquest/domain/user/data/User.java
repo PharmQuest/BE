@@ -40,8 +40,9 @@ public class User {
     @CreationTimestamp
     private Timestamp createDate;
 
+    @Lob
     @Convert(converter = ListStringConverter.class)
-    @Column(columnDefinition = "varchar(100) default '{}'")
+    @Column(columnDefinition = "TEXT")
     private List<String> pharmacyScraps; // 스크랩한 약국 목록을 문자열로 저장
 
     // Relationships

@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class HomePostResponseDTO {
 
-    private LocalDateTime createdAt;
+    private String createdAt;
     private String title;
     private String category;
 

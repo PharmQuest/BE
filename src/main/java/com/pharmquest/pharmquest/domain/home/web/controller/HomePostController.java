@@ -22,10 +22,10 @@ public class HomePostController {
     @GetMapping("/posts")
     public ApiResponse<HomePostsResponse> getHomePosts() {
 
-        List<Post> hotPosts = homePostService.getHotPosts();
-        List<Post> newPosts = homePostService.getNewPosts();
+        Post hotPost = homePostService.getHotPosts();
+        List<Post> newPosts = homePostService.getNewPosts(hotPost);
         // 두 개의 List로 응답 생성
-        return ApiResponse.of(SuccessStatus.HOME_POSTS, new HomePostsResponse(hotPosts, newPosts));
+        return ApiResponse.of(SuccessStatus.HOME_POSTS, new HomePostsResponse(hotPost, newPosts));
     }
 
 }

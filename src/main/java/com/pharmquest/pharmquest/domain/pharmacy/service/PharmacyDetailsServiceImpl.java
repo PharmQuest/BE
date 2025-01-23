@@ -1,5 +1,6 @@
 package com.pharmquest.pharmquest.domain.pharmacy.service;
 
+import com.pharmquest.pharmquest.domain.mypage.web.dto.ScrapResponseDTO;
 import com.pharmquest.pharmquest.domain.pharmacy.web.dto.GooglePlaceDetailsResponse;
 import com.pharmquest.pharmquest.global.apiPayload.code.status.ErrorStatus;
 import com.pharmquest.pharmquest.global.apiPayload.exception.handler.CommonExceptionHandler;
@@ -27,16 +28,7 @@ public class PharmacyDetailsServiceImpl implements PharmacyDetailsService {
     @Override
     public Boolean isPharmacyByPlaceId(String placeId) {
 
-        GooglePlaceDetailsResponse response;
-        response = webClient.get()
-                .uri(uriBuilder -> uriBuilder
-                        .queryParam("key", API_KEY)
-                        .queryParam("place_id", placeId)
-                        .build())
-                .retrieve()
-                .bodyToMono(GooglePlaceDetailsResponse.class)
-                .block();
-
+        GooglePlaceDetailsResponse response = getDetailsByPlaceId(placeId);
         if (response != null && "OK".equals(response.getStatus())) {
             return checkIfPharmacy(response);
         }
@@ -45,7 +37,52 @@ public class PharmacyDetailsServiceImpl implements PharmacyDetailsService {
         }
     }
 
+    // placeId로 상세정보를 불러와 Dto로 변환
+    @Override
+    public ScrapResponseDTO.PharmacyDto getPharmacyByPlaceId(String placeId) {
 
+        GooglePlaceDetailsResponse response = getDetailsByPlaceId(placeId);
+        GooglePlaceDetailsResponse.Result detailsResult = response.getResult();
+
+        return ScrapResponseDTO.PharmacyDto.builder()
+                .name(detailsResult.getName())
+                .openNow(detailsResult.getOpeningHours().getOpenNow())
+                .region(detailsResult.getFormattedAddress())
+                .latitude(detailsResult.getGeometry().getLocation().getLat())
+                .longitude(detailsResult.getGeometry().getLocation().getLng())
+                .country(getCountryName(response))
+                .periods(detailsResult.getOpeningHours().getPeriods())
+                .imgUrl("imgURL")
+                .build();
+
+
+    }
+
+    // 상세정보로부터 국가 이름 가져옴
+    private String getCountryName(GooglePlaceDetailsResponse response) {
+        if (response.getResult().getAddressComponents() != null) {
+            return response.getResult().getAddressComponents().stream()
+                    .filter(component -> component.getTypes().contains("country"))
+                    .map(GooglePlaceDetailsResponse.AddressComponent::getLongName)
+                    .findFirst()
+                    .orElse("Unknown");
+        }
+        return "Unknown";
+    }
+
+    // placeId를 가지고 api로 상세정보 조회
+    private GooglePlaceDetailsResponse getDetailsByPlaceId(String placeId) {
+        return webClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .queryParam("key", API_KEY)
+                        .queryParam("place_id", placeId)
+                        .build())
+                .retrieve()
+                .bodyToMono(GooglePlaceDetailsResponse.class)
+                .block();
+    }
+
+    // api로부터 불러온 정보를 바탕으로 약국인지 확인
     private Boolean checkIfPharmacy(GooglePlaceDetailsResponse response) {
 
         if (response.getResult() != null && response.getResult().getTypes() != null) {

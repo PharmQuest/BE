@@ -9,9 +9,6 @@ public class PharmacyRequestDTO {
 
     @Getter
     public static class ScrapDto{
-        @NotNull
-        @JsonProperty(value = "user_id")
-        private Long userId;
         @NotBlank
         @JsonProperty(value = "place_id")
         private String placeId;

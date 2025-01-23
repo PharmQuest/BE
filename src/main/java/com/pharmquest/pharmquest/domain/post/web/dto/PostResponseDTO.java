@@ -40,7 +40,7 @@ public class PostResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class PostPreViewDTO {
-        String user;
+        String userName;
         String title;
         String content;
         String category;
@@ -57,7 +57,7 @@ public class PostResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class PostDetailDTO {
-        String user;
+        String userName;
         String title;
         String content;
         String category;

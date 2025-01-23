@@ -5,9 +5,11 @@ import com.pharmquest.pharmquest.domain.supplements.data.mapping.SupplementsScra
 import com.pharmquest.pharmquest.domain.user.data.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface SupplementsScrapRepository extends JpaRepository<SupplementsScrap, Long> {
     Optional<SupplementsScrap> findByUserAndSupplements(User user, Supplements supplements);
     boolean existsByUserIdAndSupplementsId(Long userId, Long supplementsId);
+    List<SupplementsScrap> findSupplementsByUserId(Long userId);
 }

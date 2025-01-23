@@ -1,6 +1,6 @@
 package com.pharmquest.pharmquest.domain.post.web.controller;
 
-import com.pharmquest.pharmquest.domain.mypage.domain.PostScrap;
+import com.pharmquest.pharmquest.domain.mypage.data.PostScrap;
 import com.pharmquest.pharmquest.domain.post.converter.PostConverter;
 import com.pharmquest.pharmquest.domain.post.converter.PostLikeConverter;
 import com.pharmquest.pharmquest.domain.post.converter.PostScrapConverter;

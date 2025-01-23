@@ -1,8 +1,8 @@
 package com.pharmquest.pharmquest.domain.user.data;
 
-import com.pharmquest.pharmquest.domain.mypage.domain.MedicineScrap;
-import com.pharmquest.pharmquest.domain.mypage.domain.SupplementScrap;
-import com.pharmquest.pharmquest.domain.mypage.domain.PostScrap;
+import com.pharmquest.pharmquest.domain.mypage.data.MedicineScrap;
+import com.pharmquest.pharmquest.domain.mypage.data.SupplementScrap;
+import com.pharmquest.pharmquest.domain.mypage.data.PostScrap;
 import com.pharmquest.pharmquest.domain.pharmacy.converter.ListStringConverter;
 import com.pharmquest.pharmquest.domain.post.data.mapping.PostLike;
 import com.pharmquest.pharmquest.domain.post.data.mapping.PostReport;

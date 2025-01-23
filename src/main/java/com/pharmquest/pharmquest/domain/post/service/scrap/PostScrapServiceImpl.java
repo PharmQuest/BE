@@ -1,7 +1,7 @@
 package com.pharmquest.pharmquest.domain.post.service.scrap;
 
 
-import com.pharmquest.pharmquest.domain.mypage.domain.PostScrap;
+import com.pharmquest.pharmquest.domain.mypage.data.PostScrap;
 import com.pharmquest.pharmquest.domain.post.converter.PostScrapConverter;
 import com.pharmquest.pharmquest.domain.post.data.Post;
 import com.pharmquest.pharmquest.domain.post.repository.post.PostRepository;

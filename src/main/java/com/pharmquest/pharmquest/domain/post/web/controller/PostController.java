@@ -120,6 +120,7 @@ public class PostController {
     }
 
     @PostMapping("/posts/{post_id}/comments")
+    @Operation(summary = "게시글 댓글, 답글 작성 API")
     public ApiResponse<CommentResponseDTO.CreateCommentResultDTO> createComment(
             @Parameter (hidden = true) @RequestHeader("Authorization") String authorizationHeader,
             @PathVariable(name = "post_id")Long postId,
@@ -133,6 +134,7 @@ public class PostController {
     }
 
     @GetMapping("/{post_id}/comments")
+    @Operation(summary = "게시글 댓글 조회 API")
     public ApiResponse<CommentResponseDTO.CommentListDTO> getComments( @PathVariable(name = "post_id")Long postId) {
         CommentResponseDTO.CommentListDTO commentListDTO = postCommentService.getCommentsByPost(postId);
         return ApiResponse.onSuccess(commentListDTO);

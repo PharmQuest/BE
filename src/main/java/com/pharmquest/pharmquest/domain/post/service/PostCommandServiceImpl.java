@@ -17,6 +17,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -46,12 +47,15 @@ public class PostCommandServiceImpl implements PostCommandService{
     //게시글 리스트 가져오기 (카테고리별 필터링, 10개씩 페이징)
     @Override
     public Page<Post> getAllPosts(PostCategory category, Integer page) {
+
+        PageRequest pageRequest = PageRequest.of(page - 1, 10, Sort.by(Sort.Direction.DESC, "createdAt"));
+
         if (category == PostCategory.ALL) {
             // category가 ALL이면 전체 게시물 조회
-            return postRepository.findAll(PageRequest.of(page - 1, 10));
+            return postRepository.findAll(pageRequest);
         } else {
             // 특정 category에 맞는 게시물 조회
-            return postRepository.findByCategory(category, PageRequest.of(page - 1, 10));
+            return postRepository.findByCategory(category, pageRequest);
         }
     }
 
@@ -72,7 +76,12 @@ public class PostCommandServiceImpl implements PostCommandService{
     @Override
     public Page<Post> searchPostsDynamically(String keyword, Country country, PostCategory category, Integer page) {
 
-        Page<Post> posts = postRepository.findAll(PostSpecification.dynamicQuery(keyword, category, country), PageRequest.of(page - 1, 10));
+        PageRequest pageRequest = PageRequest.of(page - 1, 10, Sort.by(Sort.Direction.DESC, "createdAt"));
+
+        Page<Post> posts = postRepository.findAll(
+                PostSpecification.dynamicQuery(keyword, category, country),
+                pageRequest
+        );
 
         if (posts.isEmpty()) {
             throw new EntityNotFoundException("검색어에 해당하는 게시글이 없습니다.");

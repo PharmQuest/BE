@@ -40,6 +40,8 @@ public class PostResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class PostPreViewDTO {
+        Long postId;
+        Long userId;
         String userName;
         String title;
         String content;

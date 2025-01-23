@@ -36,6 +36,7 @@ public class CommentResponseDTO {
     public static class CommentDTO {
         private Long commentId;
         private String content;
+        private Long userId;
         private String userName;
         private LocalDateTime createdAt;
         private Long parentId;

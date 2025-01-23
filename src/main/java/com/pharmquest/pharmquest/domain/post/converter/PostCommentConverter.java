@@ -23,6 +23,7 @@ public class PostCommentConverter {
         return CommentResponseDTO.CommentDTO.builder()
                 .commentId(comment.getId())
                 .content(comment.getContent())
+                .userId(comment.getUser().getId())
                 .userName(comment.getUser().getEmail().substring(0, comment.getUser().getEmail().indexOf("@")))
                 .createdAt(comment.getCreatedAt())
                 .parentId(comment.getParent() != null ? comment.getParent().getId():null)

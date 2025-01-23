@@ -32,6 +32,8 @@ public class PostConverter {
 
     public static PostResponseDTO.PostPreViewDTO postPreViewDTO(Post post) {
         return PostResponseDTO.PostPreViewDTO.builder()
+                .postId(post.getId())
+                .userId(post.getUser().getId())
                 .userName(post.getUser().getEmail().substring(0, post.getUser().getEmail().indexOf("@")))
                 .title(post.getTitle())
                 .content(post.getContent())

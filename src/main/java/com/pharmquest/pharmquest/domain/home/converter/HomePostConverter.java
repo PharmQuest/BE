@@ -15,6 +15,9 @@ public class HomePostConverter {
     }
 
     public static HomePostResponseDTO postToDto(Post post) {
+        if(post == null) {
+            return null;
+        }
         return HomePostResponseDTO.builder()
                 .postId(post.getId())
                 .title(post.getTitle())

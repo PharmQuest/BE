@@ -17,8 +17,6 @@ public enum ErrorStatus implements BaseErrorCode {
     ILLEGAL_COUNTRY(HttpStatus.BAD_REQUEST, "POST4001", "올바르지 않은 국가."),
     ILLEGAL_POST_CATEGORY(HttpStatus.BAD_REQUEST, "POST4002", "올바르지 않은 카테고리."),
 
-    POST_NOT_FOUND(HttpStatus.NOT_FOUND, "POST4004", "게시글이 존재하지 않습니다."),
-
     // user
     USER_NOT_FOUND(HttpStatus.BAD_REQUEST, "USER4001", "존재하지 않는 사용자입니다."),
 

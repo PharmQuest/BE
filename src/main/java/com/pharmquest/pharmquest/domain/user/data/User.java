@@ -11,6 +11,7 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -40,9 +41,10 @@ public class User {
     @CreationTimestamp
     private Timestamp createDate;
 
+    @Lob
     @Convert(converter = ListStringConverter.class)
-    @Column(columnDefinition = "varchar(100) default '{}'")
-    private List<String> pharmacyScraps; // 스크랩한 약국 목록을 문자열로 저장
+    @Column(columnDefinition = "TEXT")
+    private List<String> pharmacyScraps = new ArrayList<>(); // 스크랩한 약국 목록을 문자열로 저장
 
     // Relationships
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)

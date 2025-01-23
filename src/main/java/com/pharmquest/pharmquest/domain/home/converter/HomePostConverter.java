@@ -16,6 +16,7 @@ public class HomePostConverter {
 
     public static HomePostResponseDTO postToDto(Post post) {
         return HomePostResponseDTO.builder()
+                .postId(post.getId())
                 .title(post.getTitle())
                 .createdAt(convertDate(post.getCreatedAt()))
                 .category(post.getCategory().getKoreanName())

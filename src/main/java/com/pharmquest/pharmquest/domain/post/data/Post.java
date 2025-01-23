@@ -1,6 +1,7 @@
 package com.pharmquest.pharmquest.domain.post.data;
 
 import com.pharmquest.pharmquest.domain.mypage.domain.PostScrap;
+import com.pharmquest.pharmquest.domain.post.data.mapping.Comment;
 import com.pharmquest.pharmquest.domain.user.data.User;
 import com.pharmquest.pharmquest.global.data.BaseEntity;
 import com.pharmquest.pharmquest.domain.post.data.enums.Country;
@@ -60,6 +61,8 @@ public class Post extends BaseEntity {
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
     private List<PostReport> reports = new ArrayList<>();
 
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+    private List<Comment> comments = new ArrayList<>();
 
 
     @ManyToOne(fetch = FetchType.LAZY)

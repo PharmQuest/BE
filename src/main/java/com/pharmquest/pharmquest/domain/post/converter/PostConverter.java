@@ -40,6 +40,7 @@ public class PostConverter {
                 .category(post.getCategory().getKoreanName())
                 .scrapeCount(post.getScraps().size())
                 .likeCount(post.getLikes().size())
+                .commentCount(post.getComments().size())
                 .createdAt(post.getCreatedAt())
                 .build();
     }

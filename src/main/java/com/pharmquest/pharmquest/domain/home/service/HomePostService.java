@@ -8,7 +8,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -16,9 +15,9 @@ public class HomePostService {
 
     private final HomePostRepository postRepository;
 
-    public Post getHotPosts(){
+    public Post getHotPost(){
         // 인기 게시물 1개
-        return postRepository.findTop1ByOrderByScrapCountDesc().orElseThrow(() -> new CommonExceptionHandler(ErrorStatus.POST_NOT_FOUND));
+        return postRepository.findHotPost().orElseThrow(() -> new CommonExceptionHandler(ErrorStatus.POST_NOT_FOUND));
     }
 
     // 최신 게시물 4개 반환

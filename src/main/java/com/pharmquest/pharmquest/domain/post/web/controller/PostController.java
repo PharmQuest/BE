@@ -1,16 +1,22 @@
 package com.pharmquest.pharmquest.domain.post.web.controller;
 
+import com.google.protobuf.Api;
 import com.pharmquest.pharmquest.domain.mypage.domain.PostScrap;
+import com.pharmquest.pharmquest.domain.post.converter.PostCommentConverter;
 import com.pharmquest.pharmquest.domain.post.converter.PostConverter;
 import com.pharmquest.pharmquest.domain.post.converter.PostLikeConverter;
 import com.pharmquest.pharmquest.domain.post.converter.PostScrapConverter;
 import com.pharmquest.pharmquest.domain.post.data.Post;
 import com.pharmquest.pharmquest.domain.post.data.enums.Country;
 import com.pharmquest.pharmquest.domain.post.data.enums.PostCategory;
+import com.pharmquest.pharmquest.domain.post.data.mapping.Comment;
 import com.pharmquest.pharmquest.domain.post.data.mapping.PostLike;
 import com.pharmquest.pharmquest.domain.post.service.PostCommandService;
+import com.pharmquest.pharmquest.domain.post.service.comment.PostCommentService;
 import com.pharmquest.pharmquest.domain.post.service.like.PostLikeService;
 import com.pharmquest.pharmquest.domain.post.service.scrap.PostScrapService;
+import com.pharmquest.pharmquest.domain.post.web.dto.CommentRequestDTO;
+import com.pharmquest.pharmquest.domain.post.web.dto.CommentResponseDTO;
 import com.pharmquest.pharmquest.domain.post.web.dto.PostRequestDTO;
 import com.pharmquest.pharmquest.domain.post.web.dto.PostResponseDTO;
 import com.pharmquest.pharmquest.domain.user.data.User;
@@ -24,6 +30,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/community")
@@ -33,6 +41,7 @@ public class PostController {
     private final PostLikeService postLikeService;
     private final PostScrapService postScrapService;
     private final JwtUtil jwtUtil;
+    private final PostCommentService postCommentService;
 
     @PostMapping("/posts")
     public ApiResponse<PostResponseDTO.CreatePostResultDTO> postCommandService(
@@ -110,5 +119,23 @@ public class PostController {
         return ApiResponse.onSuccess("스크랩이 취소되었습니다");
     }
 
+    @PostMapping("/posts/{post_id}/comments")
+    public ApiResponse<CommentResponseDTO.CreateCommentResultDTO> createComment(
+            @Parameter (hidden = true) @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable(name = "post_id")Long postId,
+            @RequestParam(name="parentsId", required = false)Long parentsId,
+            @RequestBody @Valid CommentRequestDTO.CreateCommentDTO requestDTO) {
+
+        User user = jwtUtil.getUserFromHeader(authorizationHeader);
+
+        Comment createdComment = postCommentService.addComment(user.getId(),postId, parentsId,requestDTO);
+        return ApiResponse.onSuccess(PostCommentConverter.toCreateCommentResultDTO(createdComment));
+    }
+
+    @GetMapping("/{post_id}/comments")
+    public ApiResponse<CommentResponseDTO.CommentListDTO> getComments( @PathVariable(name = "post_id")Long postId) {
+        CommentResponseDTO.CommentListDTO commentListDTO = postCommentService.getCommentsByPost(postId);
+        return ApiResponse.onSuccess(commentListDTO);
+    }
 
 }

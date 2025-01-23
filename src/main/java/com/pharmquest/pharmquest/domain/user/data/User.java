@@ -4,6 +4,7 @@ import com.pharmquest.pharmquest.domain.mypage.domain.MedicineScrap;
 import com.pharmquest.pharmquest.domain.mypage.domain.SupplementScrap;
 import com.pharmquest.pharmquest.domain.mypage.domain.PostScrap;
 import com.pharmquest.pharmquest.domain.pharmacy.converter.ListStringConverter;
+import com.pharmquest.pharmquest.domain.post.data.mapping.Comment;
 import com.pharmquest.pharmquest.domain.post.data.mapping.PostLike;
 import com.pharmquest.pharmquest.domain.post.data.mapping.PostReport;
 import jakarta.persistence.*;
@@ -59,5 +60,8 @@ public class User {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostReport> postReports;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments;
 
 }

@@ -2,7 +2,7 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ dev ]  
+    branches: [ dev ]
 
 jobs:
   build:
@@ -22,6 +22,11 @@ jobs:
           echo "${{ secrets.APPLICATION_YML }}" > src/main/resources/application.yml
         shell: bash
 
+      - name: Validate application.yml  # application.yml 디버깅용 출력
+        run: |
+          echo "Checking application.yml..."
+          head -n 10 src/main/resources/application.yml  # 내용 확인
+
       - name: Grant execute permission for gradlew  # gradlew 실행 권한 부여
         run: chmod +x gradlew
 
@@ -31,7 +36,7 @@ jobs:
           arguments: build
 
       - name: Upload build artifact  # 빌드된 아티팩트 업로드
-        uses: actions/upload-artifact@v4  # 최신 버전으로 업데이트
+        uses: actions/upload-artifact@v4  # 최신 버전 사용
         with:
           name: umc7thServer
           path: build/libs/*.jar
@@ -47,6 +52,14 @@ jobs:
           name: umc7thServer
           path: build/libs/
 
+      - name: Debug Environment Variables  # 환경 변수 디버깅
+        run: |
+          echo "Environment variables:"
+          echo "EC2_HOST: ${{ secrets.EC2_HOST }}"
+          echo "EC2_USERNAME: ${{ secrets.EC2_USERNAME }}"
+          echo "GOOGLE_CREDENTIALS_JSON: ${GOOGLE_CREDENTIALS_JSON:0:20}..." # 첫 20자 출력
+          echo "Secrets validated successfully."
+
       - name: Deploy to EC2  # EC2에 배포
         env:
           EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
@@ -55,23 +68,37 @@ jobs:
           GOOGLE_CREDENTIALS_JSON: ${{ secrets.GOOGLE_CREDENTIALS_JSON }}
         run: |
           # 1. 프라이빗 키 생성
+          echo "Creating private key..."
           echo "$EC2_SSH_KEY" > private_key.pem
           chmod 600 private_key.pem
           
           # 2. JSON 파일 생성
-          echo "$GOOGLE_CREDENTIALS_JSON" > /home/$EC2_USERNAME/skilful-card-445716-m2-6364abe85b4b.json
-          chmod 600 /home/$EC2_USERNAME/skilful-card-445716-m2-6364abe85b4b.json
+          echo "Generating Google credentials JSON..."
+          echo "$GOOGLE_CREDENTIALS_JSON" > skilful-card-445716-m2-6364abe85b4b.json
+          chmod 600 skilful-card-445716-m2-6364abe85b4b.json
 
           # 3. JAR 파일 전송
+          echo "Transferring JAR file..."
           jar_file=$(find build/libs -name '*.jar' ! -name '*plain.jar' | head -n 1)
+          if [ -z "$jar_file" ]; then
+            echo "Error: No JAR file found!"
+            exit 1
+          fi
           scp -i private_key.pem -o StrictHostKeyChecking=no "$jar_file" $EC2_USERNAME@$EC2_HOST:/home/$EC2_USERNAME/umc7thServer.jar
           
           # 4. 기존 프로세스 종료 및 애플리케이션 실행
+          echo "Stopping existing Java processes on EC2..."
           ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_HOST "
             pgrep java | xargs -r kill -15  # 기존에 실행 중인 Java 프로세스 종료
             sleep 10
-            nohup java -jar /home/$EC2_USERNAME/umc7thServer.jar > app.log 2>&1 &  # 새 버전 애플리케이션 실행
+          "
+
+          echo "Starting new application on EC2..."
+          ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_HOST "
+            nohup java -jar /home/$EC2_USERNAME/umc7thServer.jar > /home/$EC2_USERNAME/app.log 2>&1 &
           "
           
           # 5. 민감한 파일 삭제
-          rm -f private_key.pem
+          echo "Cleaning up..."
+          rm -f private_key.pem skilful-card-445716-m2-6364abe85b4b.json
+          echo "Deployment completed successfully."

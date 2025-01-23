@@ -44,7 +44,7 @@ public class User {
     @Lob
     @Convert(converter = ListStringConverter.class)
     @Column(columnDefinition = "TEXT")
-    private List<String> pharmacyScraps = new ArrayList<>(); // 스크랩한 약국 목록을 문자열로 저장
+    private List<String> pharmacyScraps; // 스크랩한 약국 목록을 문자열로 저장
 
     // Relationships
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)

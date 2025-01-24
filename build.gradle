@@ -61,7 +61,7 @@ dependencies {
 	implementation 'com.google.cloud:google-cloud-translate:2.55.0'
 
 	implementation 'org.springframework.boot:spring-boot-starter-mustache'
-	
+
 }
 
 tasks.named('test') {

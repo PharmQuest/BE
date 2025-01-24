@@ -1,7 +1,7 @@
 package com.pharmquest.pharmquest.domain.medicine.web.controller;
 
 import com.pharmquest.pharmquest.domain.medicine.data.Medicine;
-import com.pharmquest.pharmquest.domain.medicine.repository.Medrepository;
+import com.pharmquest.pharmquest.domain.medicine.repository.MedRepository;
 import com.pharmquest.pharmquest.domain.medicine.service.MedicineService;
 import com.pharmquest.pharmquest.domain.medicine.web.dto.MedicineResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -14,9 +14,9 @@ import java.util.List;
 public class MedicineController {
 
     private final MedicineService medicineService;
-    private final Medrepository medRepository;
+    private final MedRepository medRepository;
 
-    public MedicineController(MedicineService medicineService, Medrepository medrepository) {
+    public MedicineController(MedicineService medicineService, MedRepository medrepository) {
         this.medicineService = medicineService;
         this.medRepository =medrepository;
     }

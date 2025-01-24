@@ -23,28 +23,41 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'org.springframework.boot:spring-boot-starter-webflux'
-	implementation 'org.springframework.boot:spring-boot-starter-mustache'
-	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
-	implementation 'org.springframework.boot:spring-boot-starter-security'
+	compileOnly 'org.projectlombok:lombok'
+	runtimeOnly 'com.mysql:mysql-connector-j'
+	annotationProcessor 'org.projectlombok:lombok'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.security:spring-security-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	implementation 'com.fasterxml.jackson.core:jackson-databind'
 
+	// Spring Boot WebFlux (WebClient 사용)
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+
+	// Spring Boot DevTools (개발 시 편의성 제공)
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0'
+
+	// Netty (macOS에서 DNS 서버 주소를 처리)
+	runtimeOnly 'io.netty:netty-resolver-dns-native-macos:4.1.104.Final:osx-aarch_64'
+
+	// Security (소셜 로그인 관련 의존성)
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
+	testImplementation 'org.springframework.security:spring-security-test'
+
+	// Jwt
 	implementation 'io.jsonwebtoken:jjwt-api:0.12.2'
 	implementation 'io.jsonwebtoken:jjwt-impl:0.12.2'
 	implementation 'io.jsonwebtoken:jjwt-jackson:0.12.2'
 
-	implementation 'org.projectlombok:lombok'
-	compileOnly 'org.projectlombok:lombok'
-	annotationProcessor 'org.projectlombok:lombok'
+	// OAuth 2.0
+	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 
-	implementation 'mysql:mysql-connector-java:8.0.33'
 	implementation 'com.google.cloud:google-cloud-translate:2.55.0'
-	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0'
 
-	runtimeOnly 'io.netty:netty-resolver-dns-native-macos:4.1.104.Final:osx-aarch_64'
+	implementation 'org.springframework.boot:spring-boot-starter-mustache'
 
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testImplementation 'org.springframework.security:spring-security-test'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 tasks.named('test') {

@@ -2,7 +2,7 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ dev ]  # develop 브랜치에 푸시 발생 시 실행
+    branches: [ main ]
 
 jobs:
   build:
@@ -82,3 +82,4 @@ jobs:
 
           # 5. 민감한 파일 삭제
           rm -f private_key.pem application.yml
+

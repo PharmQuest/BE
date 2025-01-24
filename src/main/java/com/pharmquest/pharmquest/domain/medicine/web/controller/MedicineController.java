@@ -1,11 +1,11 @@
 package com.pharmquest.pharmquest.domain.medicine.web.controller;
 
+import com.pharmquest.pharmquest.domain.medicine.data.Medicine;
+import com.pharmquest.pharmquest.domain.medicine.repository.Medrepository;
 import com.pharmquest.pharmquest.domain.medicine.service.MedicineService;
 import com.pharmquest.pharmquest.domain.medicine.web.dto.MedicineResponseDTO;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import io.swagger.v3.oas.annotations.Operation;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -14,9 +14,11 @@ import java.util.List;
 public class MedicineController {
 
     private final MedicineService medicineService;
+    private final Medrepository medRepository;
 
-    public MedicineController(MedicineService medicineService) {
+    public MedicineController(MedicineService medicineService, Medrepository medrepository) {
         this.medicineService = medicineService;
+        this.medRepository =medrepository;
     }
 
     // 번역된 약물 정보 검색
@@ -47,5 +49,23 @@ public class MedicineController {
     @GetMapping("/detail")
     public MedicineResponseDTO searchBySplSetId(@RequestParam String splSetId) {
         return medicineService.getMedicineBySplSetId(splSetId);
+    }
+
+
+
+
+    @Operation(summary = "Save a new medicine", description = "Add a new medicine by providing its content.")
+    @PostMapping("/{content}")
+    public Medicine saveMedicine(@PathVariable String content) {
+        Medicine medicine = new Medicine();
+        medicine.setContent(content);
+        return medRepository.save(medicine); // DB에 저장
+    }
+
+    @Operation(summary = "Get all medicines", description = "Retrieve a list of all medicines.")
+    // 전체 약물 조회 API
+    @GetMapping
+    public List<Medicine> getAllMedicines() {
+        return medRepository.findAll(); // DB에서 전체 데이터 조회
     }
 }

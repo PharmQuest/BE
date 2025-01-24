@@ -2,7 +2,7 @@ name: CI/CD Pipeline for Dev Deployment
 
 on:
   push:
-    branches: [ main ]  # dev 브랜치에 push가 발생하면 실행
+    branches: [ main ]  # main 브랜치에 push가 발생하면 실행
 
 jobs:
   build:
@@ -23,26 +23,34 @@ jobs:
       - name: Set Environment Variables
         run: |
           echo "SPRING_PROFILES_ACTIVE=prod" >> $GITHUB_ENV
-          echo "GOOGLE_CLOUD_JSON_KEY=${{ secrets.GOOGLE_CLOUD_JSON_KEY }}" >> $GITHUB_ENV
+          echo "GOOGLE_APPLICATION_CREDENTIALS=/home/ubuntu/google-key.json" >> $GITHUB_ENV
         shell: bash
 
-      # 4. Generate application-prod.yml
+      # 4. Generate Google Cloud JSON Key
+      - name: Generate Google Cloud JSON Key
+        run: |
+          echo "$GOOGLE_APPLICATION_CREDENTIALS" > /home/ubuntu/google-key.json
+          chmod 600 /home/ubuntu/google-key.json
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+
+      # 5. Generate application-prod.yml
       - name: Make application-prod.yml
         run: |
           echo "${{ secrets.APPLICATION_PROD_YML }}" > /home/ubuntu/application-prod.yml
-          shell: bash
+        shell: bash
 
-      # 5. Grant execute permission for Gradlew
+      # 6. Grant execute permission for Gradlew
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      # 6. Build with Gradle
+      # 7. Build with Gradle
       - name: Build with Gradle
         uses: gradle/gradle-build-action@v2
         with:
           arguments: build
 
-      # 7. Upload build artifact
+      # 8. Upload build artifact
       - name: Upload build artifact
         uses: actions/upload-artifact@v3
         with:
@@ -67,8 +75,6 @@ jobs:
           EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
           EC2_USERNAME: ${{ secrets.EC2_USERNAME }}
           EC2_HOST: ${{ secrets.EC2_HOST }}
-          SPRING_PROFILES_ACTIVE: prod  # 프로파일 설정
-          GOOGLE_CLOUD_JSON_KEY: ${{ secrets.GOOGLE_CLOUD_JSON_KEY }}  # Base64 JSON Key
         run: |
           echo "$EC2_SSH_KEY" > private_key.pem
           chmod 600 private_key.pem
@@ -77,8 +83,6 @@ jobs:
           ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_HOST "
             pgrep java | xargs -r kill -15  # 기존 Java 프로세스 종료
             sleep 10
-            echo $GOOGLE_CLOUD_JSON_KEY | base64 -d > /home/$EC2_USERNAME/google-key.json  # Base64 디코딩 후 JSON 파일 생성
-            export GOOGLE_APPLICATION_CREDENTIALS=/home/$EC2_USERNAME/google-key.json  # GOOGLE_APPLICATION_CREDENTIALS 설정
-            nohup java -jar /home/$EC2_USERNAME/devServer.jar > app.log 2>&1 &
+            nohup java -jar /home/$EC2_USERNAME/devServer.jar --spring.config.location=/home/$EC2_USERNAME/application-prod.yml --spring.profiles.active=prod > app.log 2>&1 &
           "
           rm -f private_key.pem  # 민감한 정보 삭제

@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 public class SupplementsResponseDTO {
     // 내부 처리용 (전체 로드)
     @Builder
@@ -16,7 +18,6 @@ public class SupplementsResponseDTO {
         private String image;
         private String brand;
         private String maker;
-        private String link;
         private String category1;
         private String category2;
         private String category3;
@@ -48,6 +49,7 @@ public class SupplementsResponseDTO {
         private boolean isScrapped;
         private int scrapCount;
         private String category4;
+        private List<String> categories;
     }
 
     @Builder
@@ -59,12 +61,12 @@ public class SupplementsResponseDTO {
         private String image;
         private String brand;
         private String maker;
-        private String link;
         private boolean isScrapped;
         private int scrapCount;
         private String category1;
         private String category2;
         private String category3;
         private String category4;
+        private List<String> categories;
     }
 }

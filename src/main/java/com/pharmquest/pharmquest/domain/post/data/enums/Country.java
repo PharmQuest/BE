@@ -9,6 +9,7 @@ import java.util.Arrays;
 @Getter
 public enum Country {
 
+    KOREA("대한민국", "KR"),
     USA("미국", "US"),
     JAPAN("일본", "JP"),
     CHINA("중국", "CH"),
@@ -19,8 +20,7 @@ public enum Country {
     PHILIPPINES("필리핀", "PH"),
     SINGAPORE("싱가포르", "SG"),
     EUROPE("유럽", "EU"),
-    NONE("선택없음", "NONE")
-    ;
+    NONE("선택없음", "NONE");
 
     private final String koreanName;
     private final String shortName;

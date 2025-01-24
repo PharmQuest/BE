@@ -38,8 +38,8 @@ public class TranslationService {
                 .getService();
     }
 
-
     // 주어진 텍스트를 대상 언어로 번역
+
     public String translateText(String text, String targetLanguage) {
         Translation translation = translate.translate(
                 text,

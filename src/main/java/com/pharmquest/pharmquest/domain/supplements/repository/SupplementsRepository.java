@@ -6,10 +6,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
+
 public interface SupplementsRepository extends JpaRepository<Supplements, Long> {
 
     // category만으로 필터링
-    Page<Supplements> findByCategory4(String category4, Pageable pageable);
+    Page<Supplements> findByIdIn(List<Long> ids, Pageable pageable);
+
 
     // 모든 데이터 페이징
     Page<Supplements> findAll(Pageable pageable);

@@ -1,4 +1,4 @@
-package com.pharmquest.pharmquest.domain.supplements.service;
+package com.pharmquest.pharmquest.domain.supplements.service.SupplementsScrap;
 
 import com.pharmquest.pharmquest.domain.supplements.data.Supplements;
 import com.pharmquest.pharmquest.domain.supplements.data.mapping.SupplementsScrap;

@@ -1,15 +1,18 @@
-name: CI/CD Pipeline
+name: Dev Deployment Pipeline
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main # main 브랜치에 push될 때 실행
 
 jobs:
   build:
+    name: Build Application
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3  # 코드 체크아웃
+      - name: Checkout Code
+        uses: actions/checkout@v3 # 코드 체크아웃
 
       - name: Set up JDK 17
         uses: actions/setup-java@v3
@@ -33,32 +36,36 @@ jobs:
       - name: Build with Gradle
         uses: gradle/gradle-build-action@v2
         with:
-          arguments: build -x test  # 테스트 제외 (필요 시 테스트 활성화)
+          arguments: build -x test # 테스트 제외
 
-      - name: Upload build artifact
+      - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
         with:
           name: umc7thServer
           path: build/libs/*.jar
 
   deploy:
+    name: Deploy to EC2
     needs: build
     runs-on: ubuntu-latest
 
     steps:
-      - name: Download build artifact
+      - name: Download Build Artifact
         uses: actions/download-artifact@v4
         with:
           name: umc7thServer
           path: build/libs/
 
-      - name: Deploy to EC2
+      - name: Deploy Application to EC2
         env:
           EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
           EC2_USERNAME: ${{ secrets.EC2_USERNAME }}
           EC2_HOST: ${{ secrets.EC2_HOST }}
+          RDS_ENDPOINT: ${{ secrets.RDS_ENDPOINT }}
+          RDS_USER: ${{ secrets.RDS_USER }}
+          RDS_PASSWORD: ${{ secrets.RDS_PASSWORD }}
         run: |
-          # 1. 프라이빗 키 생성
+          # 1. EC2 프라이빗 키 생성
           echo "$EC2_SSH_KEY" > private_key.pem
           chmod 600 private_key.pem
 
@@ -70,16 +77,40 @@ jobs:
           echo "${{ secrets.APPLICATION_YML }}" > application.yml
           scp -i private_key.pem -o StrictHostKeyChecking=no application.yml $EC2_USERNAME@$EC2_HOST:/home/$EC2_USERNAME/application.yml
 
-          # 4. EC2에서 애플리케이션 실행
+          # 4. Google Credentials 업로드
+          echo "${{ secrets.GOOGLE_CREDENTIALS_JSON }}" > google-credentials.json
+          scp -i private_key.pem -o StrictHostKeyChecking=no google-credentials.json $EC2_USERNAME@$EC2_HOST:/home/$EC2_USERNAME/google-credentials.json
+          rm -f google-credentials.json
+
+          # 5. RDS 연결 테스트 (디버깅용)
+          echo "Testing RDS connection..."
+          ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_HOST "
+            echo 'Running MySQL connection test...';
+            mysql -h $RDS_ENDPOINT -u $RDS_USER -p$RDS_PASSWORD -e 'SELECT 1;' && echo 'RDS connection successful!' || echo 'RDS connection failed!';
+          "
+
+          # 6. EC2에서 애플리케이션 실행
           ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_HOST "
             if pgrep java > /dev/null; then
               pgrep java | xargs -r kill -15
               sleep 10
             fi
             nohup java -jar /home/$EC2_USERNAME/umc7thServer.jar \
-              --spring.config.location=/home/$EC2_USERNAME/application.yml > /home/$EC2_USERNAME/app-$(date +%Y%m%d%H%M%S).log 2>&1 &
+              --spring.config.location=/home/$EC2_USERNAME/application.yml \
+              --google.credentials=/home/$EC2_USERNAME/google-credentials.json \
+              > /home/$EC2_USERNAME/app-$(date +%Y%m%d%H%M%S).log 2>&1 &
           "
 
-          # 5. 민감한 파일 삭제
+          # 7. 민감한 파일 삭제
           rm -f private_key.pem application.yml
 
+      - name: Verify Application Deployment
+        run: |
+          ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_HOST "
+            if pgrep -f umc7thServer.jar > /dev/null; then
+              echo 'Application is running successfully';
+            else
+              echo 'Application failed to start';
+              exit 1;
+            fi
+          "

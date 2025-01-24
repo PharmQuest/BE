@@ -16,9 +16,10 @@ public class MedicineController {
     private final MedicineService medicineService;
     private final MedRepository medRepository;
 
-    public MedicineController(MedicineService medicineService, MedRepository medrepository) {
+
+    public MedicineController(MedicineService medicineService, MedRepository medRepository) {
         this.medicineService = medicineService;
-        this.medRepository =medrepository;
+        this.medRepository = medRepository;
     }
 
     // 번역된 약물 정보 검색

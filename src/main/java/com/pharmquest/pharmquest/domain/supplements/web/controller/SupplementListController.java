@@ -1,7 +1,7 @@
 package com.pharmquest.pharmquest.domain.supplements.web.controller;
 
 import com.pharmquest.pharmquest.domain.post.data.enums.Country;
-import com.pharmquest.pharmquest.domain.supplements.service.SupplementsService;
+import com.pharmquest.pharmquest.domain.supplements.service.Supplements.SupplementsService;
 import com.pharmquest.pharmquest.domain.supplements.web.dto.SupplementsResponseDTO;
 import com.pharmquest.pharmquest.global.apiPayload.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;

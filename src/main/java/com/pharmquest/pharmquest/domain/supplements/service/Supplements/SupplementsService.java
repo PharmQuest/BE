@@ -1,4 +1,4 @@
-package com.pharmquest.pharmquest.domain.supplements.service;
+package com.pharmquest.pharmquest.domain.supplements.service.Supplements;
 
 import com.pharmquest.pharmquest.domain.post.data.enums.Country;
 import com.pharmquest.pharmquest.domain.supplements.web.dto.SupplementsResponseDTO;

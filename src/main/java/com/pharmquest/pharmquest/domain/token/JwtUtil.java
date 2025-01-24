@@ -1,4 +1,4 @@
-package com.pharmquest.pharmquest.global.jwt;
+package com.pharmquest.pharmquest.domain.token;
 
 
 import com.pharmquest.pharmquest.domain.user.data.User;
@@ -27,7 +27,6 @@ public class JwtUtil {
     @Value("${jwt.secret}")
     private String SECRET_KEY;
     private final UserRepository userRepository;
-
 
     private SecretKey getSigningKey() {
         byte[] keyBytes = Decoders.BASE64.decode(this.SECRET_KEY);

@@ -57,11 +57,9 @@ public class PostCommandServiceImpl implements PostCommandService{
 
     //게시글 상세보기
     @Override
-    public PostResponseDTO.PostDetailDTO getPost(Long postId) {
+    public PostResponseDTO.PostDetailDTO getPost(Long userId, Long postId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new EntityNotFoundException(postId + "에 해당하는 게시글이 없습니다."));
-
-        Long userId = 3L;
 
         boolean isLiked = likeRepository.existsByPostIdAndUserId(postId, userId);
         boolean isReported = reportRepository.existsByPostIdAndUserId(postId, userId);

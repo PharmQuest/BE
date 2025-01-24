@@ -1,26 +1,27 @@
 plugins {
-    id 'java'
-    id 'org.springframework.boot' version '3.0.0'
-    id 'io.spring.dependency-management' version '1.0.15.RELEASE'
+	id 'java'
+	id 'org.springframework.boot' version '3.0.0'
+	id 'io.spring.dependency-management' version '1.0.15.RELEASE'
 }
 
 group = 'com.pharmquest'
 version = '1.0.0'
 
 java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
-    }
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(17)
+	}
 }
 
 configurations {
-    compileOnly {
-        extendsFrom annotationProcessor
-    }
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
 }
 
 repositories {
-    mavenCentral()
+	mavenCentral()
+	maven { url "https://maven.google.com" }
 }
 
 dependencies {
@@ -33,7 +34,7 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-	implementation 'com.fasterxml.jackson.core:jackson-databind'
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
 
 	// Spring Boot WebFlux (WebClient 사용)
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
@@ -57,27 +58,24 @@ dependencies {
 
 	// OAuth 2.0
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
-
 	implementation 'com.google.cloud:google-cloud-translate:2.55.0'
-
 	implementation 'org.springframework.boot:spring-boot-starter-mustache'
-	
 }
 
 tasks.named('test') {
-    useJUnitPlatform()
+	useJUnitPlatform()
 }
 
 def querydslDir = "src/main/generated"
 
 sourceSets {
-    main.java.srcDirs += [ querydslDir ]
+	main.java.srcDirs += [ querydslDir ]
 }
 
 tasks.withType(JavaCompile) {
-    options.annotationProcessorGeneratedSourcesDirectory = file(querydslDir)
+	options.annotationProcessorGeneratedSourcesDirectory = file(querydslDir)
 }
 
 clean.doLast {
-    file(querydslDir).deleteDir()
+	file(querydslDir).deleteDir()
 }

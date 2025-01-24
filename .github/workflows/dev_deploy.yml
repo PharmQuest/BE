@@ -41,6 +41,7 @@ jobs:
         uses: gradle/gradle-build-action@v2
         with:
           arguments: build -x test # 테스트 제외
+
       - name: Confirm Build Success
         run: |
           if [[ ! -f build/libs/*.jar ]]; then

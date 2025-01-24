@@ -1,11 +1,12 @@
 plugins {
-	id 'java'
-	id 'org.springframework.boot' version '3.3.7'
-	id 'io.spring.dependency-management' version '1.1.7'
+    id 'java'
+    id 'org.springframework.boot' version '3.0.0'
+    id 'io.spring.dependency-management' version '1.0.15.RELEASE'
 }
 
+
 group = 'com.pharmquest'
-version = '0.0.1-SNAPSHOT'
+version = '1.0.0'
 
 java {
 	toolchain {
@@ -50,20 +51,16 @@ tasks.named('test') {
 	useJUnitPlatform()
 }
 
-def querydslDir = file("src/main/generated")
+def querydslDir = "src/main/generated"
 
 sourceSets {
-	main {
-		java {
-			srcDir querydslDir
-		}
-	}
+    main.java.srcDirs += [ querydslDir ]
 }
 
 tasks.withType(JavaCompile) {
-	options.annotationProcessorGeneratedSourcesDirectory = querydslDir
+    options.annotationProcessorGeneratedSourcesDirectory = file(querydslDir)
 }
 
-clean {
-	delete querydslDir
+clean.doLast {
+    file(querydslDir).deleteDir()
 }

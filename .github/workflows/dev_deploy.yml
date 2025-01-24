@@ -1,146 +1,66 @@
-name: Dev Deployment Pipeline
+name: CI/CD Pipeline
 
 on:
   push:
-    branches:
-      - main # main 브랜치에 push될 때 실행
+    branches: [ main ]  # develop 브랜치에 push가 일어날 때 실행
 
 jobs:
   build:
-    name: Build Application
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3 # 코드 체크아웃
+      - uses: actions/checkout@v3  # 저장소 코드 체크아웃
 
-      - name: Set up JDK 17
+      - name: Set up JDK 17  # Java 개발 킷 설정
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Generate application.yml
+      - name: Make application.yml  # application.yml 파일 생성
         run: |
-          if [[ -z "${{ secrets.APPLICATION_YML }}" ]]; then
-            echo "ERROR: APPLICATION_YML is not set" >&2
-            exit 1
-          fi
-          echo "${{ secrets.APPLICATION_YML }}" > src/main/resources/application.yml
+          cd ./src/main/resources
+          echo "${{ secrets.APPLICATION_YML }}" > ./application.yml
         shell: bash
 
-      - name: Validate application.yml
-        run: |
-          echo "Validating application.yml..."
-          head -n 10 src/main/resources/application.yml
-
-      - name: Grant execute permission for gradlew
+      - name: Grant execute permission for gradlew  # gradlew 실행 권한 부여
         run: chmod +x gradlew
 
-      - name: Build with Gradle
+      - name: Build with Gradle  # Gradle을 사용하여 프로젝트 빌드
         uses: gradle/gradle-build-action@v2
         with:
-          arguments: build -x test # 테스트 제외
+          arguments: build
 
-      - name: Confirm Build Success
-        run: |
-          if [[ ! -f build/libs/*.jar ]]; then
-            echo "ERROR: Build artifact not found" >&2
-            exit 1
-          else
-            echo "Build artifact successfully created"
-          fi
-
-      - name: Upload Build Artifact
-        uses: actions/upload-artifact@v4
+      - name: Upload build artifact  # 빌드된 아티팩트 업로드
+        uses: actions/upload-artifact@v3
         with:
           name: umc7thServer
           path: build/libs/*.jar
 
   deploy:
-    needs: build
+    needs: build  # build 작업이 성공적으로 완료된 후 실행
     runs-on: ubuntu-latest
 
     steps:
-      - name: Download build artifact
-        uses: actions/download-artifact@v4
+      - name: Download build artifact  # 이전 단계에서 업로드한 아티팩트 다운로드
+        uses: actions/download-artifact@v3
         with:
           name: umc7thServer
           path: build/libs/
 
-      - name: Create Private Key
-        run: |
-          if [[ -z "${{ secrets.EC2_SSH_KEY }}" ]]; then
-            echo "ERROR: EC2_SSH_KEY is not set" >&2
-            exit 1
-          fi
-          echo "${{ secrets.EC2_SSH_KEY }}" > private_key.pem
-          chmod 600 private_key.pem
-
-      - name: Validate Private Key
-        run: |
-          if [[ ! -f private_key.pem ]]; then
-            echo "ERROR: private_key.pem file not found" >&2
-            exit 1
-          fi
-          echo "Private key validated successfully"
-
-      - name: Deploy to EC2
+      - name: Deploy to EC2  # EC2에 배포
         env:
+          EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
           EC2_USERNAME: ${{ secrets.EC2_USERNAME }}
           EC2_HOST: ${{ secrets.EC2_HOST }}
         run: |
-          if [[ -z "$EC2_USERNAME" || -z "$EC2_HOST" ]]; then
-            echo "ERROR: EC2_USERNAME or EC2_HOST is not set" >&2
-            exit 1
-          fi
-
+          echo "$EC2_SSH_KEY" > private_key.pem
+          chmod 600 private_key.pem
           jar_file=$(find build/libs -name '*.jar' ! -name '*plain.jar' | head -n 1)
-          if [[ -z "$jar_file" ]]; then
-            echo "ERROR: JAR file not found" >&2
-            exit 1
-          fi
-
-          echo "Uploading JAR file to EC2..."
-          scp -i private_key.pem -o StrictHostKeyChecking=no "$jar_file" $EC2_USERNAME@$EC2_HOST:/home/$EC2_USERNAME/umc7thServer.jar || {
-            echo "ERROR: Failed to upload JAR file to EC2" >&2
-            exit 1
-          }
-
-          echo "Uploading application.yml to EC2..."
-          scp -i private_key.pem -o StrictHostKeyChecking=no src/main/resources/application.yml $EC2_USERNAME@$EC2_HOST:/home/$EC2_USERNAME/application.yml || {
-            echo "ERROR: Failed to upload application.yml to EC2" >&2
-            exit 1
-          }
-
-          echo "Starting application on EC2..."
+          scp -i private_key.pem -o StrictHostKeyChecking=no "$jar_file" $EC2_USERNAME@$EC2_HOST:/home/$EC2_USERNAME/umc7thServer.jar
           ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_HOST "
-            if pgrep -f umc7thServer.jar > /dev/null; then
-              echo 'Stopping running application...'
-              pgrep -f umc7thServer.jar | xargs -r kill -15
-              sleep 10
-            fi
-            nohup java -jar /home/$EC2_USERNAME/umc7thServer.jar \
-              --spring.config.location=/home/$EC2_USERNAME/application.yml > /home/$EC2_USERNAME/app-$(date +%Y%m%d%H%M%S).log 2>&1 &
-          " || {
-            echo "ERROR: Failed to start application on EC2" >&2
-            exit 1
-          }
-
-      - name: Validate Application Start
-        run: |
-          echo "Validating application status on EC2..."
-          ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_HOST "
-            if pgrep -f umc7thServer.jar > /dev/null; then
-              echo 'Application is running successfully';
-            else
-              echo 'Application failed to start';
-              exit 1;
-            fi
+            pgrep java | xargs -r kill -15  # 기존에 실행 중인 Java 프로세스 종료
+            sleep 10
+            nohup java -jar /home/$EC2_USERNAME/umc7thServer.jar > app.log 2>&1 &  # 새 버전 애플리케이션 실행
           "
-
-      - name: Clean Up
-        run: |
-          echo "Cleaning up sensitive files..."
-          rm -f private_key.pem
-          echo "Cleanup completed successfully"
+          rm -f private_key.pem  # 민감한 정보 삭제

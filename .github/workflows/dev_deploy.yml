@@ -22,6 +22,10 @@ jobs:
 
       - name: Generate application.yml
         run: |
+          if [[ -z "${{ secrets.APPLICATION_YML }}" ]]; then
+            echo "ERROR: APPLICATION_YML is not set" >&2
+            exit 1
+          fi
           echo "${{ secrets.APPLICATION_YML }}" > src/main/resources/application.yml
         shell: bash
 
@@ -37,6 +41,14 @@ jobs:
         uses: gradle/gradle-build-action@v2
         with:
           arguments: build -x test # 테스트 제외
+      - name: Confirm Build Success
+        run: |
+          if [[ ! -f build/libs/*.jar ]]; then
+            echo "ERROR: Build artifact not found" >&2
+            exit 1
+          else
+            echo "Build artifact successfully created"
+          fi
 
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
@@ -45,67 +57,78 @@ jobs:
           path: build/libs/*.jar
 
   deploy:
-    name: Deploy to EC2
     needs: build
     runs-on: ubuntu-latest
 
     steps:
-      - name: Download Build Artifact
+      - name: Download build artifact
         uses: actions/download-artifact@v4
         with:
           name: umc7thServer
           path: build/libs/
 
-      - name: Deploy Application to EC2
-        env:
-          EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
-          EC2_USERNAME: ${{ secrets.EC2_USERNAME }}
-          EC2_HOST: ${{ secrets.EC2_HOST }}
-          RDS_ENDPOINT: ${{ secrets.RDS_ENDPOINT }}
-          RDS_USER: ${{ secrets.RDS_USER }}
-          RDS_PASSWORD: ${{ secrets.RDS_PASSWORD }}
+      - name: Create Private Key
         run: |
-          # 1. EC2 프라이빗 키 생성
-          echo "$EC2_SSH_KEY" > private_key.pem
+          if [[ -z "${{ secrets.EC2_SSH_KEY }}" ]]; then
+            echo "ERROR: EC2_SSH_KEY is not set" >&2
+            exit 1
+          fi
+          echo "${{ secrets.EC2_SSH_KEY }}" > private_key.pem
           chmod 600 private_key.pem
 
-          # 2. JAR 파일 업로드
+      - name: Validate Private Key
+        run: |
+          if [[ ! -f private_key.pem ]]; then
+            echo "ERROR: private_key.pem file not found" >&2
+            exit 1
+          fi
+          echo "Private key validated successfully"
+
+      - name: Deploy to EC2
+        env:
+          EC2_USERNAME: ${{ secrets.EC2_USERNAME }}
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+        run: |
+          if [[ -z "$EC2_USERNAME" || -z "$EC2_HOST" ]]; then
+            echo "ERROR: EC2_USERNAME or EC2_HOST is not set" >&2
+            exit 1
+          fi
+
           jar_file=$(find build/libs -name '*.jar' ! -name '*plain.jar' | head -n 1)
-          scp -i private_key.pem -o StrictHostKeyChecking=no "$jar_file" $EC2_USERNAME@$EC2_HOST:/home/$EC2_USERNAME/umc7thServer.jar
+          if [[ -z "$jar_file" ]]; then
+            echo "ERROR: JAR file not found" >&2
+            exit 1
+          fi
 
-          # 3. application.yml 업로드
-          echo "${{ secrets.APPLICATION_YML }}" > application.yml
-          scp -i private_key.pem -o StrictHostKeyChecking=no application.yml $EC2_USERNAME@$EC2_HOST:/home/$EC2_USERNAME/application.yml
+          echo "Uploading JAR file to EC2..."
+          scp -i private_key.pem -o StrictHostKeyChecking=no "$jar_file" $EC2_USERNAME@$EC2_HOST:/home/$EC2_USERNAME/umc7thServer.jar || {
+            echo "ERROR: Failed to upload JAR file to EC2" >&2
+            exit 1
+          }
 
-          # 4. Google Credentials 업로드
-          echo "${{ secrets.GOOGLE_CREDENTIALS_JSON }}" > google-credentials.json
-          scp -i private_key.pem -o StrictHostKeyChecking=no google-credentials.json $EC2_USERNAME@$EC2_HOST:/home/$EC2_USERNAME/google-credentials.json
-          rm -f google-credentials.json
+          echo "Uploading application.yml to EC2..."
+          scp -i private_key.pem -o StrictHostKeyChecking=no src/main/resources/application.yml $EC2_USERNAME@$EC2_HOST:/home/$EC2_USERNAME/application.yml || {
+            echo "ERROR: Failed to upload application.yml to EC2" >&2
+            exit 1
+          }
 
-          # 5. RDS 연결 테스트 (디버깅용)
-          echo "Testing RDS connection..."
+          echo "Starting application on EC2..."
           ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_HOST "
-            echo 'Running MySQL connection test...';
-            mysql -h $RDS_ENDPOINT -u $RDS_USER -p$RDS_PASSWORD -e 'SELECT 1;' && echo 'RDS connection successful!' || echo 'RDS connection failed!';
-          "
-
-          # 6. EC2에서 애플리케이션 실행
-          ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_HOST "
-            if pgrep java > /dev/null; then
-              pgrep java | xargs -r kill -15
+            if pgrep -f umc7thServer.jar > /dev/null; then
+              echo 'Stopping running application...'
+              pgrep -f umc7thServer.jar | xargs -r kill -15
               sleep 10
             fi
             nohup java -jar /home/$EC2_USERNAME/umc7thServer.jar \
-              --spring.config.location=/home/$EC2_USERNAME/application.yml \
-              --google.credentials=/home/$EC2_USERNAME/google-credentials.json \
-              > /home/$EC2_USERNAME/app-$(date +%Y%m%d%H%M%S).log 2>&1 &
-          "
+              --spring.config.location=/home/$EC2_USERNAME/application.yml > /home/$EC2_USERNAME/app-$(date +%Y%m%d%H%M%S).log 2>&1 &
+          " || {
+            echo "ERROR: Failed to start application on EC2" >&2
+            exit 1
+          }
 
-          # 7. 민감한 파일 삭제
-          rm -f private_key.pem application.yml
-
-      - name: Verify Application Deployment
+      - name: Validate Application Start
         run: |
+          echo "Validating application status on EC2..."
           ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_HOST "
             if pgrep -f umc7thServer.jar > /dev/null; then
               echo 'Application is running successfully';
@@ -114,3 +137,9 @@ jobs:
               exit 1;
             fi
           "
+
+      - name: Clean Up
+        run: |
+          echo "Cleaning up sensitive files..."
+          rm -f private_key.pem
+          echo "Cleanup completed successfully"

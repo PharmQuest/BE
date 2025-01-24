@@ -1,0 +1,84 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3  # 코드 체크아웃
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Generate application.yml
+        run: |
+          echo "${{ secrets.APPLICATION_YML }}" > src/main/resources/application.yml
+        shell: bash
+
+      - name: Validate application.yml
+        run: |
+          echo "Validating application.yml..."
+          head -n 10 src/main/resources/application.yml
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build with Gradle
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: build -x test  # 테스트 제외 (필요 시 테스트 활성화)
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: umc7thServer
+          path: build/libs/*.jar
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: umc7thServer
+          path: build/libs/
+
+      - name: Deploy to EC2
+        env:
+          EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+          EC2_USERNAME: ${{ secrets.EC2_USERNAME }}
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+        run: |
+          # 1. 프라이빗 키 생성
+          echo "$EC2_SSH_KEY" > private_key.pem
+          chmod 600 private_key.pem
+
+          # 2. JAR 파일 업로드
+          jar_file=$(find build/libs -name '*.jar' ! -name '*plain.jar' | head -n 1)
+          scp -i private_key.pem -o StrictHostKeyChecking=no "$jar_file" $EC2_USERNAME@$EC2_HOST:/home/$EC2_USERNAME/umc7thServer.jar
+
+          # 3. application.yml 업로드
+          echo "${{ secrets.APPLICATION_YML }}" > application.yml
+          scp -i private_key.pem -o StrictHostKeyChecking=no application.yml $EC2_USERNAME@$EC2_HOST:/home/$EC2_USERNAME/application.yml
+
+          # 4. EC2에서 애플리케이션 실행
+          ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_HOST "
+            if pgrep java > /dev/null; then
+              pgrep java | xargs -r kill -15
+              sleep 10
+            fi
+            nohup java -jar /home/$EC2_USERNAME/umc7thServer.jar \
+              --spring.config.location=/home/$EC2_USERNAME/application.yml > /home/$EC2_USERNAME/app-$(date +%Y%m%d%H%M%S).log 2>&1 &
+          "
+
+          # 5. 민감한 파일 삭제
+          rm -f private_key.pem application.yml

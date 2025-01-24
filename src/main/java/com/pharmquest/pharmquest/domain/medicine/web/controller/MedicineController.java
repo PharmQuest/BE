@@ -51,9 +51,6 @@ public class MedicineController {
         return medicineService.getMedicineBySplSetId(splSetId);
     }
 
-
-
-
     @Operation(summary = "Save a new medicine", description = "Add a new medicine by providing its content.")
     @PostMapping("/{content}")
     public Medicine saveMedicine(@PathVariable String content) {

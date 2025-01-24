@@ -4,21 +4,21 @@ import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.translate.Translate;
 import com.google.cloud.translate.TranslateOptions;
 import com.google.cloud.translate.Translation;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 @Service
 public class TranslationService {
 
     private final Translate translate;
 
-    // Google Cloud Translation API 클라이언트를 초기화합니다.
-    public TranslationService() throws IOException {
-        // JSON 키 파일 경로 지정
-        String jsonKeyFilePath = "src/main/resources/skilful-card-445716-m2-6364abe85b4b.json";
-
+    // YAML 파일에서 경로를 가져오기 위해 @Value 어노테이션 사용
+    public TranslationService(@Value("${google.cloud.json-key-path}") String jsonKeyFilePath) throws IOException {
         this.translate = TranslateOptions.newBuilder()
                 .setCredentials(GoogleCredentials.fromStream(new FileInputStream(jsonKeyFilePath)))
                 .build()

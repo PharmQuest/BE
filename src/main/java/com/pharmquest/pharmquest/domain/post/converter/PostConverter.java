@@ -32,7 +32,7 @@ public class PostConverter {
 
     public static PostResponseDTO.PostPreViewDTO postPreViewDTO(Post post) {
         return PostResponseDTO.PostPreViewDTO.builder()
-              //  .user(post.getUser().getEmail())
+                .userName(post.getUser().getEmail().substring(0, post.getUser().getEmail().indexOf("@")))
                 .title(post.getTitle())
                 .content(post.getContent())
                 .category(post.getCategory().getKoreanName())
@@ -57,7 +57,7 @@ public class PostConverter {
 
     public static PostResponseDTO.PostDetailDTO postDetailDTO(Post post, Boolean isLiked, Boolean isScraped, Boolean isReported) {
         return PostResponseDTO.PostDetailDTO.builder()
-                //  .user(post.getUser().getEmail())
+                .userName(post.getUser().getEmail().substring(0, post.getUser().getEmail().indexOf("@")))
                 .title(post.getTitle())
                 .content(post.getContent())
                 .category(post.getCategory().getKoreanName())
@@ -70,4 +70,7 @@ public class PostConverter {
                 .build();
     }
 
+
+
 }
+

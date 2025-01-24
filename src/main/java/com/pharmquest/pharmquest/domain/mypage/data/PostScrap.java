@@ -1,4 +1,4 @@
-package com.pharmquest.pharmquest.domain.mypage.domain;
+package com.pharmquest.pharmquest.domain.mypage.data;
 
 import com.pharmquest.pharmquest.domain.post.data.Post;
 import com.pharmquest.pharmquest.domain.user.data.User;

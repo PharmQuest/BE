@@ -1,6 +1,6 @@
 package com.pharmquest.pharmquest.domain.post.repository.scrap;
 
-import com.pharmquest.pharmquest.domain.mypage.domain.PostScrap;
+import com.pharmquest.pharmquest.domain.mypage.data.PostScrap;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

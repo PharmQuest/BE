@@ -1,8 +1,8 @@
 package com.pharmquest.pharmquest.domain.user.data;
 
-import com.pharmquest.pharmquest.domain.mypage.domain.MedicineScrap;
-import com.pharmquest.pharmquest.domain.mypage.domain.SupplementScrap;
-import com.pharmquest.pharmquest.domain.mypage.domain.PostScrap;
+import com.pharmquest.pharmquest.domain.mypage.data.MedicineScrap;
+import com.pharmquest.pharmquest.domain.mypage.data.SupplementScrap;
+import com.pharmquest.pharmquest.domain.mypage.data.PostScrap;
 import com.pharmquest.pharmquest.domain.pharmacy.converter.ListStringConverter;
 import com.pharmquest.pharmquest.domain.post.data.mapping.PostLike;
 import com.pharmquest.pharmquest.domain.post.data.mapping.PostReport;
@@ -11,6 +11,7 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -40,8 +41,9 @@ public class User {
     @CreationTimestamp
     private Timestamp createDate;
 
+    @Lob
     @Convert(converter = ListStringConverter.class)
-    @Column(columnDefinition = "varchar(100) default '{}'")
+    @Column(columnDefinition = "TEXT")
     private List<String> pharmacyScraps; // 스크랩한 약국 목록을 문자열로 저장
 
     // Relationships

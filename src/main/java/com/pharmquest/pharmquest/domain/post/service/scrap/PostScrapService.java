@@ -1,6 +1,6 @@
 package com.pharmquest.pharmquest.domain.post.service.scrap;
 
-import com.pharmquest.pharmquest.domain.mypage.domain.PostScrap;
+import com.pharmquest.pharmquest.domain.mypage.data.PostScrap;
 
 
 public interface PostScrapService {

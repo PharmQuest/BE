@@ -1,6 +1,6 @@
 package com.pharmquest.pharmquest.domain.post.data;
 
-import com.pharmquest.pharmquest.domain.mypage.domain.PostScrap;
+import com.pharmquest.pharmquest.domain.mypage.data.PostScrap;
 import com.pharmquest.pharmquest.domain.user.data.User;
 import com.pharmquest.pharmquest.global.data.BaseEntity;
 import com.pharmquest.pharmquest.domain.post.data.enums.Country;

@@ -82,3 +82,4 @@ jobs:
 
           # 5. 민감한 파일 삭제
           rm -f private_key.pem application.yml
+

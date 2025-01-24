@@ -1,4 +1,4 @@
-package com.pharmquest.pharmquest.domain.supplements.service;
+package com.pharmquest.pharmquest.domain.supplements.service.Naver;
 
 import com.pharmquest.pharmquest.domain.supplements.web.dto.SupplementsResponseDTO;
 import com.pharmquest.pharmquest.global.config.NaverShoppingConfig;
@@ -56,7 +56,6 @@ public class NaverShoppingServiceImpl implements NaverShoppingService {
                     return SupplementsResponseDTO.SupplementsInternalDto.builder()
                             .name(item.get("title").toString().replaceAll("<[^>]*>", ""))
                             .image(item.get("image").toString())
-                            .link(item.get("link").toString())
                             .brand(brand)
                             .maker(maker)
                             .category1(category1)

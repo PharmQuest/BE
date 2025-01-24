@@ -1,6 +1,6 @@
 package com.pharmquest.pharmquest.domain.supplements.web.controller;
 
-import com.pharmquest.pharmquest.domain.supplements.service.SupplementsScrapService;
+import com.pharmquest.pharmquest.domain.supplements.service.SupplementsScrap.SupplementsScrapService;
 import com.pharmquest.pharmquest.domain.supplements.web.dto.SupplementsScrapResponseDTO;
 import com.pharmquest.pharmquest.global.apiPayload.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;

@@ -2,7 +2,7 @@ name: CI/CD Pipeline for Dev Deployment
 
 on:
   push:
-    branches: [ main ]  # main 브랜치에 push가 발생하면 실행
+    branches: [ main ]  # dev 브랜치에 push가 발생하면 실행
 
 jobs:
   build:
@@ -26,17 +26,23 @@ jobs:
           echo "GOOGLE_CLOUD_JSON_KEY=${{ secrets.GOOGLE_CLOUD_JSON_KEY }}" >> $GITHUB_ENV
         shell: bash
 
-      # 4. Grant execute permission for Gradlew
+      # 4. Generate application-prod.yml (절대 경로 사용)
+      - name: Make application-prod.yml
+        run: |
+          echo "${{ secrets.APPLICATION_PROD_YML }}" > /home/runner/application-prod.yml
+        shell: bash
+
+      # 5. Grant execute permission for Gradlew
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      # 5. Build with Gradle
+      # 6. Build with Gradle
       - name: Build with Gradle
         uses: gradle/gradle-build-action@v2
         with:
           arguments: build
 
-      # 6. Upload build artifact
+      # 7. Upload build artifact
       - name: Upload build artifact
         uses: actions/upload-artifact@v3
         with:
@@ -63,19 +69,11 @@ jobs:
           EC2_HOST: ${{ secrets.EC2_HOST }}
           SPRING_PROFILES_ACTIVE: prod  # 프로파일 설정
           GOOGLE_CLOUD_JSON_KEY: ${{ secrets.GOOGLE_CLOUD_JSON_KEY }}  # Base64 JSON Key
-          APPLICATION_PROD_YML: ${{ secrets.APPLICATION_PROD_YML }}  # application-prod.yml 내용
         run: |
           echo "$EC2_SSH_KEY" > private_key.pem
           chmod 600 private_key.pem
-
-          # JAR 파일 업로드
           jar_file=$(find build/libs -name '*.jar' ! -name '*plain.jar' | head -n 1)
           scp -i private_key.pem -o StrictHostKeyChecking=no "$jar_file" $EC2_USERNAME@$EC2_HOST:/home/$EC2_USERNAME/devServer.jar
-
-          # application-prod.yml 업로드
-          echo "$APPLICATION_PROD_YML" | ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_HOST "cat > /home/$EC2_USERNAME/application-prod.yml"
-
-          # EC2에서 애플리케이션 실행
           ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_HOST "
             pgrep java | xargs -r kill -15  # 기존 Java 프로세스 종료
             sleep 10

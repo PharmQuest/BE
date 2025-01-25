@@ -20,13 +20,9 @@ jobs:
       - name: Make application.yml
         run: |
           echo "${{ secrets.APPLICATION_YML }}" > $GITHUB_WORKSPACE/application.yml
-        shell: bash
-
-      - name: Debug application.yml
-        run: |
-          echo "Checking application.yml file..."
+          echo "application.yml created at: $GITHUB_WORKSPACE/application.yml"
           cat $GITHUB_WORKSPACE/application.yml
-          ls -l $GITHUB_WORKSPACE/
+        shell: bash
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
@@ -62,6 +58,7 @@ jobs:
           echo "$EC2_SSH_KEY" > private_key.pem
           chmod 600 private_key.pem
           jar_file=$(find build/libs -name '*.jar' ! -name '*plain.jar' | head -n 1)
+          echo "Deploying $jar_file and application.yml to EC2..."
           scp -i private_key.pem -o StrictHostKeyChecking=no "$jar_file" $EC2_USERNAME@$EC2_HOST:/home/$EC2_USERNAME/umc73thServer.jar
           scp -i private_key.pem -o StrictHostKeyChecking=no $GITHUB_WORKSPACE/application.yml $EC2_USERNAME@$EC2_HOST:/home/$EC2_USERNAME/application.yml
           ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_HOST "

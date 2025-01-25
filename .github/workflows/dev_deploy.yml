@@ -17,10 +17,10 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Make application.yml
+      - name: Make application-umc72th.yml  # 새로 배포할 서비스의 application.yml 파일 생성
         run: |
           cd ./src/main/resources
-          echo "${{ secrets.APPLICATION_YML }}" > ./application.yml
+          echo "${{ secrets.APPLICATION_YML }}" > ./application-umc72th.yml
         shell: bash
 
       - name: Grant execute permission for gradlew
@@ -58,9 +58,10 @@ jobs:
           chmod 600 private_key.pem
           jar_file=$(find build/libs -name '*.jar' ! -name '*plain.jar' | head -n 1)
           scp -i private_key.pem -o StrictHostKeyChecking=no "$jar_file" $EC2_USERNAME@$EC2_HOST:/home/$EC2_USERNAME/umc72thServer.jar
+          scp -i private_key.pem -o StrictHostKeyChecking=no ./src/main/resources/application-umc72th.yml $EC2_USERNAME@$EC2_HOST:/home/$EC2_USERNAME/application-umc72th.yml
           ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_HOST "
             pgrep java | xargs -r kill -15
             sleep 10
-            nohup java -jar /home/$EC2_USERNAME/umc72thServer.jar > app.log 2>&1 &
+            nohup java -jar /home/$EC2_USERNAME/umc72thServer.jar --spring.config.location=/home/$EC2_USERNAME/application-umc72th.yml > app.log 2>&1 &
           "
           rm -f private_key.pem

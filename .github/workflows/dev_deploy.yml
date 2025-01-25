@@ -19,8 +19,14 @@ jobs:
 
       - name: Make application.yml
         run: |
-          echo "${{ secrets.APPLICATION_YML }}" > /home/runner/work/application.yml
+          echo "${{ secrets.APPLICATION_YML }}" > $GITHUB_WORKSPACE/application.yml
         shell: bash
+
+      - name: Debug application.yml
+        run: |
+          echo "Checking application.yml file..."
+          cat $GITHUB_WORKSPACE/application.yml
+          ls -l $GITHUB_WORKSPACE/
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
@@ -33,7 +39,7 @@ jobs:
       - name: Upload build artifact
         uses: actions/upload-artifact@v3
         with:
-          name: umc72thServer
+          name: umc73thServer
           path: build/libs/*.jar
 
   deploy:
@@ -44,7 +50,7 @@ jobs:
       - name: Download build artifact
         uses: actions/download-artifact@v3
         with:
-          name: umc72thServer
+          name: umc73thServer
           path: build/libs/
 
       - name: Deploy to EC2
@@ -56,11 +62,11 @@ jobs:
           echo "$EC2_SSH_KEY" > private_key.pem
           chmod 600 private_key.pem
           jar_file=$(find build/libs -name '*.jar' ! -name '*plain.jar' | head -n 1)
-          scp -i private_key.pem -o StrictHostKeyChecking=no "$jar_file" $EC2_USERNAME@$EC2_HOST:/home/$EC2_USERNAME/umc72thServer.jar
-          scp -i private_key.pem -o StrictHostKeyChecking=no /home/runner/work/application.yml $EC2_USERNAME@$EC2_HOST:/home/$EC2_USERNAME/application.yml
+          scp -i private_key.pem -o StrictHostKeyChecking=no "$jar_file" $EC2_USERNAME@$EC2_HOST:/home/$EC2_USERNAME/umc73thServer.jar
+          scp -i private_key.pem -o StrictHostKeyChecking=no $GITHUB_WORKSPACE/application.yml $EC2_USERNAME@$EC2_HOST:/home/$EC2_USERNAME/application.yml
           ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_HOST "
             pgrep java | xargs -r kill -15
             sleep 10
-            nohup java -jar /home/$EC2_USERNAME/umc72thServer.jar --spring.config.location=/home/$EC2_USERNAME/application.yml > app.log 2>&1 &
+            nohup java -jar /home/$EC2_USERNAME/umc73thServer.jar --spring.config.location=/home/$EC2_USERNAME/application.yml > app.log 2>&1 &
           "
           rm -f private_key.pem

@@ -5,15 +5,13 @@ import com.google.cloud.translate.Translate;
 import com.google.cloud.translate.TranslateOptions;
 import com.google.cloud.translate.Translation;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Base64;
 
 @Service
 public class TranslationService {
@@ -25,7 +23,7 @@ public class TranslationService {
             throw new IllegalArgumentException("Google Cloud JSON Key가 비어 있습니다!");
         }
 
-        // JSON 유효성 검증
+        // JSON 유효성 검증 및 필수 필드 확인
         validateJson(jsonKey);
 
         // JSON 문자열로 GoogleCredentials 생성
@@ -55,10 +53,17 @@ public class TranslationService {
         try {
             JsonElement jsonElement = JsonParser.parseString(jsonKey);
             if (!jsonElement.isJsonObject()) {
-                throw new IllegalArgumentException("JSON Key가 유효한 객체 형식이 아닙니다!");
+                throw new IllegalArgumentException("JSON Key가 유효한 JSON 객체 형식이 아닙니다!");
+            }
+
+            JsonObject jsonObject = jsonElement.getAsJsonObject();
+
+            // 필수 필드 확인
+            if (!jsonObject.has("type") || !jsonObject.has("private_key") || !jsonObject.has("client_email")) {
+                throw new IllegalArgumentException("JSON Key에 필요한 필드(type, private_key, client_email)가 없습니다!");
             }
         } catch (Exception e) {
-            throw new IllegalArgumentException("JSON Key가 유효하지 않습니다!", e);
+            throw new IllegalArgumentException("JSON Key가 유효하지 않습니다! 상세 메시지: " + e.getMessage(), e);
         }
     }
 }

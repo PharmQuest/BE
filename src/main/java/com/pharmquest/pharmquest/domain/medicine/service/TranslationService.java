@@ -18,22 +18,15 @@ public class TranslationService {
 
     private final Translate translate;
 
-    public TranslationService(@Value("${google.cloud.json-key-path}") String jsonKeyPath) throws IOException {
-        GoogleCredentials credentials;
-
-        File jsonFile = new File(jsonKeyPath);
-        if (jsonFile.exists()) {
-            // 로컬 환경: 파일 경로로 GoogleCredentials 생성
-            credentials = GoogleCredentials.fromStream(new FileInputStream(jsonFile));
-        } else {
-            // 배포 환경: GOOGLE_APPLICATION_CREDENTIALS 환경 변수 사용
-            String envKeyPath = System.getenv("GOOGLE_APPLICATION_CREDENTIALS");
-            if (envKeyPath != null && new File(envKeyPath).exists()) {
-                credentials = GoogleCredentials.fromStream(new FileInputStream(envKeyPath));
-            } else {
-                throw new IllegalArgumentException("Google Cloud JSON Key를 찾을 수 없습니다!");
-            }
+    public TranslationService(@Value("${google.cloud.json}") String jsonKey) throws IOException {
+        if (jsonKey == null || jsonKey.isEmpty()) {
+            throw new IllegalArgumentException("Google Cloud JSON Key가 비어 있습니다!");
         }
+
+        // JSON 문자열로 GoogleCredentials 생성
+        GoogleCredentials credentials = GoogleCredentials.fromStream(
+                new ByteArrayInputStream(jsonKey.getBytes())
+        );
 
         this.translate = TranslateOptions.newBuilder()
                 .setCredentials(credentials)

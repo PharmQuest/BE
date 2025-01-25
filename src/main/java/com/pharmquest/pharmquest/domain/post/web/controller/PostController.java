@@ -1,5 +1,6 @@
 package com.pharmquest.pharmquest.domain.post.web.controller;
 
+import com.pharmquest.pharmquest.domain.post.converter.PostCommentConverter;
 import com.pharmquest.pharmquest.domain.mypage.data.PostScrap;
 import com.pharmquest.pharmquest.domain.post.converter.PostConverter;
 import com.pharmquest.pharmquest.domain.post.converter.PostLikeConverter;
@@ -7,10 +8,14 @@ import com.pharmquest.pharmquest.domain.post.converter.PostScrapConverter;
 import com.pharmquest.pharmquest.domain.post.data.Post;
 import com.pharmquest.pharmquest.domain.post.data.enums.Country;
 import com.pharmquest.pharmquest.domain.post.data.enums.PostCategory;
+import com.pharmquest.pharmquest.domain.post.data.mapping.Comment;
 import com.pharmquest.pharmquest.domain.post.data.mapping.PostLike;
-import com.pharmquest.pharmquest.domain.post.service.PostCommandService;
+import com.pharmquest.pharmquest.domain.post.service.post.PostCommandService;
+import com.pharmquest.pharmquest.domain.post.service.comment.PostCommentService;
 import com.pharmquest.pharmquest.domain.post.service.like.PostLikeService;
 import com.pharmquest.pharmquest.domain.post.service.scrap.PostScrapService;
+import com.pharmquest.pharmquest.domain.post.web.dto.CommentRequestDTO;
+import com.pharmquest.pharmquest.domain.post.web.dto.CommentResponseDTO;
 import com.pharmquest.pharmquest.domain.post.web.dto.PostRequestDTO;
 import com.pharmquest.pharmquest.domain.post.web.dto.PostResponseDTO;
 import com.pharmquest.pharmquest.domain.user.data.User;
@@ -18,7 +23,6 @@ import com.pharmquest.pharmquest.global.apiPayload.ApiResponse;
 import com.pharmquest.pharmquest.domain.token.JwtUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.headers.Header;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -33,6 +37,7 @@ public class PostController {
     private final PostLikeService postLikeService;
     private final PostScrapService postScrapService;
     private final JwtUtil jwtUtil;
+    private final PostCommentService postCommentService;
 
     @PostMapping("/posts")
     public ApiResponse<PostResponseDTO.CreatePostResultDTO> postCommandService(
@@ -53,11 +58,11 @@ public class PostController {
 
     @GetMapping("/posts/{post_id}")
     @Operation(summary = "게시글 상세조회 API")
-    public ApiResponse<PostResponseDTO.PostDetailDTO> getPost(@Parameter (hidden = true) @RequestHeader("Authorization") String authorizationHeader,@PathVariable(name = "post_id")Long postId){
+    public ApiResponse<PostResponseDTO.PostDetailDTO> getPost(@Parameter (hidden = true) @RequestHeader("Authorization") String authorizationHeader,@PathVariable(name = "post_id")Long postId, @RequestParam(name="page")Integer page){
      
         User user = jwtUtil.getUserFromHeader(authorizationHeader);
 
-        PostResponseDTO.PostDetailDTO postDetail = postCommandService.getPost(user.getId(), postId);
+        PostResponseDTO.PostDetailDTO postDetail = postCommandService.getPost(user.getId(), postId,page);
 
         return ApiResponse.onSuccess(postDetail);
     }
@@ -109,5 +114,18 @@ public class PostController {
         return ApiResponse.onSuccess("스크랩이 취소되었습니다");
     }
 
+    @PostMapping("/posts/{post_id}/comments")
+    @Operation(summary = "게시글 댓글, 답글 작성 API")
+    public ApiResponse<CommentResponseDTO.CreateCommentResultDTO> createComment(
+            @Parameter (hidden = true) @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable(name = "post_id")Long postId,
+            @RequestParam(name="parentsId", required = false)Long parentsId,
+            @RequestBody @Valid CommentRequestDTO.CreateCommentDTO requestDTO) {
+
+        User user = jwtUtil.getUserFromHeader(authorizationHeader);
+
+        Comment createdComment = postCommentService.addComment(user.getId(),postId, parentsId,requestDTO);
+        return ApiResponse.onSuccess(PostCommentConverter.toCreateCommentResultDTO(createdComment));
+    }
 
 }

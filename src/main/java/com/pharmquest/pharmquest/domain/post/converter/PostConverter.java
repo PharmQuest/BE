@@ -1,6 +1,8 @@
 package com.pharmquest.pharmquest.domain.post.converter;
 
 import com.pharmquest.pharmquest.domain.post.data.Post;
+import com.pharmquest.pharmquest.domain.post.data.mapping.Comment;
+import com.pharmquest.pharmquest.domain.post.web.dto.CommentResponseDTO;
 import com.pharmquest.pharmquest.domain.post.web.dto.PostRequestDTO;
 import com.pharmquest.pharmquest.domain.post.web.dto.PostResponseDTO;
 import com.pharmquest.pharmquest.domain.user.data.User;
@@ -32,12 +34,15 @@ public class PostConverter {
 
     public static PostResponseDTO.PostPreViewDTO postPreViewDTO(Post post) {
         return PostResponseDTO.PostPreViewDTO.builder()
+                .postId(post.getId())
+                .userId(post.getUser().getId())
                 .userName(post.getUser().getEmail().substring(0, post.getUser().getEmail().indexOf("@")))
                 .title(post.getTitle())
                 .content(post.getContent())
                 .category(post.getCategory().getKoreanName())
                 .scrapeCount(post.getScraps().size())
                 .likeCount(post.getLikes().size())
+                .commentCount(post.getComments().size())
                 .createdAt(post.getCreatedAt())
                 .build();
     }
@@ -55,22 +60,36 @@ public class PostConverter {
                 .build();
     }
 
-    public static PostResponseDTO.PostDetailDTO postDetailDTO(Post post, Boolean isLiked, Boolean isScraped, Boolean isReported) {
+    public static PostResponseDTO.PostDetailDTO postDetailDTO(
+            Post post,
+            Boolean isLiked,
+            Boolean isScraped,
+            Boolean isReported,
+            List<CommentResponseDTO.CommentDTO> topLevelComment,
+            Page<Comment> parentCommentsPage
+    ) {
         return PostResponseDTO.PostDetailDTO.builder()
+                .postId(post.getId())
+                .userId(post.getUser().getId())
                 .userName(post.getUser().getEmail().substring(0, post.getUser().getEmail().indexOf("@")))
                 .title(post.getTitle())
                 .content(post.getContent())
                 .category(post.getCategory().getKoreanName())
                 .scrapeCount(post.getScraps().size())
                 .likeCount(post.getLikes().size())
+                .commentCount(post.getComments().size())
                 .isLiked(isLiked)
                 .isScraped(isScraped)
                 .isReported(isReported)
+                .comments(topLevelComment)
+                .isFirst(parentCommentsPage.isFirst())
+                .isLast(parentCommentsPage.isLast())
+                .totalPage(parentCommentsPage.getTotalPages())
+                .totalElements(parentCommentsPage.getTotalElements())
+                .listSize(parentCommentsPage.getSize())
                 .createdAt(post.getCreatedAt())
                 .build();
     }
-
-
 
 }
 

@@ -30,13 +30,12 @@ public class MedicineController {
         return medicineService.getMedicines(query, limit);
     }
 
-    @GetMapping("/search")
+    @GetMapping("/lists")
     public List<MedicineResponseDTO> searchMedicinesByCategory(
-            @RequestParam(defaultValue = "openfda.product_type:OTC") String query,
+            @RequestParam(defaultValue = "진통/해열") String category,
             @RequestParam(defaultValue = "10") int limit) {
-        return medicineService.getMedicinesbyCategory(query, limit);
+        return medicineService.getMedicinesbyCategory(category, limit);
     }
-
 
     // 번역되지 않은 약물 정보 검색
     @GetMapping("/search/english")

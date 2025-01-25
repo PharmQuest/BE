@@ -54,23 +54,23 @@ public class MedicineCategoryMapper {
 
     public static String getQueryForCategory(String category) {
         switch (category) {
-            case "진통/해열":
+            case "1":
                 return "purpose:(\"Pain reliever\" OR \"Fever reducer\") OR " +
                         "active_ingredient:(\"Acetaminophen\" OR \"Naproxen\" OR \"Ibuprofen\") OR " +
                         "pharm_class_epc:(\"Analgesic\" OR \"Antipyretic\")";
-            case "소화/위장":
+            case "2":
                 return "purpose:(\"Antacid\" OR \"Acid reducer\") OR " +
                         "pharm_class_epc:(\"Antacid\" OR \"Proton pump inhibitor\")";
-            case "감기/기침":
+            case "3":
                 return "purpose:(\"Cough suppressant\" OR \"Expectorant\") OR " +
                         "pharm_class_epc:(\"Decongestant\")";
-            case "알레르기":
+            case "4":
                 return "purpose:(\"Antihistamine\") OR pharm_class_epc:(\"Antihistamine\")";
-            case "상처/소독":
+            case "5":
                 return "purpose:(\"Antiseptic\") OR pharm_class_epc:(\"Antiseptic\")";
-            case "멀미":
+            case "6":
                 return "purpose:(\"Antiemetic\") OR pharm_class_epc:(\"Antiemetic\")";
-            case "안약":
+            case "7":
                 return "openfda.route:(\"OPHTHALMIC\")";
             case "기타":
                 // "기타"는 위의 모든 카테고리를 제외하는 쿼리

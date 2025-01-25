@@ -1,7 +1,7 @@
 package com.pharmquest.pharmquest.domain.post.web.controller;
 
-import com.pharmquest.pharmquest.domain.mypage.domain.PostScrap;
 import com.pharmquest.pharmquest.domain.post.converter.PostCommentConverter;
+import com.pharmquest.pharmquest.domain.mypage.data.PostScrap;
 import com.pharmquest.pharmquest.domain.post.converter.PostConverter;
 import com.pharmquest.pharmquest.domain.post.converter.PostLikeConverter;
 import com.pharmquest.pharmquest.domain.post.converter.PostScrapConverter;
@@ -45,7 +45,6 @@ public class PostController {
             @RequestBody @Valid PostRequestDTO.CreatePostDTO request) {
 
         User user = jwtUtil.getUserFromHeader(authorizationHeader);
-
         Post post = postCommandService.registerPost(user.getId(), request);
         return ApiResponse.onSuccess(PostConverter.toCreatePostResultDTO(post));
     }

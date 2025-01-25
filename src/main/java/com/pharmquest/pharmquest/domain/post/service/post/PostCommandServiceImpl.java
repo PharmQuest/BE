@@ -1,4 +1,4 @@
-package com.pharmquest.pharmquest.domain.post.service;
+package com.pharmquest.pharmquest.domain.post.service.post;
 
 import com.pharmquest.pharmquest.domain.post.converter.PostCommentConverter;
 import com.pharmquest.pharmquest.domain.post.converter.PostConverter;
@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class PostCommandServiceImpl implements PostCommandService{
+public class PostCommandServiceImpl implements PostCommandService {
 
     private final PostRepository postRepository;
     private final PostLikeRepository likeRepository;
@@ -69,7 +69,7 @@ public class PostCommandServiceImpl implements PostCommandService{
 
     //게시글 상세보기
     @Override
-    public PostResponseDTO.PostDetailDTO getPost(Long userId, Long postId) {
+    public PostResponseDTO.PostDetailDTO getPost(Long userId, Long postId, Integer page) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new EntityNotFoundException(postId + "에 해당하는 게시글이 없습니다."));
 
@@ -77,9 +77,12 @@ public class PostCommandServiceImpl implements PostCommandService{
         boolean isReported = reportRepository.existsByPostIdAndUserId(postId, userId);
         boolean isScrapped = scrapRepository.existsByPostIdAndUserId(postId, userId);
 
-        List<Comment> allComments = commentRepository.findByPost(post);
-        List<CommentResponseDTO.CommentDTO> topLevelComments = allComments.stream()
-                .filter(comment -> comment.getParent() == null)
+        Page<Comment> parentCommentsPage = commentRepository.findByPostAndParentIsNull(
+                post,
+                PageRequest.of(page - 1, 5)
+        );
+
+        List<CommentResponseDTO.CommentDTO> topLevelComments = parentCommentsPage.getContent().stream()
                 .map(PostCommentConverter::toComment)
                 .collect(Collectors.toList());
 

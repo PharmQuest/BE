@@ -1,4 +1,4 @@
-package com.pharmquest.pharmquest.domain.post.service;
+package com.pharmquest.pharmquest.domain.post.service.post;
 
 import com.pharmquest.pharmquest.domain.post.data.Post;
 import com.pharmquest.pharmquest.domain.post.data.enums.Country;
@@ -14,7 +14,7 @@ public interface PostCommandService {
 
     Page<Post> getAllPosts(PostCategory category, Integer page);
 
-    PostResponseDTO.PostDetailDTO getPost(Long userId, Long postId);
+    PostResponseDTO.PostDetailDTO getPost(Long userId, Long postId, Integer page);
 
     Page<Post> searchPostsDynamically(String keyword, Country country, PostCategory category, Integer page);
 }

@@ -51,4 +51,38 @@ public class MedicineCategoryMapper {
         // 기타
         return "기타";
     }
+
+    public static String getQueryForCategory(String category) {
+        switch (category) {
+            case "1":
+                return "purpose:(\"Pain reliever\" OR \"Fever reducer\") OR " +
+                        "active_ingredient:(\"Acetaminophen\" OR \"Naproxen\" OR \"Ibuprofen\") OR " +
+                        "pharm_class_epc:(\"Analgesic\" OR \"Antipyretic\")";
+            case "2":
+                return "purpose:(\"Antacid\" OR \"Acid reducer\") OR " +
+                        "pharm_class_epc:(\"Antacid\" OR \"Proton pump inhibitor\")";
+            case "3":
+                return "purpose:(\"Cough suppressant\" OR \"Expectorant\") OR " +
+                        "pharm_class_epc:(\"Decongestant\")";
+            case "4":
+                return "purpose:(\"Antihistamine\") OR pharm_class_epc:(\"Antihistamine\")";
+            case "5":
+                return "purpose:(\"Antiseptic\") OR pharm_class_epc:(\"Antiseptic\")";
+            case "6":
+                return "purpose:(\"Antiemetic\") OR pharm_class_epc:(\"Antiemetic\")";
+            case "7":
+                return "openfda.route:(\"OPHTHALMIC\")";
+            case "기타":
+                // "기타"는 위의 모든 카테고리를 제외하는 쿼리
+                return "NOT (purpose:(\"Pain reliever\" OR \"Fever reducer\" OR \"Antacid\" OR " +
+                        "\"Acid reducer\" OR \"Cough suppressant\" OR \"Expectorant\" OR \"Antihistamine\" OR " +
+                        "\"Antiseptic\" OR \"Antiemetic\") OR " +
+                        "active_ingredient:(\"Acetaminophen\" OR \"Naproxen\" OR \"Ibuprofen\") OR " +
+                        "pharm_class_epc:(\"Analgesic\" OR \"Antipyretic\" OR \"Antacid\" OR \"Proton pump inhibitor\" OR " +
+                        "\"Decongestant\" OR \"Antihistamine\" OR \"Antiseptic\" OR \"Antiemetic\") OR " +
+                        "openfda.route:(\"OPHTHALMIC\"))";
+            default:
+                return null; // 매칭되는 카테고리 없음
+        }
+    }
 }

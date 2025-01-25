@@ -48,7 +48,7 @@ public class PostCommandServiceImpl implements PostCommandService{
     @Override
     public Page<Post> getAllPosts(PostCategory category, Integer page) {
 
-        PageRequest pageRequest = PageRequest.of(page - 1, 10, Sort.by(Sort.Direction.DESC, "createdAt"));
+        PageRequest pageRequest = PageRequest.of(page - 1, 20, Sort.by(Sort.Direction.DESC, "createdAt"));
 
         if (category == PostCategory.ALL) {
             // category가 ALL이면 전체 게시물 조회
@@ -76,7 +76,7 @@ public class PostCommandServiceImpl implements PostCommandService{
     @Override
     public Page<Post> searchPostsDynamically(String keyword, Country country, PostCategory category, Integer page) {
 
-        PageRequest pageRequest = PageRequest.of(page - 1, 10, Sort.by(Sort.Direction.DESC, "createdAt"));
+        PageRequest pageRequest = PageRequest.of(page - 1, 20, Sort.by(Sort.Direction.DESC, "createdAt"));
 
         Page<Post> posts = postRepository.findAll(
                 PostSpecification.dynamicQuery(keyword, category, country),

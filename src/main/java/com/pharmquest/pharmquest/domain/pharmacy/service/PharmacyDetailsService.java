@@ -6,5 +6,5 @@ import com.pharmquest.pharmquest.domain.mypage.web.dto.ScrapResponseDTO;
 public interface PharmacyDetailsService {
     public Boolean isPharmacyByPlaceId(String placeId);
 
-    public ScrapResponseDTO.PharmacyDto getPharmacyByPlaceId(String placeId);
+    public ScrapResponseDTO.PharmacyDto getPharmacyDtoByPlaceId(String placeId);
 }

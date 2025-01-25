@@ -39,13 +39,14 @@ public class PharmacyDetailsServiceImpl implements PharmacyDetailsService {
 
     // placeId로 상세정보를 불러와 Dto로 변환
     @Override
-    public ScrapResponseDTO.PharmacyDto getPharmacyByPlaceId(String placeId) {
+    public ScrapResponseDTO.PharmacyDto getPharmacyDtoByPlaceId(String placeId) {
 
         GooglePlaceDetailsResponse response = getDetailsByPlaceId(placeId);
         GooglePlaceDetailsResponse.Result detailsResult = response.getResult();
 
         return ScrapResponseDTO.PharmacyDto.builder()
                 .name(detailsResult.getName())
+                .placeId(placeId)
                 .openNow(detailsResult.getOpeningHours().getOpenNow())
                 .region(detailsResult.getFormattedAddress())
                 .latitude(detailsResult.getGeometry().getLocation().getLat())

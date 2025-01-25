@@ -23,11 +23,6 @@ public class MedicineConverter {
     public MedicineResponseDTO convertWithTranslation(JsonNode result) {
         String brandName = translate(getFirstValue(result, "openfda.brand_name"));
         String genericName = translate(getFirstValue(result, "openfda.generic_name"));
-        String substanceName = translate(getFirstValue(result, "openfda.substance_name"));
-        String activeIngredient = translate(getFirstValue(result, "active_ingredient"));
-        String route = translate(getFirstValue(result, "openfda.route"));
-        String purpose = translate(getFirstValue(result, "purpose"));
-
         String category = MedicineCategoryMapper.getCategory(
                 getFirstValue(result, "purpose"),
                 getFirstValue(result, "active_ingredient"),
@@ -35,26 +30,17 @@ public class MedicineConverter {
                 getFirstValue(result, "openfda.route")
         );
 
-        String indicationsAndUsage = translate(getFirstValue(result, "indications_and_usage"));
-        String dosageAndAdministration = translate(getFirstValue(result, "dosage_and_administration"));
-        String dosageFormsAndStrengths = translate(getFirstValue(result, "dosage_forms_and_strengths"));
         String splSetId = getFirstValue(result, "openfda.spl_set_id");
-
         String imgUrl = fetchImageUrl(splSetId);
+        String country = "미국";
 
         return new MedicineResponseDTO(
                 brandName,
                 genericName,
-                substanceName,
-                activeIngredient,
-                route,
-                purpose,
-                indicationsAndUsage,
-                dosageAndAdministration,
-                dosageFormsAndStrengths,
                 splSetId,
                 imgUrl,
-                category
+                category,
+                country
         );
     }
 
@@ -62,33 +48,21 @@ public class MedicineConverter {
     public MedicineResponseDTO convertWithoutTranslation(JsonNode result) {
         String brandName = getFirstValue(result, "openfda.brand_name");
         String genericName = getFirstValue(result, "openfda.generic_name");
-        String substanceName = getFirstValue(result, "openfda.substance_name");
         String activeIngredient = getFirstValue(result, "active_ingredient");
         String route = getFirstValue(result, "openfda.route");
         String purpose = getFirstValue(result, "purpose");
-
         String category = MedicineCategoryMapper.getCategory(purpose, activeIngredient, "", route);
-
-        String indicationsAndUsage = getFirstValue(result, "indications_and_usage");
-        String dosageAndAdministration = getFirstValue(result, "dosage_and_administration");
-        String dosageFormsAndStrengths = getFirstValue(result, "dosage_forms_and_strengths");
         String splSetId = getFirstValue(result, "openfda.spl_set_id");
-
         String imgUrl = fetchImageUrl(splSetId);
+        String country = "미국";
 
         return new MedicineResponseDTO(
                 brandName,
                 genericName,
-                substanceName,
-                activeIngredient,
-                route,
-                purpose,
-                indicationsAndUsage,
-                dosageAndAdministration,
-                dosageFormsAndStrengths,
                 splSetId,
                 imgUrl,
-                category
+                category,
+                country
         );
     }
 

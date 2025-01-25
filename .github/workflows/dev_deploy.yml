@@ -19,7 +19,7 @@ jobs:
 
       - name: Make application.yml
         run: |
-          echo "${{ secrets.APPLICATION_YML }}" > ./application.yml
+          echo "${{ secrets.APPLICATION_YML }}" > /home/runner/work/application.yml
         shell: bash
 
       - name: Grant execute permission for gradlew
@@ -57,7 +57,7 @@ jobs:
           chmod 600 private_key.pem
           jar_file=$(find build/libs -name '*.jar' ! -name '*plain.jar' | head -n 1)
           scp -i private_key.pem -o StrictHostKeyChecking=no "$jar_file" $EC2_USERNAME@$EC2_HOST:/home/$EC2_USERNAME/umc72thServer.jar
-          scp -i private_key.pem -o StrictHostKeyChecking=no application.yml $EC2_USERNAME@$EC2_HOST:/home/$EC2_USERNAME/application.yml
+          scp -i private_key.pem -o StrictHostKeyChecking=no /home/runner/work/application.yml $EC2_USERNAME@$EC2_HOST:/home/$EC2_USERNAME/application.yml
           ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_HOST "
             pgrep java | xargs -r kill -15
             sleep 10

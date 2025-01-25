@@ -60,7 +60,14 @@ public class PostConverter {
                 .build();
     }
 
-    public static PostResponseDTO.PostDetailDTO postDetailDTO(Post post, Boolean isLiked, Boolean isScraped, Boolean isReported, List<CommentResponseDTO.CommentDTO> topLevelComment) {
+    public static PostResponseDTO.PostDetailDTO postDetailDTO(
+            Post post,
+            Boolean isLiked,
+            Boolean isScraped,
+            Boolean isReported,
+            List<CommentResponseDTO.CommentDTO> topLevelComment,
+            Page<Comment> parentCommentsPage
+    ) {
         return PostResponseDTO.PostDetailDTO.builder()
                 .postId(post.getId())
                 .userId(post.getUser().getId())
@@ -75,11 +82,14 @@ public class PostConverter {
                 .isScraped(isScraped)
                 .isReported(isReported)
                 .comments(topLevelComment)
+                .isFirst(parentCommentsPage.isFirst())
+                .isLast(parentCommentsPage.isLast())
+                .totalPage(parentCommentsPage.getTotalPages())
+                .totalElements(parentCommentsPage.getTotalElements())
+                .listSize(parentCommentsPage.getSize())
                 .createdAt(post.getCreatedAt())
                 .build();
     }
-
-
 
 }
 

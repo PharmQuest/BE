@@ -74,7 +74,12 @@ public class PostResponseDTO {
         Boolean isLiked;
         Boolean isScraped;
         Boolean isReported;
-        private List<CommentResponseDTO.CommentDTO> comments;
+        List<CommentResponseDTO.CommentDTO> comments;
+        Integer listSize;
+        Integer totalPage;
+        Long totalElements;
+        Boolean isFirst;
+        Boolean isLast;
 
     }
 

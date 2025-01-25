@@ -52,7 +52,7 @@ public class PostCommandServiceImpl implements PostCommandService {
         return postRepository.save(newPost);
     }
 
-    //게시글 리스트 가져오기 (카테고리별 필터링, 10개씩 페이징)
+    //게시글 리스트 가져오기 (카테고리별 필터링, 20개씩 페이징)
     @Override
     public Page<Post> getAllPosts(PostCategory category, Integer page) {
 
@@ -87,10 +87,10 @@ public class PostCommandServiceImpl implements PostCommandService {
                 .collect(Collectors.toList());
 
 
-        return PostConverter.postDetailDTO(post, isLiked, isScrapped, isReported, topLevelComments);
+        return PostConverter.postDetailDTO(post, isLiked, isScrapped, isReported, topLevelComments,parentCommentsPage);
     }
 
-    //게시글 제목, 내용으로 검색(카테고리, 나라 별 필터링, 10개씩 페이징)
+    //게시글 제목, 내용으로 검색(카테고리, 나라 별 필터링, 20개씩 페이징)
     @Override
     public Page<Post> searchPostsDynamically(String keyword, Country country, PostCategory category, Integer page) {
 

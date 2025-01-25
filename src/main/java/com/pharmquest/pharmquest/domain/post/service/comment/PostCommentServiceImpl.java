@@ -6,7 +6,6 @@ import com.pharmquest.pharmquest.domain.post.data.mapping.Comment;
 import com.pharmquest.pharmquest.domain.post.repository.comment.PostCommentRepository;
 import com.pharmquest.pharmquest.domain.post.repository.post.PostRepository;
 import com.pharmquest.pharmquest.domain.post.web.dto.CommentRequestDTO;
-import com.pharmquest.pharmquest.domain.post.web.dto.CommentResponseDTO;
 import com.pharmquest.pharmquest.domain.user.data.User;
 import com.pharmquest.pharmquest.domain.user.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -14,39 +13,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 @Service
 @RequiredArgsConstructor
 public class PostCommentServiceImpl implements PostCommentService {
-
 
     private final PostCommentRepository postCommentRepository;
     private final PostRepository postRepository;
     private final UserRepository userRepository;
 
-    @Override
-    public CommentResponseDTO.CommentListDTO getCommentsByPost(Long postId) {
-
-        Post post = postRepository.findById(postId).orElse(null);
-        List<Comment> allComments = postCommentRepository.findByPost(post);
-
-        // 최상위 댓글만 필터링
-        List<CommentResponseDTO.CommentDTO> topLevelComments = allComments.stream()
-                .filter(comment -> comment.getParent() == null)
-                .map(PostCommentConverter::toComment) // 정적 메서드 호출
-                .collect(Collectors.toList());
-
-        // 총 댓글 수 계산
-        int totalComments = allComments.size();
-
-        return CommentResponseDTO.CommentListDTO.builder()
-                .postId(postId)
-                .comments(topLevelComments)
-                .totalComments(totalComments)
-                .build();
-    }
 
     @Override
     @Transactional

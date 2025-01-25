@@ -18,52 +18,23 @@ public class TranslationService {
 
     private final Translate translate;
 
-    public TranslationService(@Value("${google.cloud.json}") String jsonKey) throws IOException {
-        if (jsonKey == null || jsonKey.isEmpty()) {
-            throw new IllegalArgumentException("Google Cloud JSON Key가 비어 있습니다!");
+    public TranslationService(@Value("${google.cloud.translate.api-key}") String apiKey) {
+        if (apiKey == null || apiKey.isEmpty()) {
+            throw new IllegalArgumentException("Google Cloud Translation API 키가 비어 있습니다!");
         }
 
-        // JSON 유효성 검증 및 필수 필드 확인
-        validateJson(jsonKey);
-
-        // JSON 문자열로 GoogleCredentials 생성
-        GoogleCredentials credentials = GoogleCredentials.fromStream(
-                new ByteArrayInputStream(jsonKey.getBytes())
-        );
-
+        // API 키로 TranslateOptions 초기화
         this.translate = TranslateOptions.newBuilder()
-                .setCredentials(credentials)
+                .setApiKey(apiKey)
                 .build()
                 .getService();
     }
 
     public String translateText(String text, String targetLanguage) {
-        return this.translate.translate(
+        Translation translation = this.translate.translate(
                 text,
                 Translate.TranslateOption.targetLanguage(targetLanguage)
-        ).getTranslatedText();
-    }
-
-    /**
-     * JSON 유효성을 검증하는 메서드
-     *
-     * @param jsonKey JSON 문자열
-     */
-    private void validateJson(String jsonKey) {
-        try {
-            JsonElement jsonElement = JsonParser.parseString(jsonKey);
-            if (!jsonElement.isJsonObject()) {
-                throw new IllegalArgumentException("JSON Key가 유효한 JSON 객체 형식이 아닙니다!");
-            }
-
-            JsonObject jsonObject = jsonElement.getAsJsonObject();
-
-            // 필수 필드 확인
-            if (!jsonObject.has("type") || !jsonObject.has("private_key") || !jsonObject.has("client_email")) {
-                throw new IllegalArgumentException("JSON Key에 필요한 필드(type, private_key, client_email)가 없습니다!");
-            }
-        } catch (Exception e) {
-            throw new IllegalArgumentException("JSON Key가 유효하지 않습니다! 상세 메시지: " + e.getMessage(), e);
-        }
+        );
+        return translation.getTranslatedText();
     }
 }

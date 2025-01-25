@@ -5,7 +5,6 @@ import com.pharmquest.pharmquest.domain.pharmacy.data.enums.PharmacyCountry;
 import com.pharmquest.pharmquest.domain.pharmacy.service.PharmacyDetailsService;
 import com.pharmquest.pharmquest.domain.user.data.User;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,7 +13,6 @@ import java.util.List;
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
-@Slf4j
 public class ScrapServiceImpl implements ScrapService {
 
     private final PharmacyDetailsService pharmacyDetailsService;

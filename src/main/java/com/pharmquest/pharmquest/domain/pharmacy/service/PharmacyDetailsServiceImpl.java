@@ -48,7 +48,7 @@ public class PharmacyDetailsServiceImpl implements PharmacyDetailsService {
                 .name(detailsResult.getName())
                 .placeId(placeId)
                 .openNow(detailsResult.getOpeningHours().getOpenNow())
-                .region(detailsResult.getFormattedAddress())
+                .region(detailsResult.getLocation())
                 .latitude(detailsResult.getGeometry().getLocation().getLat())
                 .longitude(detailsResult.getGeometry().getLocation().getLng())
                 .country(getCountryName(response))

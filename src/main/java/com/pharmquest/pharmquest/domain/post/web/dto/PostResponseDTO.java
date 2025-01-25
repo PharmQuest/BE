@@ -1,6 +1,7 @@
 package com.pharmquest.pharmquest.domain.post.web.dto;
 
 import com.pharmquest.pharmquest.domain.post.data.enums.PostCategory;
+import com.pharmquest.pharmquest.domain.post.data.mapping.Comment;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -59,6 +60,8 @@ public class PostResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class PostDetailDTO {
+        Long postId;
+        Long userId;
         String userName;
         String title;
         String content;
@@ -71,7 +74,7 @@ public class PostResponseDTO {
         Boolean isLiked;
         Boolean isScraped;
         Boolean isReported;
-        private List<String> comments;
+        private List<CommentResponseDTO.CommentDTO> comments;
 
     }
 

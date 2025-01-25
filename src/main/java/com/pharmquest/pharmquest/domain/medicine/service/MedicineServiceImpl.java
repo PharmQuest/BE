@@ -3,6 +3,7 @@ package com.pharmquest.pharmquest.domain.medicine.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pharmquest.pharmquest.domain.medicine.converter.MedicineConverter;
+import com.pharmquest.pharmquest.domain.medicine.data.MedicineCategoryMapper;
 import com.pharmquest.pharmquest.domain.medicine.repository.MedicineRepository;
 import com.pharmquest.pharmquest.domain.medicine.web.dto.MedicineResponseDTO;
 import org.springframework.stereotype.Service;
@@ -31,6 +32,31 @@ public class MedicineServiceImpl implements MedicineService {
     @Override
     public List<MedicineResponseDTO> getMedicines(String query, int limit) {
         try {
+            String response = medicineRepository.fetchMedicineData(query, limit);
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode results = mapper.readTree(response).path("results");
+
+            List<MedicineResponseDTO> medicines = new ArrayList<>();
+            if (results.isArray()) {
+                for (JsonNode result : results) {
+                    medicines.add(medicineConverter.convertWithTranslation(result));
+                }
+            }
+            return medicines;
+        } catch (Exception e) {
+            throw new RuntimeException("FDA API 요청 실패", e);
+        }
+    }
+
+    @Override
+    public List<MedicineResponseDTO> getMedicinesbyCategory(String query, int limit) {
+        try {
+            // 카테고리 이름을 쿼리로 변환 (해당되는 경우)
+            String apiQuery = MedicineCategoryMapper.getQueryForCategory(query);
+            if (apiQuery != null) {
+                query = apiQuery; // FDA 쿼리로 대체
+            }
+
             String response = medicineRepository.fetchMedicineData(query, limit);
             ObjectMapper mapper = new ObjectMapper();
             JsonNode results = mapper.readTree(response).path("results");

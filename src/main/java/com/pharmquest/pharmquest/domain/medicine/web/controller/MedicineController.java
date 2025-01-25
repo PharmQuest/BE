@@ -23,12 +23,20 @@ public class MedicineController {
     }
 
     // 번역된 약물 정보 검색
-    @GetMapping("/search")
+    @GetMapping("/search/ko")
     public List<MedicineResponseDTO> searchMedicines(
             @RequestParam(defaultValue = "openfda.product_type:OTC") String query,
             @RequestParam(defaultValue = "10") int limit) {
         return medicineService.getMedicines(query, limit);
     }
+
+    @GetMapping("/search")
+    public List<MedicineResponseDTO> searchMedicinesByCategory(
+            @RequestParam(defaultValue = "openfda.product_type:OTC") String query,
+            @RequestParam(defaultValue = "10") int limit) {
+        return medicineService.getMedicinesbyCategory(query, limit);
+    }
+
 
     // 번역되지 않은 약물 정보 검색
     @GetMapping("/search/english")
@@ -52,6 +60,7 @@ public class MedicineController {
         return medicineService.getMedicineBySplSetId(splSetId);
     }
 
+    //rds 연결 확인용
     @Operation(summary = "Save a new medicine", description = "Add a new medicine by providing its content.")
     @PostMapping("/{content}")
     public Medicine saveMedicine(@PathVariable String content) {
@@ -66,4 +75,7 @@ public class MedicineController {
     public List<Medicine> getAllMedicines() {
         return medRepository.findAll(); // DB에서 전체 데이터 조회
     }
+
+
+
 }

@@ -16,4 +16,11 @@ public class MyPageConverter {
                         .build())
                 .collect(Collectors.toList());
     }
+
+    public static MyPageResponseDTO.PharmacyResponse toPharmaciesDto(List<MyPageResponseDTO.PharmacyDto> pharmacyDtoList) {
+        return MyPageResponseDTO.PharmacyResponse.builder()
+                .pharmacies(pharmacyDtoList)
+                .count(pharmacyDtoList.size())
+                .build();
+    }
 }

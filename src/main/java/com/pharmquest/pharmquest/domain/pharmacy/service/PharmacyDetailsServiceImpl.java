@@ -1,7 +1,7 @@
 package com.pharmquest.pharmquest.domain.pharmacy.service;
 
 import com.pharmquest.pharmquest.domain.medicine.service.TranslationService;
-import com.pharmquest.pharmquest.domain.mypage.web.dto.ScrapResponseDTO;
+import com.pharmquest.pharmquest.domain.mypage.web.dto.MyPageResponseDTO;
 import com.pharmquest.pharmquest.domain.pharmacy.data.enums.PharmacyCountry;
 import com.pharmquest.pharmquest.domain.pharmacy.web.dto.GooglePlaceDetailsResponse;
 import com.pharmquest.pharmquest.global.apiPayload.code.status.ErrorStatus;
@@ -43,16 +43,15 @@ public class PharmacyDetailsServiceImpl implements PharmacyDetailsService {
 
     // placeId로 상세정보를 불러와 Dto로 변환
     @Override
-    public ScrapResponseDTO.PharmacyDto getPharmacyDtoByPlaceId(String placeId) {
+    public MyPageResponseDTO.PharmacyDto getPharmacyDtoByPlaceId(String placeId) {
 
         GooglePlaceDetailsResponse response = getDetailsByPlaceId(placeId);
         GooglePlaceDetailsResponse.Result detailsResult = response.getResult();
 
-        return ScrapResponseDTO.PharmacyDto.builder()
+        return MyPageResponseDTO.PharmacyDto.builder()
                 .name(detailsResult.getName())
                 .placeId(placeId)
                 .openNow(detailsResult.getOpeningHours().getOpenNow())
-//                .region(detailsResult.getEnglishLocation())
                 .region(getTranslatedLocation(response, detailsResult.getEnglishLocationList()))
                 .latitude(detailsResult.getGeometry().getLocation().getLat())
                 .longitude(detailsResult.getGeometry().getLocation().getLng())

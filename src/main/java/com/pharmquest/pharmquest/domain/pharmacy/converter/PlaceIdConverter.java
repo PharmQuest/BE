@@ -6,7 +6,7 @@ import jakarta.persistence.Converter;
 import java.util.ArrayList;
 import java.util.List;
 
-@Converter
+@Converter/**/
 public class PlaceIdConverter implements AttributeConverter<List<String>, String> {
 
     @Override // DB에 저장하는거 placeId -> db 문자열에 포함

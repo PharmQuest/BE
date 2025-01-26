@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -64,10 +63,11 @@ public class GooglePlaceDetailsResponse {
         }
 
         // 지역 반환
-        public String getLocation() {
+        public List<String> getEnglishLocationList() {
 
             if (addressComponents == null || addressComponents.isEmpty()) {
-                return "Unknown";
+//                return "Unknown";
+                return List.of("Unknown");
             }
 
             // 지역 키워드 중 political 가진 country가 아닌 키워드 추출하여 list에 저장
@@ -79,16 +79,18 @@ public class GooglePlaceDetailsResponse {
 
             int size = locationList.size();
             if (size == 0) {
-                return "Unknown";
+//                return "Unknown";
+                return List.of("Unknown");
             }
 
             // 지역 키워드를 규모 큰 순서로 3개 이하가 되도록 설정
             locationList =  locationList.subList(Math.max(0, size - 3), size);
-            String listString = locationList.toString();
+            return locationList;
+//            String listString = locationList.toString();
 
             // listString 얖옆에 [] 제거, 중간에 ',' 제거
-            listString = listString.substring(1, listString.length()-1).replaceAll(",", "");
-            return listString;
+//            listString = listString.substring(1, listString.length()-1).replaceAll(",", "");
+//            return listString;
         }
 
     }

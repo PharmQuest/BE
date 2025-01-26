@@ -1,6 +1,8 @@
 package com.pharmquest.pharmquest.domain.pharmacy.service;
 
+import com.pharmquest.pharmquest.domain.medicine.service.TranslationService;
 import com.pharmquest.pharmquest.domain.mypage.web.dto.ScrapResponseDTO;
+import com.pharmquest.pharmquest.domain.pharmacy.data.enums.PharmacyCountry;
 import com.pharmquest.pharmquest.domain.pharmacy.web.dto.GooglePlaceDetailsResponse;
 import com.pharmquest.pharmquest.global.apiPayload.code.status.ErrorStatus;
 import com.pharmquest.pharmquest.global.apiPayload.exception.handler.CommonExceptionHandler;
@@ -17,12 +19,14 @@ public class PharmacyDetailsServiceImpl implements PharmacyDetailsService {
 
     private final WebClient webClient;
     private final String GOOGLE_PLACES_API_URL = "https://maps.googleapis.com/maps/api/place/details/json";
+    private final TranslationService translationService;
 
     @Value("${place.details.api-key}")
     private String API_KEY;
 
-    public PharmacyDetailsServiceImpl(WebClient.Builder webClientBuilder) {
+    public PharmacyDetailsServiceImpl(WebClient.Builder webClientBuilder, TranslationService translationService) {
         this.webClient = webClientBuilder.baseUrl(GOOGLE_PLACES_API_URL).build();
+        this.translationService = translationService;
     }
 
     @Override
@@ -48,15 +52,32 @@ public class PharmacyDetailsServiceImpl implements PharmacyDetailsService {
                 .name(detailsResult.getName())
                 .placeId(placeId)
                 .openNow(detailsResult.getOpeningHours().getOpenNow())
-                .region(detailsResult.getLocation())
+//                .region(detailsResult.getEnglishLocation())
+                .region(getTranslatedLocation(response, detailsResult.getEnglishLocationList()))
                 .latitude(detailsResult.getGeometry().getLocation().getLat())
                 .longitude(detailsResult.getGeometry().getLocation().getLng())
                 .country(getCountryName(response))
                 .periods(detailsResult.getOpeningHours().getPeriods())
                 .imgUrl("imgURL")
                 .build();
+    }
 
+    private String getTranslatedLocation(GooglePlaceDetailsResponse response, List<String> locationList) {
+        String countryName = getCountryName(response);
+        String translateLanguage = PharmacyCountry.getLanguage(countryName);
+        System.out.println("translateLanguage = " + translateLanguage);
+        locationList
+                .forEach( location -> translationService.translateText(location, translateLanguage));
+        for (String location : locationList) {
+            System.out.print("location = " + location);
+        }
+        System.out.println();
 
+        String listString = locationList.toString();
+
+        // listString 얖옆에 [] 제거, 중간에 ',' 제거
+        listString = listString.substring(1, listString.length()-1).replaceAll(",", "");
+        return listString;
     }
 
     // 상세정보로부터 국가 이름 가져옴

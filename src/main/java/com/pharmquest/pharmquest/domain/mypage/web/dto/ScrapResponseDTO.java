@@ -13,6 +13,8 @@ public class ScrapResponseDTO {
     @Getter
     public static class PharmacyDto {
         private String name;
+        @JsonProperty("place_id")
+        private String placeId;
         @JsonProperty(value = "open_now")
         private Boolean openNow;
         private String region;

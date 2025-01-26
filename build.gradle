@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'com.pharmquest'
-version = '0.0.1-SNAPSHOT'
+version = '1.0.0'
 
 java {
 	toolchain {
@@ -21,8 +21,9 @@ configurations {
 
 repositories {
 	mavenCentral()
-	maven { url "https://maven.google.com" }
+	maven { url "https://maven.google.com" }  // Google Maven Repository
 }
+
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-security'
@@ -34,7 +35,7 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-    implementation 'com.fasterxml.jackson.core:jackson-databind'
+	implementation 'com.fasterxml.jackson.core:jackson-databind'
 
 	// Spring Boot WebFlux (WebClient 사용)
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
@@ -62,11 +63,23 @@ dependencies {
 	implementation 'com.google.cloud:google-cloud-translate:2.55.0'
 
 	implementation 'org.springframework.boot:spring-boot-starter-mustache'
-
-
-
 }
 
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+// QueryDSL 관련 설정 (필요 시 유지)
+def querydslDir = "src/main/generated"
+
+sourceSets {
+	main.java.srcDirs += [ querydslDir ]
+}
+
+tasks.withType(JavaCompile) {
+	options.annotationProcessorGeneratedSourcesDirectory = file(querydslDir)
+}
+
+clean.doLast {
+	file(querydslDir).deleteDir()
 }

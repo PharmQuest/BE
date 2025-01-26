@@ -4,11 +4,14 @@ import com.pharmquest.pharmquest.domain.mypage.data.MedicineScrap;
 import com.pharmquest.pharmquest.domain.mypage.data.SupplementScrap;
 import com.pharmquest.pharmquest.domain.mypage.data.PostScrap;
 import com.pharmquest.pharmquest.domain.pharmacy.converter.PlaceIdConverter;
+import com.pharmquest.pharmquest.domain.pharmacy.converter.ListStringConverter;
+import com.pharmquest.pharmquest.domain.post.data.mapping.Comment;
 import com.pharmquest.pharmquest.domain.post.data.mapping.PostLike;
 import com.pharmquest.pharmquest.domain.post.data.mapping.PostReport;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -60,5 +63,8 @@ public class User {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostReport> postReports;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments;
 
 }

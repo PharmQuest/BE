@@ -1,11 +1,13 @@
 package com.pharmquest.pharmquest.domain.pharmacy.converter;
 
 import jakarta.persistence.AttributeConverter;
+import jakarta.persistence.Converter;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ListStringConverter implements AttributeConverter<List<String>, String> {
+@Converter/**/
+public class PlaceIdConverter implements AttributeConverter<List<String>, String> {
 
     @Override // DB에 저장하는거 placeId -> db 문자열에 포함
     public String convertToDatabaseColumn(List<String> placeIdList) {

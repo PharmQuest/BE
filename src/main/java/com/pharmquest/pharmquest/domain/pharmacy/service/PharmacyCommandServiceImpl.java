@@ -21,7 +21,6 @@ public class PharmacyCommandServiceImpl implements PharmacyCommandService {
     @Override
     public Boolean scrapPharmacy(User user, String placeId) {
 
-        System.out.println("service");
         List<String> pharmacyScraps = user.getPharmacyScraps();
         List<String> updatedPharmacyScraps = new ArrayList<>(pharmacyScraps);
 

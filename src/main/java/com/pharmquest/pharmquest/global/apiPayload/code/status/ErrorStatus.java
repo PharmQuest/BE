@@ -25,6 +25,15 @@ public enum ErrorStatus implements BaseErrorCode {
     PHARMACY_UNKNOWN_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "PHARMACY5000", "알 수 없는 오류입니다."),
     PHARMACY_REQUEST_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "PHARMACY5001", "google api 요청이 잘못되었습니다. 관리자 문의 바랍니다"),
     PHARMACY_SCRAP_MAX_EXCEED(HttpStatus.INTERNAL_SERVER_ERROR, "PHARMACY5002", "약국의 최대 스크랩 수를 초과했습니다."),
+
+
+    //supplement
+    SUPPLEMENTS_NO_SEARCH_RESULT(HttpStatus.NOT_FOUND, "SUPP4001", "검색결과가 없습니다."),
+    SUPPLEMENTS_NO_KEYWORD(HttpStatus.BAD_REQUEST, "SUPP4002", "검색어를 입력해주세요."),
+    AUTHORIZATION_HEADER_NOT_FOUND(HttpStatus.UNAUTHORIZED, "AUTH4001", "로그인이 필요한 서비스입니다."),
+
+    //user
+    USER_NOT_FOUND(HttpStatus.NOT_FOUND, "USER4001", "사용자를 찾을 수 없습니다.")
     ;
 
     private final HttpStatus httpStatus;

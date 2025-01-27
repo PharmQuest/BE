@@ -36,6 +36,7 @@ public class SupplementsResponseDTO {
         private boolean isScrapped;
         private int scrapCount;
         private String category4;
+        private List<String> categories;
     }
 
     @Builder
@@ -56,6 +57,18 @@ public class SupplementsResponseDTO {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
+    public static class RelatedSupplementDto {
+        private Long id;
+        private String name;
+        private String image;
+        private String brand;
+        private String maker;
+    }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class SupplementsDetailResponseDto {
         private String name;
         private String image;
@@ -68,5 +81,6 @@ public class SupplementsResponseDTO {
         private String category3;
         private String category4;
         private List<String> categories;
+        private List<RelatedSupplementDto> relatedSupplements;
     }
 }

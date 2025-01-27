@@ -5,10 +5,38 @@ import com.pharmquest.pharmquest.domain.supplements.data.Supplements;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+@Repository
 public interface SupplementsRepository extends JpaRepository<Supplements, Long> {
+
+    @Query("""
+    SELECT DISTINCT s FROM Supplements s
+    JOIN SupplementsCategory sc ON s.id = sc.supplement.id
+    WHERE sc.category.id IN (
+        SELECT sc2.category.id
+        FROM SupplementsCategory sc2 
+        WHERE sc2.supplement.id = :supplementId
+    )
+    AND s.id != :supplementId
+""")
+    List<Supplements> findRelatedSupplements(@Param("supplementId") Long supplementId, Pageable pageable);
+
+    @Query("""
+    SELECT s FROM Supplements s
+    WHERE s.country = (SELECT country FROM Supplements WHERE id = :supplementId)
+    AND s.id NOT IN :excludeIds
+    ORDER BY RAND()
+""")
+    List<Supplements> findRandomSupplementsByCountry(
+            @Param("supplementId") Long supplementId,
+            @Param("excludeIds") List<Long> excludeIds,
+            Pageable pageable
+    );
 
     // category만으로 필터링
     Page<Supplements> findByIdIn(List<Long> ids, Pageable pageable);

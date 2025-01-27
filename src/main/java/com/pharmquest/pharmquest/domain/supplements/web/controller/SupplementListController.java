@@ -1,6 +1,8 @@
 package com.pharmquest.pharmquest.domain.supplements.web.controller;
 
 import com.pharmquest.pharmquest.domain.post.data.enums.Country;
+import com.pharmquest.pharmquest.domain.supplements.data.Category;
+import com.pharmquest.pharmquest.domain.supplements.data.Enum.CategoryKeyword;
 import com.pharmquest.pharmquest.domain.supplements.service.Supplements.SupplementsService;
 import com.pharmquest.pharmquest.domain.supplements.web.dto.SupplementsResponseDTO;
 import com.pharmquest.pharmquest.global.apiPayload.ApiResponse;
@@ -31,7 +33,7 @@ public class SupplementListController {
     @GetMapping("/lists")
     @Operation(summary = "영양제 조회 API", description = "영양제 목록 조회 및 카테고리 필터링")
     public ApiResponse<List<SupplementsResponseDTO.SupplementsDto>> getSupplements(
-            @Parameter(description = "카테고리") @RequestParam(required = false) String category,
+            @Parameter(description = "카테고리") @RequestParam(required = false) CategoryKeyword category,
             @Parameter(description = "페이지 번호", example = "0") @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "사용자 ID") @RequestParam(required = false) Long userId
     ) {
@@ -50,7 +52,7 @@ public class SupplementListController {
     @GetMapping("/search")
     @Operation(summary = "영양제 검색 API", description = "영양제 검색")
     public ApiResponse<List<SupplementsResponseDTO.SupplementsSearchResponseDto>> searchSupplements(
-            @Parameter(description = "키워드") @RequestParam(required = true) String keyword,
+            @Parameter(description = "키워드") @RequestParam(required = false) String keyword,
             @Parameter(description = "국가",schema = @Schema(allowableValues = {"USA", "JAPAN", "CHINA"}))
             @RequestParam(required = false) Country country,
             @Parameter(description = "페이지 번호") @RequestParam(defaultValue = "0") int page,

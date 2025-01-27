@@ -51,6 +51,8 @@ public class Post extends BaseEntity {
     @ColumnDefault("0")
     private Integer scrapCount;
 
+    private boolean isDeleted = false;
+
     // 매핑
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
     private List<PostLike> likes = new ArrayList<>();
@@ -63,7 +65,6 @@ public class Post extends BaseEntity {
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
     private List<Comment> comments = new ArrayList<>();
-
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")

@@ -12,7 +12,7 @@ public interface PostCommandService {
 
     Post registerPost(Long userId, PostRequestDTO.CreatePostDTO request);
 
-    Page<Post> getAllPosts(PostCategory category, Integer page);
+    Page<Post> getAllPosts(Long userId, PostCategory category, Integer page);
 
     PostResponseDTO.PostDetailDTO getPost(Long userId, Long postId, Integer page);
 

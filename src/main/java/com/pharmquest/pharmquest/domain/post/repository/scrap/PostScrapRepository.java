@@ -8,7 +8,7 @@ import java.util.Optional;
 public interface PostScrapRepository extends JpaRepository<PostScrap, Long> {
 
     boolean existsByPostIdAndUserId(Long postId, Long userId);
-    Optional<PostScrap> findByPostIdAndUserId(Long postId, Long memberId);
+    Optional<PostScrap> findByPostIdAndUserId(Long postId, Long userId);
 
 
 }

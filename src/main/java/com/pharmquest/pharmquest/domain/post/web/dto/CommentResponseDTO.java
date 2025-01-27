@@ -23,16 +23,6 @@ public class CommentResponseDTO {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class CommentListDTO {
-        private Long postId;
-        private List<CommentDTO> comments;
-        private Integer totalComments;
-    }
-
-    @Builder
-    @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor
     public static class CommentDTO {
         private Long commentId;
         private String content;

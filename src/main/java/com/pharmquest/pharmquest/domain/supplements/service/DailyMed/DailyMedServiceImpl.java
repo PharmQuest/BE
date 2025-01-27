@@ -74,7 +74,7 @@ public class DailyMedServiceImpl implements DailyMedService {
 
             String manufacturer = extractManufacturerFromTitle(title);
             String processedTitle = removeManufacturerFromTitle(title);
-            String fullTitle = processedTitle + " / " + translate(processedTitle);
+            String fullTitle = processedTitle.replaceAll("\\(.*?\\)", "").trim() + " / " + translate(processedTitle.replaceAll("\\(.*?\\)", "").trim());
             String imageUrl = fetchImageUrl(setId);
 
 

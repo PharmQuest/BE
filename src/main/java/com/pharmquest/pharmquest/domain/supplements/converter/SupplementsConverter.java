@@ -3,14 +3,13 @@ package com.pharmquest.pharmquest.domain.supplements.converter;
 import com.pharmquest.pharmquest.domain.supplements.data.Supplements;
 import com.pharmquest.pharmquest.domain.supplements.repository.SupplementsCategoryRepository;
 import com.pharmquest.pharmquest.domain.supplements.repository.SupplementsRepository;
-import com.pharmquest.pharmquest.domain.supplements.web.dto.EMedResponseDTO;
 import com.pharmquest.pharmquest.domain.supplements.web.dto.SupplementsResponseDTO;
 import com.pharmquest.pharmquest.domain.supplements.repository.SupplementsScrapRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -62,7 +61,17 @@ public class SupplementsConverter {
 
     public SupplementsResponseDTO.SupplementsDetailResponseDto toDetailDto(Supplements supplement, Long userId) {
         List<String> categories = supplementsCategoryRepository.findCategoryNamesBySupplementId(supplement.getId());
-        List<Supplements> relatedSupplements = supplementsRepository.findRelatedSupplements(supplement.getId(), PageRequest.of(0, 8));
+        List<Supplements> relatedSupplements = supplementsRepository.findRelatedSupplements(supplement.getId(), PageRequest.of(0, 6));
+
+        if (relatedSupplements.size() < 6){
+            List<Long> excludeIds = new ArrayList<>();
+            excludeIds.add(supplement.getId());
+            excludeIds.addAll(relatedSupplements.stream()
+                    .map(Supplements::getId).toList());
+
+            List<Supplements> randomSupplements = supplementsRepository.findRandomSupplementsByCountry(supplement.getId(), excludeIds, PageRequest.of(0, 6 - relatedSupplements.size()));
+            relatedSupplements.addAll(randomSupplements);
+        }
 
         return SupplementsResponseDTO.SupplementsDetailResponseDto.builder()
                 .name(supplement.getName())
@@ -71,6 +80,7 @@ public class SupplementsConverter {
                 .maker(supplement.getMaker())
                 .isScrapped(isSupplementScrappedByUser(supplement, userId))
                 .scrapCount(supplement.getScrapCount())
+                .isScrapped(isSupplementScrappedByUser(supplement, userId))
                 .category1(supplement.getCategory1())
                 .category2(supplement.getCategory2())
                 .category3(supplement.getCategory3())
@@ -82,6 +92,8 @@ public class SupplementsConverter {
                                 .name(s.getName())
                                 .brand(s.getBrand())
                                 .maker(s.getMaker())
+                                .isScrapped(isSupplementScrappedByUser(s, userId))
+                                .scrapCount(s.getScrapCount())
                                 .build())
                         .collect(Collectors.toList()))
                 .build();

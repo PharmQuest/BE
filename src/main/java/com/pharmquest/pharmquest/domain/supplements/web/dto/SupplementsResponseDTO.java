@@ -1,6 +1,5 @@
 package com.pharmquest.pharmquest.domain.supplements.web.dto;
 
-import com.pharmquest.pharmquest.domain.supplements.data.Supplements;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -58,6 +57,20 @@ public class SupplementsResponseDTO {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
+    public static class RelatedSupplementDto {
+        private Long id;
+        private String name;
+        private String image;
+        private String brand;
+        private String maker;
+        private boolean isScrapped;
+        private int scrapCount;
+    }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class SupplementsDetailResponseDto {
         private String name;
         private String image;
@@ -72,16 +85,5 @@ public class SupplementsResponseDTO {
         private List<String> categories;
         private List<RelatedSupplementDto> relatedSupplements;
     }
-
-    @Builder
-    @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class RelatedSupplementDto {
-        private Long id;
-        private String name;
-        private String image;
-        private String brand;
-        private String maker;
-    }
 }
+

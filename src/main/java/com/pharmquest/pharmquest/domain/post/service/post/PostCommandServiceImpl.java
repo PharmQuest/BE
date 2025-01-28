@@ -93,7 +93,7 @@ public class PostCommandServiceImpl implements PostCommandService {
     @Override
     public PostResponseDTO.PostDetailDTO getPost(Long userId, Long postId, Integer page) {
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new EntityNotFoundException(postId + "에 해당하는 게시글이 없습니다."));
+                .orElseThrow(() -> new PostHandler(ErrorStatus.POST_NOT_EXIST));
 
         boolean isLiked = likeRepository.existsByPostIdAndUserId(postId, userId);
         boolean isReported = reportRepository.existsByPostIdAndUserId(postId, userId);
@@ -124,7 +124,7 @@ public class PostCommandServiceImpl implements PostCommandService {
         );
 
         if (posts.isEmpty()) {
-            throw new EntityNotFoundException("검색어에 해당하는 게시글이 없습니다.");
+            throw new PostHandler(ErrorStatus.POST_NOT_EXIST);
         }
         return posts;
     }
@@ -133,10 +133,10 @@ public class PostCommandServiceImpl implements PostCommandService {
     public void deletePost(Long userId, Long postId) {
 
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new EntityNotFoundException("해당하는 게시글을 찾을 수 없습니다. ID: " + postId));
+                .orElseThrow(() -> new PostHandler(ErrorStatus.POST_NOT_EXIST));
 
         if (!userId.equals(post.getUser().getId())) {
-            throw new IllegalArgumentException("작성자만 게시글을 삭제할 수 있습니다.");
+            throw new PostHandler(ErrorStatus.NOT_POST_AUTHOR);
         }
 
         // 게시글 삭제
@@ -148,7 +148,7 @@ public class PostCommandServiceImpl implements PostCommandService {
     @Transactional
     public Post updatePost(Long userId, Long postId, PostRequestDTO.UpdatePostDTO request) {
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new EntityNotFoundException("해당하는 게시글을 찾을 수 없습니다. ID: " + postId));
+                .orElseThrow(() -> new PostHandler(ErrorStatus.POST_NOT_EXIST));
 
         if (request.getTitle() != null && !request.getTitle().isEmpty()) {
             post.setTitle(request.getTitle());

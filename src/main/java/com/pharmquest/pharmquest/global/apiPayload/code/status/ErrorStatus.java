@@ -18,7 +18,10 @@ public enum ErrorStatus implements BaseErrorCode {
     ILLEGAL_POST_CATEGORY(HttpStatus.BAD_REQUEST, "POST4002", "올바르지 않은 카테고리."),
     TITLE_NOT_PROVIDED(HttpStatus.BAD_REQUEST, "POST4003", "제목은 필수 입력 사항입니다."),
     CONTENT_NOT_PROVIDED(HttpStatus.BAD_REQUEST, "POST4004", "내용은 필수 입력 사항입니다."),
-
+    POST_NOT_EXIST(HttpStatus.BAD_REQUEST, "POST4005", "해당하는 게시글이 존재하지 않습니다."),
+    COMMENT_NOT_EXIST(HttpStatus.BAD_REQUEST, "POST4006", "해당하는 댓글이 존재하지 않습니다."),
+    COMMENT_NOT_IN_POST(HttpStatus.BAD_REQUEST, "POST4007", "해당하는 댓글이 게시글의 댓글 목록에 존재하지 않습니다."),
+    NOT_POST_AUTHOR(HttpStatus.BAD_REQUEST, "POST4008", "해당하는 게시글의 작성자가 아닙니다."),
 
     // pharmacy
     PHARMACY_BAD_PLACE_ID(HttpStatus.BAD_REQUEST, "PHARMACY4001", "약국의 place_id가 올바르지 않습니다."),

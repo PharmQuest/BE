@@ -9,11 +9,11 @@ import com.pharmquest.pharmquest.domain.supplements.repository.CategoryRepositor
 import com.pharmquest.pharmquest.domain.supplements.repository.SupplementsCategoryRepository;
 import com.pharmquest.pharmquest.domain.supplements.repository.SupplementsRepository;
 import com.pharmquest.pharmquest.domain.supplements.service.DailyMed.DailyMedService;
-import com.pharmquest.pharmquest.domain.supplements.service.EMed.EMedService;
 import com.pharmquest.pharmquest.domain.supplements.service.Naver.NaverShoppingService;
 import com.pharmquest.pharmquest.domain.supplements.web.dto.DailyMedResponseDTO;
-import com.pharmquest.pharmquest.domain.supplements.web.dto.EMedResponseDTO;
 import com.pharmquest.pharmquest.domain.supplements.web.dto.SupplementsResponseDTO;
+import com.pharmquest.pharmquest.global.apiPayload.code.status.ErrorStatus;
+import com.pharmquest.pharmquest.global.apiPayload.exception.handler.CommonExceptionHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -39,20 +39,20 @@ public class SupplementsServiceImpl implements SupplementsService {
     private final SupplementsRepository supplementsRepository;
     private final SupplementsConverter supplementsConverter;
     private final CategoryRepository categoryRepository;
-    private final EMedService eMedService;
 
+    //영양제 리스트 조회
     @Override
     public Page<SupplementsResponseDTO.SupplementsDto> getSupplements(CategoryKeyword category, Pageable pageable, Long userId) {
         Page<Supplements> supplementsPage;
-        if (category != null) {
-            // 유효한 카테고리 이름인지 먼저 확인
-            if (!categoryRepository.existsByName(category.toString())) {
+        if (category == null || category == CategoryKeyword.valueOf("전체")) {
+            supplementsPage = supplementsRepository.findAll(pageable);
+        }
+        else {
+            List<Long> supplementIds = supplementsCategoryRepository.findSupplementIdByCategoryName(category.toString());
+            if (supplementIds.isEmpty()) {
                 return new PageImpl<>(new ArrayList<>(), pageable, 0);
             }
-            List<Long> supplementIds = supplementsCategoryRepository.findSupplementIdByCategoryName(category.toString());
             supplementsPage = supplementsRepository.findByIdIn(supplementIds, pageable);
-        } else {
-            supplementsPage = supplementsRepository.findAll(pageable);
         }
 
         return new PageImpl<>(
@@ -64,15 +64,22 @@ public class SupplementsServiceImpl implements SupplementsService {
         );
     }
 
+    //영양제 검색
     @Override
     public Page<SupplementsResponseDTO.SupplementsSearchResponseDto> searchSupplements(String keyword, Country country, Pageable pageable, Long userId) {
         Page<Supplements> supplementsPage;
-        if (keyword != null && country != null) {
+        if (keyword == null) {
+            throw new CommonExceptionHandler(ErrorStatus.SUPPLEMENTS_NO_KEYWORD);
+        }
+
+        if (country != null) {
             supplementsPage = supplementsRepository.findByNameContainingAndCountry(keyword, country, pageable);
-        } else if (keyword != null) {
-            supplementsPage = supplementsRepository.findByNameContaining(keyword, pageable);
         } else {
-            return new PageImpl<>(new ArrayList<>(), pageable, 0);
+            supplementsPage = supplementsRepository.findByNameContaining(keyword, pageable);
+        }
+
+        if (supplementsPage.isEmpty()) {
+            throw new CommonExceptionHandler(ErrorStatus.SUPPLEMENTS_NO_SEARCH_RESULT);
         }
 
         List<SupplementsResponseDTO.SupplementsSearchResponseDto> dtoList = supplementsPage.getContent().stream()
@@ -82,6 +89,7 @@ public class SupplementsServiceImpl implements SupplementsService {
         return new PageImpl<>(dtoList, pageable, supplementsPage.getTotalElements());
     }
 
+    //영양제 상세조회
     @Override
     public SupplementsResponseDTO.SupplementsDetailResponseDto getSupplementById(Long id, Long userId) {
         Supplements supplement = supplementsRepository.findById(id)

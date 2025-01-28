@@ -17,12 +17,15 @@ import com.pharmquest.pharmquest.domain.post.web.dto.PostRequestDTO;
 import com.pharmquest.pharmquest.domain.post.web.dto.PostResponseDTO;
 import com.pharmquest.pharmquest.domain.user.data.User;
 import com.pharmquest.pharmquest.domain.user.repository.UserRepository;
+import com.pharmquest.pharmquest.global.apiPayload.code.status.ErrorStatus;
+import com.pharmquest.pharmquest.global.apiPayload.exception.handler.PostHandler;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -48,6 +51,13 @@ public class PostCommandServiceImpl implements PostCommandService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("해당하는 유저를 찾을 수 없습니다. ID: " + userId));
                 newPost.setUser(user);
+
+        if (request.getTitle() == null || request.getTitle().isEmpty()) {
+            throw new PostHandler(ErrorStatus.TITLE_NOT_PROVIDED);
+        }
+        if (request.getContent() == null || request.getContent().isEmpty()) {
+            throw new PostHandler(ErrorStatus.CONTENT_NOT_PROVIDED);
+        }
 
         return postRepository.save(newPost);
     }
@@ -83,11 +93,11 @@ public class PostCommandServiceImpl implements PostCommandService {
     @Override
     public PostResponseDTO.PostDetailDTO getPost(Long userId, Long postId, Integer page) {
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new EntityNotFoundException(postId + "에 해당하는 게시글이 없습니다."));
+                .orElseThrow(() -> new PostHandler(ErrorStatus.POST_NOT_EXIST));
 
         boolean isLiked = likeRepository.existsByPostIdAndUserId(postId, userId);
-        boolean isReported = reportRepository.existsByPostIdAndUserId(postId, userId);
         boolean isScrapped = scrapRepository.existsByPostIdAndUserId(postId, userId);
+        boolean isOwnPost =userId.equals(post.getUser().getId());
 
         Page<Comment> parentCommentsPage = commentRepository.findByPostAndParentIsNull(
                 post,
@@ -99,7 +109,7 @@ public class PostCommandServiceImpl implements PostCommandService {
                 .collect(Collectors.toList());
 
 
-        return PostConverter.postDetailDTO(post, isLiked, isScrapped, isReported, topLevelComments,parentCommentsPage);
+        return PostConverter.postDetailDTO(post, isLiked, isScrapped, isOwnPost , topLevelComments,parentCommentsPage);
     }
 
     //게시글 제목, 내용으로 검색(카테고리, 나라 별 필터링, 20개씩 페이징)
@@ -114,9 +124,51 @@ public class PostCommandServiceImpl implements PostCommandService {
         );
 
         if (posts.isEmpty()) {
-            throw new EntityNotFoundException("검색어에 해당하는 게시글이 없습니다.");
+            throw new PostHandler(ErrorStatus.POST_NOT_EXIST);
         }
         return posts;
+    }
+
+    @Override
+    public void deletePost(Long userId, Long postId) {
+
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new PostHandler(ErrorStatus.POST_NOT_EXIST));
+
+        if (!userId.equals(post.getUser().getId())) {
+            throw new PostHandler(ErrorStatus.NOT_POST_AUTHOR);
+        }
+
+        // 게시글 삭제
+        postRepository.deleteById(postId);
+
+    }
+
+    @Override
+    @Transactional
+    public Post updatePost(Long userId, Long postId, PostRequestDTO.UpdatePostDTO request) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("해당하는 유저를 찾을 수 없습니다. ID: " + userId));
+
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new PostHandler(ErrorStatus.POST_NOT_EXIST));
+
+        if (!userId.equals(post.getUser().getId())) {
+            throw new PostHandler(ErrorStatus.NOT_POST_AUTHOR);
+        }
+
+        if (request.getTitle() != null && !request.getTitle().isEmpty()) {
+            post.setTitle(request.getTitle());
+        }
+        if (request.getContent() != null && !request.getContent().isEmpty()) {
+            post.setContent(request.getContent());
+        }
+        if (request.getCategory() != null) {
+            post.setCategory(request.getCategory());
+        }
+
+        return post;
     }
 
 }

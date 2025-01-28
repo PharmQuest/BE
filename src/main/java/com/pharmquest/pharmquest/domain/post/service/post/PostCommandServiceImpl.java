@@ -96,8 +96,8 @@ public class PostCommandServiceImpl implements PostCommandService {
                 .orElseThrow(() -> new PostHandler(ErrorStatus.POST_NOT_EXIST));
 
         boolean isLiked = likeRepository.existsByPostIdAndUserId(postId, userId);
-        boolean isReported = reportRepository.existsByPostIdAndUserId(postId, userId);
         boolean isScrapped = scrapRepository.existsByPostIdAndUserId(postId, userId);
+        boolean isOwnPost =userId.equals(post.getUser().getId());
 
         Page<Comment> parentCommentsPage = commentRepository.findByPostAndParentIsNull(
                 post,
@@ -109,7 +109,7 @@ public class PostCommandServiceImpl implements PostCommandService {
                 .collect(Collectors.toList());
 
 
-        return PostConverter.postDetailDTO(post, isLiked, isScrapped, isReported, topLevelComments,parentCommentsPage);
+        return PostConverter.postDetailDTO(post, isLiked, isScrapped, isOwnPost , topLevelComments,parentCommentsPage);
     }
 
     //게시글 제목, 내용으로 검색(카테고리, 나라 별 필터링, 20개씩 페이징)

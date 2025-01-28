@@ -65,7 +65,7 @@ public class PostConverter {
             Post post,
             Boolean isLiked,
             Boolean isScraped,
-            Boolean isReported,
+            Boolean isOwnPost,
             List<CommentResponseDTO.CommentDTO> topLevelComment,
             Page<Comment> parentCommentsPage
     ) {
@@ -81,7 +81,7 @@ public class PostConverter {
                 .commentCount(post.getComments().size())
                 .isLiked(isLiked)
                 .isScraped(isScraped)
-                .isReported(isReported)
+                .isOwnPost(isOwnPost)
                 .comments(topLevelComment)
                 .isFirst(parentCommentsPage.isFirst())
                 .isLast(parentCommentsPage.isLast())

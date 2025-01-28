@@ -16,5 +16,5 @@ public interface PostCommandService {
 
     PostResponseDTO.PostDetailDTO getPost(Long userId, Long postId, Integer page);
 
-    Page<Post> searchPostsDynamically(String keyword, Country country, PostCategory category, Integer page);
+    Page<Post> searchPostsDynamically(Long userId, String keyword, Country country, PostCategory category, Integer page);
 }

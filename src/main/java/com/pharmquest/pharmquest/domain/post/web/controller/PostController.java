@@ -80,8 +80,15 @@ public class PostController {
 
     @GetMapping("/search")
     @Operation(summary = "게시글 키워드로 검색 API")
-    public ApiResponse<PostResponseDTO.PostPreViewListDTO> searchPost(@RequestParam(name = "keyword")String keyword,@RequestParam(name = "country") Country country, @RequestParam(name = "category")PostCategory category, @RequestParam(name="page")Integer page){
-        Page<Post> postList = postCommandService.searchPostsDynamically(keyword, country, category, page);
+    public ApiResponse<PostResponseDTO.PostPreViewListDTO> searchPost(@Parameter (hidden = true) @RequestHeader(value = "Authorization",required = false) String authorizationHeader,@RequestParam(name = "keyword")String keyword,@RequestParam(name = "country") Country country, @RequestParam(name = "category")PostCategory category, @RequestParam(name="page")Integer page){
+
+        Long userId = null;
+        if (authorizationHeader != null) {
+            User user = jwtUtil.getUserFromHeader(authorizationHeader);
+            userId = user.getId();
+        }
+
+        Page<Post> postList = postCommandService.searchPostsDynamically(userId, keyword, country, category, page);
         return ApiResponse.onSuccess(PostConverter.postPreViewListDTO(postList));
     }
 

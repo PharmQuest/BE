@@ -22,6 +22,7 @@ public class PostReportServiceImpl implements PostReportService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final PostReportRepository postReportRepository;
+
     @Override
     public PostReport createReport(Long userId, Long postId, ReportType reportType) {
         Optional<PostReport> postReport =

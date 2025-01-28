@@ -14,7 +14,7 @@ public class PostResponseDTO {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class CreatePostResultDTO {
+    public static class postResultDTO {
         Long postId;
         LocalDateTime createdAt;
     }
@@ -71,7 +71,7 @@ public class PostResponseDTO {
         Boolean isBestPost;
         Boolean isLiked;
         Boolean isScraped;
-        Boolean isReported;
+        Boolean isOwnPost;
         List<CommentResponseDTO.CommentDTO> comments;
         Integer listSize;
         Integer totalPage;

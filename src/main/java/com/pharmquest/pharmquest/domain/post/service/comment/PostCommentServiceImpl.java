@@ -8,6 +8,8 @@ import com.pharmquest.pharmquest.domain.post.repository.post.PostRepository;
 import com.pharmquest.pharmquest.domain.post.web.dto.CommentRequestDTO;
 import com.pharmquest.pharmquest.domain.user.data.User;
 import com.pharmquest.pharmquest.domain.user.repository.UserRepository;
+import com.pharmquest.pharmquest.global.apiPayload.code.status.ErrorStatus;
+import com.pharmquest.pharmquest.global.apiPayload.exception.handler.PostHandler;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -33,16 +35,16 @@ public class PostCommentServiceImpl implements PostCommentService {
                 newComment.setUser(user);
 
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new EntityNotFoundException("해당하는 게시글을 찾을 수 없습니다. ID: " + postId));
+                .orElseThrow(() -> new PostHandler(ErrorStatus.POST_NOT_EXIST));
                 newComment.setPost(post);
 
 
         if (parentId != null) {
             Comment parentComment = postCommentRepository.findById(parentId)
-                    .orElseThrow(() -> new IllegalArgumentException("부모 댓글을 찾을 수 없습니다."));
+                    .orElseThrow(() -> new PostHandler(ErrorStatus.COMMENT_NOT_EXIST));
 
             if (!parentComment.getPost().getId().equals(postId)) {
-                throw new IllegalArgumentException("부모 댓글을 해당 게시글에서 찾을 수 없습니다.");
+                throw new PostHandler(ErrorStatus.COMMENT_NOT_IN_POST);
             }
 
             newComment.setParent(parentComment);

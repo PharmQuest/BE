@@ -104,12 +104,12 @@ public class PostCommandServiceImpl implements PostCommandService {
 
     //게시글 제목, 내용으로 검색(카테고리, 나라 별 필터링, 20개씩 페이징)
     @Override
-    public Page<Post> searchPostsDynamically(String keyword, Country country, PostCategory category, Integer page) {
+    public Page<Post> searchPostsDynamically(Long userId, String keyword, Country country, PostCategory category, Integer page) {
 
         PageRequest pageRequest = PageRequest.of(page - 1, 20, Sort.by(Sort.Direction.DESC, "createdAt"));
 
         Page<Post> posts = postRepository.findAll(
-                PostSpecification.dynamicQuery(keyword, category, country),
+                PostSpecification.dynamicQuery(userId, keyword, category, country),
                 pageRequest
         );
 

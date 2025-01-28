@@ -9,8 +9,10 @@ import com.pharmquest.pharmquest.domain.supplements.repository.CategoryRepositor
 import com.pharmquest.pharmquest.domain.supplements.repository.SupplementsCategoryRepository;
 import com.pharmquest.pharmquest.domain.supplements.repository.SupplementsRepository;
 import com.pharmquest.pharmquest.domain.supplements.service.DailyMed.DailyMedService;
+import com.pharmquest.pharmquest.domain.supplements.service.EMed.EMedService;
 import com.pharmquest.pharmquest.domain.supplements.service.Naver.NaverShoppingService;
 import com.pharmquest.pharmquest.domain.supplements.web.dto.DailyMedResponseDTO;
+import com.pharmquest.pharmquest.domain.supplements.web.dto.EMedResponseDTO;
 import com.pharmquest.pharmquest.domain.supplements.web.dto.SupplementsResponseDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,11 +21,11 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.pharmquest.pharmquest.domain.supplements.data.Enum.CategoryKeyword;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -31,37 +33,35 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class SupplementsServiceImpl implements SupplementsService {
 
-    private static final List<String> CATEGORY_KEYWORDS = Arrays.asList(
-            "햇볕", "자외선", "치주", "가려움증", "눈건강", "면역력", "관절", "피부건강",
-            "간건강", "미네랄", "뼈건강", "고혈압", "수면", "피부", "두피", "화상", "허리",
-            "상처"
-    );
-
     private final SupplementsCategoryRepository supplementsCategoryRepository;
     private final DailyMedService dailyMedService;
     private final NaverShoppingService naverShoppingService;
     private final SupplementsRepository supplementsRepository;
     private final SupplementsConverter supplementsConverter;
     private final CategoryRepository categoryRepository;
+    private final EMedService eMedService;
 
     @Override
-    public Page<SupplementsResponseDTO.SupplementsDto> getSupplements(String category, Pageable pageable, Long userId) {
+    public Page<SupplementsResponseDTO.SupplementsDto> getSupplements(CategoryKeyword category, Pageable pageable, Long userId) {
         Page<Supplements> supplementsPage;
-        if (category != null && !category.isEmpty()) {
-            List<Long> supplementIds = supplementsCategoryRepository.findSupplementIdByCategoryName(category);
-            if (supplementIds.isEmpty()) {
+        if (category != null) {
+            // 유효한 카테고리 이름인지 먼저 확인
+            if (!categoryRepository.existsByName(category.toString())) {
                 return new PageImpl<>(new ArrayList<>(), pageable, 0);
             }
+            List<Long> supplementIds = supplementsCategoryRepository.findSupplementIdByCategoryName(category.toString());
             supplementsPage = supplementsRepository.findByIdIn(supplementIds, pageable);
         } else {
             supplementsPage = supplementsRepository.findAll(pageable);
         }
 
-        List<SupplementsResponseDTO.SupplementsDto> dtoList = supplementsPage.getContent().stream()
-                .map(supplement -> supplementsConverter.toDto(supplement, userId))
-                .collect(Collectors.toList());
-
-        return new PageImpl<>(dtoList, pageable, supplementsPage.getTotalElements());
+        return new PageImpl<>(
+                supplementsPage.getContent().stream()
+                        .map(supplement -> supplementsConverter.toDto(supplement, userId))
+                        .collect(Collectors.toList()),
+                pageable,
+                supplementsPage.getTotalElements()
+        );
     }
 
     @Override
@@ -93,102 +93,109 @@ public class SupplementsServiceImpl implements SupplementsService {
     @Transactional
     public boolean saveSupplements() {
         try {
-            List<String> supplementsNames = Arrays.asList(
-                    "일본 인기 영양제",
-                    "중국 인기 영양제"
-            );
-
-            supplementsNames.forEach(searchKeyword ->
-                    naverShoppingService.loadProducts(searchKeyword).stream()
-                            .map(dto -> {
-                                try {
-                                    Country country = getCountryFromSearchKeyword(searchKeyword);
-                                    String cleanedName = cleanProductName(dto.getName(), country);
-
-                                    if (supplementsRepository.existsByName(cleanedName)) {
-                                        return null;
-                                    }
-                                    return Supplements.builder()
-                                            .name(cleanedName)
-                                            .image(dto.getImage())
-                                            .brand(dto.getBrand())
-                                            .maker(dto.getMaker())
-                                            .category1(dto.getCategory1())
-                                            .category2(dto.getCategory2())
-                                            .category3(dto.getCategory3())
-                                            .category4(dto.getCategory4())
-                                            .dosage("")
-                                            .purpose("")
-                                            .warning("")
-                                            .country(country)
-                                            .scrapCount(0)
-                                            .build();
-                                } catch (Exception e) {
-                                    return null;
-                                }
-                            })
-                            .forEach(supplement -> {
-                                if (supplement != null) {
-                                    supplementsRepository.save(supplement);
-                                }
-                            })
-            );
-
-            List<DailyMedResponseDTO.ExtractedInfo> extractedInfoList = dailyMedService.extractSupplementInfo();
-            extractedInfoList.stream()
-                    .map(info -> {
-                        try {
-                            DailyMedResponseDTO.DetailInfo detailInfo = dailyMedService.getDetailInfo(info.getSetid(), info.getTitle());
-                            String cleanedName = cleanProductName(detailInfo.getTitle(), Country.USA);
-
-                            if (supplementsRepository.existsByName(cleanedName)) {
-                                return null;
-                            }
-
-                            Supplements supplement = Supplements.builder()
-                                    .name(cleanedName)
-                                    .image(detailInfo.getImageUrl())
-                                    .brand(detailInfo.getManufacturer())
-                                    .maker(detailInfo.getManufacturer())
-                                    .category1("식품")
-                                    .category2("건강식품")
-                                    .category3("영양제")
-                                    .category4("기타건강보조식품")
-                                    .dosage(detailInfo.getDosage())
-                                    .purpose(detailInfo.getPurpose())
-                                    .warning(detailInfo.getWarning())
-                                    .country(Country.USA)
-                                    .scrapCount(0)
-                                    .build();
-
-                            String fullText = detailInfo.getDosage() + " " + detailInfo.getPurpose();
-                            supplement = supplementsRepository.save(supplement);
-                            processCateogories(fullText, supplement);
-
-                            return supplement;
-                        } catch (Exception e) {
-                            return null;
-                        }
-                    })
-                    .filter(supplement -> supplement != null)
-                    .collect(Collectors.toList());
+            saveDailyMedSupplements();
+            saveNaverSupplements();
             return true;
         } catch (Exception e) {
             return false;
         }
     }
 
+    private void saveDailyMedSupplements() {
+        List<DailyMedResponseDTO.ExtractedInfo> extractedInfoList = dailyMedService.extractSupplementInfo();
+        extractedInfoList.stream()
+                .map(info -> {
+                    try {
+                        DailyMedResponseDTO.DetailInfo detailInfo = dailyMedService.getDetailInfo(info.getSetid(), info.getTitle());
+                        String cleanedName = cleanProductName(detailInfo.getTitle(), Country.USA);
+
+                        if (supplementsRepository.existsByName(cleanedName)) {
+                            return null;
+                        }
+
+                        Supplements supplement = Supplements.builder()
+                                .name(cleanedName)
+                                .image(detailInfo.getImageUrl())
+                                .brand(detailInfo.getManufacturer())
+                                .maker(detailInfo.getManufacturer())
+                                .category1("식품")
+                                .category2("건강식품")
+                                .category3("영양제")
+                                .category4("기타건강보조식품")
+                                .dosage(detailInfo.getDosage())
+                                .purpose(detailInfo.getPurpose())
+                                .warning(detailInfo.getWarning())
+                                .country(Country.USA)
+                                .scrapCount(0)
+                                .build();
+
+                        String fullText = detailInfo.getDosage() + " " + detailInfo.getPurpose();
+                        supplement = supplementsRepository.save(supplement);
+                        processCateogories(fullText, supplement);
+
+                        return supplement;
+                    } catch (Exception e) {
+                        return null;
+                    }
+                })
+                .filter(supplement -> supplement != null)
+                .collect(Collectors.toList());
+    }
+
+    private void saveNaverSupplements() {
+        List<String> supplementsNames = Arrays.asList(
+                "일본 인기 영양제",
+                "중국 인기 영양제"
+        );
+
+        supplementsNames.forEach(searchKeyword ->
+                naverShoppingService.loadProducts(searchKeyword).stream()
+                        .map(dto -> {
+                            try {
+                                Country country = getCountryFromSearchKeyword(searchKeyword);
+                                String cleanedName = cleanProductName(dto.getName(), country);
+
+                                if (supplementsRepository.existsByName(cleanedName)) {
+                                    return null;
+                                }
+                                return Supplements.builder()
+                                        .name(cleanedName)
+                                        .image(dto.getImage())
+                                        .brand(dto.getBrand())
+                                        .maker(dto.getMaker())
+                                        .category1(dto.getCategory1())
+                                        .category2(dto.getCategory2())
+                                        .category3(dto.getCategory3())
+                                        .category4(dto.getCategory4())
+                                        .dosage("")
+                                        .purpose("")
+                                        .warning("")
+                                        .country(country)
+                                        .scrapCount(0)
+                                        .build();
+                            } catch (Exception e) {
+                                return null;
+                            }
+                        })
+                        .filter(supplement -> supplement != null)
+                        .forEach(supplementsRepository::save)
+        );
+    }
+
     private void processCateogories(String text, Supplements supplement) {
-        CATEGORY_KEYWORDS.stream()
+        Arrays.stream(CategoryKeyword.values())
+                .map(Enum::name)
                 .filter(keyword -> text != null && text.contains(keyword))
                 .forEach(keyword -> {
                     Category category = categoryRepository.findCategoryByName(keyword)
                             .orElseGet(() -> categoryRepository.save(Category.builder()
                                     .name(keyword)
                                     .build()));
-                    SupplementsCategory supplementsCategory = new SupplementsCategory();
-                    supplementsCategory.setSupplement(supplement);
-                    supplementsCategory.setCategory(category);
+
+                    SupplementsCategory supplementsCategory = SupplementsCategory.builder()
+                            .supplement(supplement)
+                            .category(category)
+                            .build();
                     supplementsCategoryRepository.save(supplementsCategory);
                 });
     }

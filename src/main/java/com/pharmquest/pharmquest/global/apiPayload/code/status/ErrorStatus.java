@@ -16,6 +16,9 @@ public enum ErrorStatus implements BaseErrorCode {
     // posts
     ILLEGAL_COUNTRY(HttpStatus.BAD_REQUEST, "POST4001", "올바르지 않은 국가."),
     ILLEGAL_POST_CATEGORY(HttpStatus.BAD_REQUEST, "POST4002", "올바르지 않은 카테고리."),
+    TITLE_NOT_PROVIDED(HttpStatus.BAD_REQUEST, "POST4003", "제목은 필수 입력 사항입니다."),
+    CONTENT_NOT_PROVIDED(HttpStatus.BAD_REQUEST, "POST4004", "내용은 필수 입력 사항입니다."),
+
 
     // pharmacy
     PHARMACY_BAD_PLACE_ID(HttpStatus.BAD_REQUEST, "PHARMACY4001", "약국의 place_id가 올바르지 않습니다."),
@@ -25,6 +28,10 @@ public enum ErrorStatus implements BaseErrorCode {
     PHARMACY_UNKNOWN_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "PHARMACY5000", "알 수 없는 오류입니다."),
     PHARMACY_REQUEST_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "PHARMACY5001", "google api 요청이 잘못되었습니다. 관리자 문의 바랍니다"),
     PHARMACY_SCRAP_MAX_EXCEED(HttpStatus.INTERNAL_SERVER_ERROR, "PHARMACY5002", "약국의 최대 스크랩 수를 초과했습니다."),
+
+
+
+
     ;
 
     private final HttpStatus httpStatus;

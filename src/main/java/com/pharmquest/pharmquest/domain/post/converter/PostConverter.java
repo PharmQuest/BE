@@ -15,8 +15,8 @@ import java.util.stream.Collectors;
 
 public class PostConverter {
 
-    public static PostResponseDTO.CreatePostResultDTO toCreatePostResultDTO(Post post) {
-        return PostResponseDTO.CreatePostResultDTO.builder()
+    public static PostResponseDTO.postResultDTO toPostResultDTO(Post post) {
+        return PostResponseDTO.postResultDTO.builder()
                 .postId(post.getId())
                 .createdAt(LocalDateTime.now())
                 .build();
@@ -31,6 +31,7 @@ public class PostConverter {
                 .country(request.getCountry())
                 .build();
     }
+
 
     public static PostResponseDTO.PostPreViewDTO postPreViewDTO(Post post) {
         return PostResponseDTO.PostPreViewDTO.builder()

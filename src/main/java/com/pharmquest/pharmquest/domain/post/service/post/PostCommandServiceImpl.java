@@ -17,12 +17,15 @@ import com.pharmquest.pharmquest.domain.post.web.dto.PostRequestDTO;
 import com.pharmquest.pharmquest.domain.post.web.dto.PostResponseDTO;
 import com.pharmquest.pharmquest.domain.user.data.User;
 import com.pharmquest.pharmquest.domain.user.repository.UserRepository;
+import com.pharmquest.pharmquest.global.apiPayload.code.status.ErrorStatus;
+import com.pharmquest.pharmquest.global.apiPayload.exception.handler.PostHandler;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -48,6 +51,13 @@ public class PostCommandServiceImpl implements PostCommandService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("해당하는 유저를 찾을 수 없습니다. ID: " + userId));
                 newPost.setUser(user);
+
+        if (request.getTitle() == null || request.getTitle().isEmpty()) {
+            throw new PostHandler(ErrorStatus.TITLE_NOT_PROVIDED);
+        }
+        if (request.getContent() == null || request.getContent().isEmpty()) {
+            throw new PostHandler(ErrorStatus.CONTENT_NOT_PROVIDED);
+        }
 
         return postRepository.save(newPost);
     }
@@ -132,6 +142,25 @@ public class PostCommandServiceImpl implements PostCommandService {
         // 게시글 삭제
         postRepository.deleteById(postId);
 
+    }
+
+    @Override
+    @Transactional
+    public Post updatePost(Long userId, Long postId, PostRequestDTO.UpdatePostDTO request) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new EntityNotFoundException("해당하는 게시글을 찾을 수 없습니다. ID: " + postId));
+
+        if (request.getTitle() != null && !request.getTitle().isEmpty()) {
+            post.setTitle(request.getTitle());
+        }
+        if (request.getContent() != null && !request.getContent().isEmpty()) {
+            post.setContent(request.getContent());
+        }
+        if (request.getCategory() != null) {
+            post.setCategory(request.getCategory());
+        }
+
+        return post;
     }
 
 }

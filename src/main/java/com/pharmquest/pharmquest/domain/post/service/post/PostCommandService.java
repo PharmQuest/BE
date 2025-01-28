@@ -19,4 +19,6 @@ public interface PostCommandService {
     Page<Post> searchPostsDynamically(Long userId, String keyword, Country country, PostCategory category, Integer page);
 
     void deletePost(Long userId, Long postId);
+
+    Post updatePost(Long userId, Long postId, PostRequestDTO.UpdatePostDTO request);
 }

@@ -42,13 +42,14 @@ public class PostController {
 
     @PostMapping("/posts")
     @Operation(summary = "게시글 작성 API")
-    public ApiResponse<PostResponseDTO.CreatePostResultDTO> createPost(
+    public ApiResponse<PostResponseDTO.postResultDTO> createPost(
             @Parameter (hidden = true) @RequestHeader("Authorization") String authorizationHeader,
             @RequestBody @Valid PostRequestDTO.CreatePostDTO request) {
 
         User user = jwtUtil.getUserFromHeader(authorizationHeader);
+
         Post post = postCommandService.registerPost(user.getId(), request);
-        return ApiResponse.onSuccess(PostConverter.toCreatePostResultDTO(post));
+        return ApiResponse.onSuccess(PostConverter.toPostResultDTO(post));
     }
 
     @DeleteMapping("/posts/{post_id}")
@@ -64,6 +65,18 @@ public class PostController {
         return ApiResponse.onSuccess("게시글이 삭제되었습니다.");
     }
 
+    @PatchMapping("/posts/{post_id}")
+    @Operation(summary = "게시글 수정 API")
+    public ApiResponse<PostResponseDTO.postResultDTO> updatePost(
+            @Parameter (hidden = true) @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable Long post_id,
+            @RequestBody @Valid PostRequestDTO.UpdatePostDTO request) {
+
+        User user = jwtUtil.getUserFromHeader(authorizationHeader);
+
+         Post post = postCommandService.updatePost(user.getId(),post_id,request);
+        return ApiResponse.onSuccess(PostConverter.toPostResultDTO(post));
+    }
     @GetMapping("/posts/lists")
     @Operation(summary = "카테고리별 게시글 리스트 조회 API")
     public ApiResponse<PostResponseDTO.PostPreViewListDTO> getPostList(@Parameter (hidden = true) @RequestHeader(value = "Authorization",required = false) String authorizationHeader, @RequestParam(name = "category")PostCategory category, @RequestParam(name="page")Integer page){

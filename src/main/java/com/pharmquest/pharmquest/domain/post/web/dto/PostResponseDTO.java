@@ -14,7 +14,7 @@ public class PostResponseDTO {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class CreatePostResultDTO {
+    public static class postResultDTO {
         Long postId;
         LocalDateTime createdAt;
     }

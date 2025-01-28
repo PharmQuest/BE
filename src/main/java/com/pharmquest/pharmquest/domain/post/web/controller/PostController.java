@@ -1,18 +1,18 @@
 package com.pharmquest.pharmquest.domain.post.web.controller;
 
-import com.pharmquest.pharmquest.domain.post.converter.PostCommentConverter;
+import com.pharmquest.pharmquest.domain.post.converter.*;
 import com.pharmquest.pharmquest.domain.mypage.data.PostScrap;
-import com.pharmquest.pharmquest.domain.post.converter.PostConverter;
-import com.pharmquest.pharmquest.domain.post.converter.PostLikeConverter;
-import com.pharmquest.pharmquest.domain.post.converter.PostScrapConverter;
 import com.pharmquest.pharmquest.domain.post.data.Post;
 import com.pharmquest.pharmquest.domain.post.data.enums.Country;
 import com.pharmquest.pharmquest.domain.post.data.enums.PostCategory;
+import com.pharmquest.pharmquest.domain.post.data.enums.ReportType;
 import com.pharmquest.pharmquest.domain.post.data.mapping.Comment;
 import com.pharmquest.pharmquest.domain.post.data.mapping.PostLike;
+import com.pharmquest.pharmquest.domain.post.data.mapping.PostReport;
 import com.pharmquest.pharmquest.domain.post.service.post.PostCommandService;
 import com.pharmquest.pharmquest.domain.post.service.comment.PostCommentService;
 import com.pharmquest.pharmquest.domain.post.service.like.PostLikeService;
+import com.pharmquest.pharmquest.domain.post.service.report.PostReportService;
 import com.pharmquest.pharmquest.domain.post.service.scrap.PostScrapService;
 import com.pharmquest.pharmquest.domain.post.web.dto.CommentRequestDTO;
 import com.pharmquest.pharmquest.domain.post.web.dto.CommentResponseDTO;
@@ -38,8 +38,10 @@ public class PostController {
     private final PostScrapService postScrapService;
     private final JwtUtil jwtUtil;
     private final PostCommentService postCommentService;
+    private final PostReportService postReportService;
 
     @PostMapping("/posts")
+    @Operation(summary = "게시글 작성 API")
     public ApiResponse<PostResponseDTO.CreatePostResultDTO> postCommandService(
             @Parameter (hidden = true) @RequestHeader("Authorization") String authorizationHeader,
             @RequestBody @Valid PostRequestDTO.CreatePostDTO request) {
@@ -51,9 +53,18 @@ public class PostController {
 
     @GetMapping("/posts/lists")
     @Operation(summary = "카테고리별 게시글 리스트 조회 API")
-    public ApiResponse<PostResponseDTO.PostPreViewListDTO> getPostList(@RequestParam(name = "category")PostCategory category, @RequestParam(name="page")Integer page){
-        Page<Post> postList = postCommandService.getAllPosts(category, page);
+    public ApiResponse<PostResponseDTO.PostPreViewListDTO> getPostList(@Parameter (hidden = true) @RequestHeader(value = "Authorization",required = false) String authorizationHeader, @RequestParam(name = "category")PostCategory category, @RequestParam(name="page")Integer page){
+
+        Long userId = null;
+        if (authorizationHeader != null) {
+            User user = jwtUtil.getUserFromHeader(authorizationHeader);
+            userId = user.getId();
+        }
+
+        Page<Post> postList = postCommandService.getAllPosts(userId, category, page);
+
         return ApiResponse.onSuccess(PostConverter.postPreViewListDTO(postList));
+
     }
 
     @GetMapping("/posts/{post_id}")
@@ -69,8 +80,15 @@ public class PostController {
 
     @GetMapping("/search")
     @Operation(summary = "게시글 키워드로 검색 API")
-    public ApiResponse<PostResponseDTO.PostPreViewListDTO> searchPost(@RequestParam(name = "keyword")String keyword,@RequestParam(name = "country") Country country, @RequestParam(name = "category")PostCategory category, @RequestParam(name="page")Integer page){
-        Page<Post> postList = postCommandService.searchPostsDynamically(keyword, country, category, page);
+    public ApiResponse<PostResponseDTO.PostPreViewListDTO> searchPost(@Parameter (hidden = true) @RequestHeader(value = "Authorization",required = false) String authorizationHeader,@RequestParam(name = "keyword")String keyword,@RequestParam(name = "country") Country country, @RequestParam(name = "category")PostCategory category, @RequestParam(name="page")Integer page){
+
+        Long userId = null;
+        if (authorizationHeader != null) {
+            User user = jwtUtil.getUserFromHeader(authorizationHeader);
+            userId = user.getId();
+        }
+
+        Page<Post> postList = postCommandService.searchPostsDynamically(userId, keyword, country, category, page);
         return ApiResponse.onSuccess(PostConverter.postPreViewListDTO(postList));
     }
 
@@ -114,6 +132,16 @@ public class PostController {
         return ApiResponse.onSuccess("스크랩이 취소되었습니다");
     }
 
+    @PostMapping("/posts/{post_id}/reports")
+    @Operation(summary = "게시글 신고 API")
+    public ApiResponse<PostResponseDTO.CreatePostReportResponseDTO> createPostLike(@Parameter (hidden = true) @RequestHeader("Authorization") String authorizationHeader, @PathVariable(name = "post_id")Long postId,  @RequestParam(name = "type") ReportType reportType){
+
+        User user = jwtUtil.getUserFromHeader(authorizationHeader);
+
+        PostReport postReport = postReportService.createReport(user.getId(), postId, reportType);
+        return ApiResponse.onSuccess(PostReportConverter.toPostReportDTO(postReport));
+    }
+
     @PostMapping("/posts/{post_id}/comments")
     @Operation(summary = "게시글 댓글, 답글 작성 API")
     public ApiResponse<CommentResponseDTO.CreateCommentResultDTO> createComment(
@@ -127,5 +155,6 @@ public class PostController {
         Comment createdComment = postCommentService.addComment(user.getId(),postId, parentsId,requestDTO);
         return ApiResponse.onSuccess(PostCommentConverter.toCreateCommentResultDTO(createdComment));
     }
+
 
 }

@@ -54,16 +54,28 @@ public class PostCommandServiceImpl implements PostCommandService {
 
     //게시글 리스트 가져오기 (카테고리별 필터링, 20개씩 페이징)
     @Override
-    public Page<Post> getAllPosts(PostCategory category, Integer page) {
+    public Page<Post> getAllPosts(Long userId, PostCategory category, Integer page) {
 
         PageRequest pageRequest = PageRequest.of(page - 1, 20, Sort.by(Sort.Direction.DESC, "createdAt"));
 
         if (category == PostCategory.ALL) {
             // category가 ALL이면 전체 게시물 조회
-            return postRepository.findAll(pageRequest);
+            if (userId == null) {
+                // 로그인하지 않은 경우: 삭제된 게시글만 제외
+                return postRepository.findAllActivePosts(pageRequest);
+            } else {
+                // 로그인한 경우: 삭제된 게시글과 신고한 게시글 모두 제외
+                return postRepository.findAllVisiblePostsExcludingReportedByUser(userId,pageRequest);
+            }
         } else {
             // 특정 category에 맞는 게시물 조회
-            return postRepository.findByCategory(category, pageRequest);
+            if (userId == null) {
+                // 로그인하지 않은 경우: 삭제된 게시글만 제외
+                return postRepository.findByCategoryExcludingDeletedPosts(category, pageRequest);
+            } else {
+                // 로그인한 경우: 삭제된 게시글과 신고한 게시글 제외
+                return postRepository.findByCategoryExcludingReportedPosts(category, userId, pageRequest);
+            }
         }
     }
 
@@ -92,12 +104,12 @@ public class PostCommandServiceImpl implements PostCommandService {
 
     //게시글 제목, 내용으로 검색(카테고리, 나라 별 필터링, 20개씩 페이징)
     @Override
-    public Page<Post> searchPostsDynamically(String keyword, Country country, PostCategory category, Integer page) {
+    public Page<Post> searchPostsDynamically(Long userId, String keyword, Country country, PostCategory category, Integer page) {
 
         PageRequest pageRequest = PageRequest.of(page - 1, 20, Sort.by(Sort.Direction.DESC, "createdAt"));
 
         Page<Post> posts = postRepository.findAll(
-                PostSpecification.dynamicQuery(keyword, category, country),
+                PostSpecification.dynamicQuery(userId, keyword, category, country),
                 pageRequest
         );
 

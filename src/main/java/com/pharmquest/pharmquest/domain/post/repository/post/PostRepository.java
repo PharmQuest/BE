@@ -27,4 +27,5 @@ public interface PostRepository extends JpaRepository<Post, Long>, PostRepositor
     @Query("SELECT p FROM Post p WHERE p.isDeleted = false AND p.id NOT IN " +
             "(SELECT pr.post.id FROM PostReport pr WHERE pr.user.id = :userId)")
     Page<Post> findAllVisiblePostsExcludingReportedByUser(@Param("userId") Long userId, Pageable pageable);
+
 }

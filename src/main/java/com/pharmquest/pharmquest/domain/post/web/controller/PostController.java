@@ -42,13 +42,26 @@ public class PostController {
 
     @PostMapping("/posts")
     @Operation(summary = "게시글 작성 API")
-    public ApiResponse<PostResponseDTO.CreatePostResultDTO> postCommandService(
+    public ApiResponse<PostResponseDTO.CreatePostResultDTO> createPost(
             @Parameter (hidden = true) @RequestHeader("Authorization") String authorizationHeader,
             @RequestBody @Valid PostRequestDTO.CreatePostDTO request) {
 
         User user = jwtUtil.getUserFromHeader(authorizationHeader);
         Post post = postCommandService.registerPost(user.getId(), request);
         return ApiResponse.onSuccess(PostConverter.toCreatePostResultDTO(post));
+    }
+
+    @DeleteMapping("/posts/{post_id}")
+    @Operation(summary = "게시글 삭제 API")
+    public ApiResponse<String> deletePost(
+            @Parameter (hidden = true) @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable Long post_id
+            ) {
+
+        User user = jwtUtil.getUserFromHeader(authorizationHeader);
+
+        postCommandService.deletePost(user.getId(),post_id);
+        return ApiResponse.onSuccess("게시글이 삭제되었습니다.");
     }
 
     @GetMapping("/posts/lists")

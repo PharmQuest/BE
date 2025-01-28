@@ -119,4 +119,19 @@ public class PostCommandServiceImpl implements PostCommandService {
         return posts;
     }
 
+    @Override
+    public void deletePost(Long userId, Long postId) {
+
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new EntityNotFoundException("해당하는 게시글을 찾을 수 없습니다. ID: " + postId));
+
+        if (!userId.equals(post.getUser().getId())) {
+            throw new IllegalArgumentException("작성자만 게시글을 삭제할 수 있습니다.");
+        }
+
+        // 게시글 삭제
+        postRepository.deleteById(postId);
+
+    }
+
 }

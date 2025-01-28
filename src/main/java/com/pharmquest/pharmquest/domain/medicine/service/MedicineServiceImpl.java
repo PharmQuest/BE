@@ -3,6 +3,7 @@ package com.pharmquest.pharmquest.domain.medicine.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pharmquest.pharmquest.domain.medicine.converter.MedicineConverter;
+import com.pharmquest.pharmquest.domain.medicine.data.MedicineCategoryMapper;
 import com.pharmquest.pharmquest.domain.medicine.repository.MedicineRepository;
 import com.pharmquest.pharmquest.domain.medicine.web.dto.MedicineResponseDTO;
 import org.springframework.stereotype.Service;
@@ -47,6 +48,39 @@ public class MedicineServiceImpl implements MedicineService {
         }
     }
 
+    @Override
+    public List<MedicineResponseDTO> getMedicinesbyCategory(String query, int limit) {
+        try {
+            // 카테고리 이름을 쿼리로 변환 (해당되는 경우)
+            String apiQuery = MedicineCategoryMapper.getQueryForCategory(query);
+            if (apiQuery != null) {
+                query = apiQuery; // FDA 쿼리로 대체
+            }
+
+            // 더 많은 데이터를 요청 (limit * 2)
+            int requestLimit = limit * 3;
+            String response = medicineRepository.fetchMedicineData(query, requestLimit);
+
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode results = mapper.readTree(response).path("results");
+
+            List<MedicineResponseDTO> medicines = new ArrayList<>();
+            if (results.isArray()) {
+                for (JsonNode result : results) {
+                    MedicineResponseDTO dto = medicineConverter.convertWithTranslation(result);
+                    if (isValidMedicine(dto)) {
+                        medicines.add(dto);
+                    }
+                }
+            }
+
+            // 필터링된 데이터 중 상위 limit 개수만 반환
+            return medicines.size() > limit ? medicines.subList(0, limit) : medicines;
+        } catch (Exception e) {
+            throw new RuntimeException("FDA API 요청 실패", e);
+        }
+    }
+
     // FDA API 데이터를 DTO로 변환 (번역 없이 원본 반환) 백엔드 작업용
     @Override
     public List<MedicineResponseDTO> getEnMedicines(String query, int limit) {
@@ -86,4 +120,10 @@ public class MedicineServiceImpl implements MedicineService {
             throw new RuntimeException("spl_set_id로 약물 검색 중 오류 발생", e);
         }
     }
+
+    private boolean isValidMedicine(MedicineResponseDTO dto) {
+        // 필수 필드가 null이거나 빈 문자열인지 확인
+        return dto.getImgUrl() != null && !dto.getImgUrl().isEmpty();
+    }
+
 }

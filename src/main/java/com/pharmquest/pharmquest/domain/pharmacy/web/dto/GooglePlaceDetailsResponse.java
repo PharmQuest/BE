@@ -61,6 +61,38 @@ public class GooglePlaceDetailsResponse {
         public List<AddressComponent> getAddressComponents() {
             return addressComponents == null ? List.of() : addressComponents;
         }
+
+        // 지역 반환
+        public List<String> getEnglishLocationList() {
+
+            if (addressComponents == null || addressComponents.isEmpty()) {
+//                return "Unknown";
+                return List.of("Unknown");
+            }
+
+            // 지역 키워드 중 political 가진 country가 아닌 키워드 추출하여 list에 저장
+            List<String> locationList = addressComponents.stream()
+                    .filter(component -> component.getTypes().contains("political") && !component.getTypes().contains("country"))
+                    .map(AddressComponent::getLongName)
+                    .map(String::trim)
+                    .toList();
+
+            int size = locationList.size();
+            if (size == 0) {
+//                return "Unknown";
+                return List.of("Unknown");
+            }
+
+            // 지역 키워드를 규모 큰 순서로 3개 이하가 되도록 설정
+            locationList =  locationList.subList(Math.max(0, size - 3), size);
+            return locationList;
+//            String listString = locationList.toString();
+
+            // listString 얖옆에 [] 제거, 중간에 ',' 제거
+//            listString = listString.substring(1, listString.length()-1).replaceAll(",", "");
+//            return listString;
+        }
+
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -111,12 +143,12 @@ public class GooglePlaceDetailsResponse {
 
         @JsonProperty("open")
         public Time getOpen() {
-            return open == null ? new Time() : open;
+            return open;
         }
 
         @JsonProperty("close")
         public Time getClose() {
-            return close == null ? new Time() : close;
+            return close;
         }
     }
 
@@ -128,12 +160,12 @@ public class GooglePlaceDetailsResponse {
 
         @JsonProperty("day")
         public Integer getDay() {
-            return day == null ? 0 : day;
+            return day == null ? null : day;
         }
 
         @JsonProperty("time")
         public String getTime() {
-            return time == null ? "" : time;
+            return time == null ? null : time;
         }
     }
 

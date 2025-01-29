@@ -10,6 +10,9 @@ import com.pharmquest.pharmquest.domain.supplements.repository.SupplementsScrapR
 import com.pharmquest.pharmquest.domain.user.data.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,19 +28,20 @@ public class MyPageServiceImpl implements MyPageService {
     private final PharmacyDetailsService pharmacyDetailsService;
     private final SupplementsScrapRepository supplementsScrapRepository;
 
-    @Override
-    public List<MyPageResponseDTO.SupplementsResponseDto> getScrapSupplements(Long userId) {
+        @Override
+        public Page<MyPageResponseDTO.SupplementsResponseDto> getScrapSupplements(Long userId, Pageable pageable) {
 
-        List<SupplementsScrap> supplementsScrapList = supplementsScrapRepository.findSupplementsByUserId(userId);
-        if (supplementsScrapList.isEmpty()) {
-            throw new NoSuchElementException("스크랩한 영양제가 없습니다.");
+            Page<SupplementsScrap> supplementsScrapPage  = supplementsScrapRepository.findSupplementsByUserId(userId, pageable);
+            if (supplementsScrapPage.isEmpty()) {
+                throw new NoSuchElementException("스크랩한 영양제가 없습니다.");
+            }
+            List<MyPageResponseDTO.SupplementsResponseDto> supplementsDtos = supplementsScrapPage.stream()
+                    .map(supplementsScrap -> myPageConverter.toSupplementsDto(supplementsScrap.getSupplements()))
+                    .toList();
+
+            return new PageImpl<>(supplementsDtos, pageable, supplementsScrapPage.getTotalElements());
+
         }
-
-        return supplementsScrapList.stream()
-                .map(supplementsScrap -> myPageConverter.toSupplementsDto(supplementsScrap.getSupplements())) // SupplementsScrap에서 supplements 값을 추출
-                .toList();
-
-    }
 
     @Override
     public List<MyPageResponseDTO.PharmacyDto> getScrapPharmacies(User user, String country) {

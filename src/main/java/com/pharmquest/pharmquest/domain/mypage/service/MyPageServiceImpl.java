@@ -1,5 +1,6 @@
 package com.pharmquest.pharmquest.domain.mypage.service;
 
+import com.pharmquest.pharmquest.domain.mypage.converter.MyPageConverter;
 import com.pharmquest.pharmquest.domain.mypage.web.dto.MyPageResponseDTO;
 import com.pharmquest.pharmquest.domain.pharmacy.data.enums.PharmacyCountry;
 import com.pharmquest.pharmquest.domain.pharmacy.service.PharmacyDetailsService;
@@ -20,12 +21,12 @@ import java.util.NoSuchElementException;
 @Transactional(readOnly = true)
 @Slf4j
 public class MyPageServiceImpl implements MyPageService {
-
+    private final MyPageConverter myPageConverter;
     private final PharmacyDetailsService pharmacyDetailsService;
     private final SupplementsScrapRepository supplementsScrapRepository;
 
     @Override
-    public List<Supplements> getScrapSupplements(Long userId) {
+    public List<MyPageResponseDTO.SupplementsResponseDto> getScrapSupplements(Long userId) {
 
         List<SupplementsScrap> supplementsScrapList = supplementsScrapRepository.findSupplementsByUserId(userId);
         if (supplementsScrapList.isEmpty()) {
@@ -33,8 +34,9 @@ public class MyPageServiceImpl implements MyPageService {
         }
 
         return supplementsScrapList.stream()
-                .map(SupplementsScrap::getSupplements) // SupplementsScrap에서 supplements 값을 추출
+                .map(supplementsScrap -> myPageConverter.toSupplementsDto(supplementsScrap.getSupplements())) // SupplementsScrap에서 supplements 값을 추출
                 .toList();
+
     }
 
     @Override

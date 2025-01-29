@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface MyPageService {
 
-    List<Supplements> getScrapSupplements(Long userId);
+    List<MyPageResponseDTO.SupplementsResponseDto> getScrapSupplements(Long userId);
     List<MyPageResponseDTO.PharmacyDto> getScrapPharmacies(User user, String country);
 
 

@@ -25,13 +25,14 @@ public class MyPageController {
 
     @GetMapping("/supplements")
     @Operation(summary = "스크랩한 영양제 조회 API")
-    public List<MyPageResponseDTO.SupplementsResponseDto> getScrapedSupplements(
+    public ApiResponse<List<MyPageResponseDTO.SupplementsResponseDto>> getScrapedSupplements(
             @Parameter (hidden = true) @RequestHeader("Authorization") String authorizationHeader) {
 
         User user = jwtUtil.getUserFromHeader(authorizationHeader);
 
-        List<Supplements> supplements = myPageService.getScrapSupplements(user.getId());
-        return ApiResponse.onSuccess(MyPageConverter.toSupplementsDto(supplements)).getResult();
+        List<MyPageResponseDTO.SupplementsResponseDto> supplements = myPageService.getScrapSupplements(user.getId());
+
+        return ApiResponse.onSuccess(null);
     }
 
     @GetMapping("/pharmacy")

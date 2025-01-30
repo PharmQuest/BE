@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -52,7 +54,7 @@ public class PharmacyDetailsServiceImpl implements PharmacyDetailsService {
                 .name(detailsResult.getName())
                 .placeId(placeId)
                 .openNow(detailsResult.getOpeningHours().getOpenNow())
-                .region(getTranslatedLocation(response, detailsResult.getEnglishLocationList()))
+                .region(getTranslatedLocation(response, detailsResult.getLocationList()))
                 .latitude(detailsResult.getGeometry().getLocation().getLat())
                 .longitude(detailsResult.getGeometry().getLocation().getLng())
                 .country(getCountryName(response))
@@ -61,22 +63,27 @@ public class PharmacyDetailsServiceImpl implements PharmacyDetailsService {
                 .build();
     }
 
+    // 장소 번역
     private String getTranslatedLocation(GooglePlaceDetailsResponse response, List<String> locationList) {
-        String countryName = getCountryName(response);
-        String translateLanguage = PharmacyCountry.getLanguage(countryName);
-        System.out.println("translateLanguage = " + translateLanguage);
-        locationList
-                .forEach( location -> translationService.translateText(location, translateLanguage));
-        for (String location : locationList) {
-            System.out.print("location = " + location);
+
+        String targetLanguage = PharmacyCountry.getLanguage(getCountryName(response));
+
+        List<String> translatedLocation = new ArrayList<>(locationList.stream()
+                .map(location -> {
+                    try {
+                        return translationService.translateText(location, targetLanguage).trim();
+                    } catch (Exception e) {
+                        log.error("Translation failed: {}", e.getMessage());
+                        return location.trim();
+                    }
+                }).toList());
+
+        if ("ko".equals(targetLanguage)) {
+            Collections.reverse(translatedLocation);
         }
-        System.out.println();
 
-        String listString = locationList.toString();
-
-        // listString 얖옆에 [] 제거, 중간에 ',' 제거
-        listString = listString.substring(1, listString.length()-1).replaceAll(",", "");
-        return listString;
+        // ex) ["Beverly Hills", "Los Angeles County", "California"] -> "Beverly Hills Los Angeles County California"
+        return String.join(" ", translatedLocation);
     }
 
     // 상세정보로부터 국가 이름 가져옴

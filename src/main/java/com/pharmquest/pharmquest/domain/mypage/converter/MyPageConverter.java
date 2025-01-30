@@ -2,10 +2,13 @@ package com.pharmquest.pharmquest.domain.mypage.converter;
 
 import com.pharmquest.pharmquest.domain.mypage.web.dto.MyPageResponseDTO;
 import com.pharmquest.pharmquest.domain.supplements.data.Supplements;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+@RequiredArgsConstructor
 public class MyPageConverter {
 
     public static List<MyPageResponseDTO.SupplementsResponseDto> toSupplementsDto(List<Supplements> supplements) {
@@ -17,10 +20,13 @@ public class MyPageConverter {
                 .collect(Collectors.toList());
     }
 
-    public static MyPageResponseDTO.PharmacyResponse toPharmaciesDto(List<MyPageResponseDTO.PharmacyDto> pharmacyDtoList) {
+    public static MyPageResponseDTO.PharmacyResponse toPharmaciesResponse(Page<MyPageResponseDTO.PharmacyDto> pharmacies) {
+
+        List<MyPageResponseDTO.PharmacyDto> list = pharmacies.stream().toList();
+
         return MyPageResponseDTO.PharmacyResponse.builder()
-                .pharmacies(pharmacyDtoList)
-                .count(pharmacyDtoList.size())
+                .pharmacies(list)
+                .count((int) pharmacies.getTotalElements())
                 .build();
     }
 }

@@ -115,7 +115,8 @@ public class PharmacyDetailsServiceImpl implements PharmacyDetailsService {
 
         if (response.getResult() != null && response.getResult().getTypes() != null) {
             List<String> types = response.getResult().getTypes();
-            return types.contains("pharmacy") || types.contains("drugstore"); // 약국 중에 장소 타입이 pharmacy 아니고 drugstore로 적혀있는 곳도 있음
+            log.info("약국 타입 List = {}",types.toString());
+            return types.contains("pharmacy") || types.contains("drugstore") || types.contains("hospital") || types.contains("health"); // 약국 중에 장소 타입이 pharmacy 아니고 drugstore로 적혀있는 곳도 있음
         }else if(response.getResult() == null){
             throw new CommonExceptionHandler(ErrorStatus.PLACE_NO_RESULT);
         }

@@ -7,9 +7,9 @@ import java.util.Arrays;
 @Getter
 public enum PharmacyCountry {
 
-    KOREA("South Korea", "korea", "ko"),
+    KOREA("South Korea","korea", "ko"),
     USA("United States", "usa", "en"),
-    ALL("all", "all", "en")
+    ALL("all",  "all", "en"),
     ;
 
     private final String googleName; // 구글에 등록된 국가 이름 형식

@@ -9,6 +9,10 @@ import com.pharmquest.pharmquest.domain.medicine.repository.MedRepository;
 import com.pharmquest.pharmquest.domain.medicine.repository.MedicineRepository;
 import com.pharmquest.pharmquest.domain.medicine.web.dto.MedicineDetailResponseDTO;
 import com.pharmquest.pharmquest.domain.medicine.web.dto.MedicineResponseDTO;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -130,10 +134,34 @@ public class MedicineServiceImpl implements MedicineService {
         }
     }
 
-//    private boolean isValidMedicine(MedicineResponseDTO dto) {
-//        // 필수 필드가 null이거나 빈 문자열인지 확인
-//        return dto.getImgUrl() != null && !dto.getImgUrl().isEmpty();
-//    }
+    @Override
+    public List<MedicineResponseDTO> getMedicinesFromDBByCategory(String category, int page, int size) {
+        try {
+            Page<Medicine> medicinesPage;
+            Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending()); // 페이지네이션 설정 (ID 기준 정렬)
+
+            // "전체" 선택 시 모든 데이터 페이지네이션 처리
+            if (category.equalsIgnoreCase("전체")) {
+                medicinesPage = medRepository.findAll(pageable);
+            } else {
+                medicinesPage = medRepository.findByCategoryIgnoreCase(category, pageable);
+            }
+
+            // 로그 추가 (검색 결과 없을 경우 디버깅)
+            if (medicinesPage.isEmpty()) {
+                System.out.println("카테고리 '" + category + "' 에 해당하는 데이터가 없습니다.");
+            }
+
+            // 결과 변환 후 반환
+            return medicinesPage.getContent().stream()
+                    .map(medicineConverter::convertFromEntity)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            throw new RuntimeException("DB에서 약물 데이터를 가져오는 중 오류 발생", e);
+        }
+    }
+
+
 
     private boolean isValidMedicine(MedicineResponseDTO dto) {
         return dto.getBrandName() != null && !dto.getBrandName().isEmpty()

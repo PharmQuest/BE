@@ -2,6 +2,7 @@ package com.pharmquest.pharmquest.domain.medicine.converter;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.pharmquest.pharmquest.domain.medicine.data.Medicine;
 import com.pharmquest.pharmquest.domain.medicine.data.MedicineCategoryMapper;
 import com.pharmquest.pharmquest.domain.medicine.repository.MedicineRepository;
 import com.pharmquest.pharmquest.domain.medicine.service.TranslationService;
@@ -131,5 +132,20 @@ public class MedicineConverter {
             System.err.println("이미지 URL 가져오기 실패: " + e.getMessage());
         }
         return null;
+    }
+
+    public MedicineResponseDTO convertFromEntity(Medicine medicine) {
+        if (medicine == null) {
+            return null;
+        }
+
+        return new MedicineResponseDTO(
+                medicine.getBrandName(),
+                medicine.getGenericName(),
+                medicine.getSplSetId(),
+                medicine.getImgUrl(),
+                medicine.getCategory(),
+                medicine.getCountry()
+        );
     }
 }

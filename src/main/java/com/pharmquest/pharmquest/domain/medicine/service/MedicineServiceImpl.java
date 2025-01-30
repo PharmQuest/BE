@@ -161,6 +161,32 @@ public class MedicineServiceImpl implements MedicineService {
         }
     }
 
+    @Override
+    public MedicineDetailResponseDTO getMedicineBySplSetIdFromDB(String splSetId) {
+        try {
+            // DB에서 SPL Set ID를 기준으로 약물 조회
+            Medicine medicine = medRepository.findBySplSetId(splSetId)
+                    .orElseThrow(() -> new IllegalArgumentException("해당 SPL Set ID를 가진 약물이 없습니다: " + splSetId));
+
+            // 엔티티를 DTO로 변환하여 반환
+            return new MedicineDetailResponseDTO(
+                    medicine.getBrandName(),
+                    medicine.getGenericName(),
+                    medicine.getSubstanceName(),
+                    medicine.getActiveIngredient(),
+                    medicine.getPurpose(),
+                    medicine.getIndicationsAndUsage(),
+                    medicine.getDosageAndAdministration(),
+                    medicine.getSplSetId(),
+                    medicine.getImgUrl(),
+                    medicine.getCategory(),
+                    medicine.getCountry()
+            );
+        } catch (Exception e) {
+            throw new RuntimeException("DB에서 약물 세부 정보를 가져오는 중 오류 발생", e);
+        }
+    }
+
 
 
     private boolean isValidMedicine(MedicineResponseDTO dto) {

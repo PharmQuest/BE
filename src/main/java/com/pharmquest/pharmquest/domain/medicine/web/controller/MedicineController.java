@@ -65,9 +65,14 @@ public class MedicineController {
     }
 
     // SPL Set ID로 약물 세부 정보 검색
-    @GetMapping("/detail")
+    @GetMapping("test/detail")
     public MedicineDetailResponseDTO searchBySplSetId(@RequestParam String splSetId) {
         return medicineService.getMedicineBySplSetId(splSetId);
+    }
+
+    @GetMapping("/detail")
+    public MedicineDetailResponseDTO searchBySplSetIdFromDB(@RequestParam String splSetId) {
+        return medicineService.getMedicineBySplSetIdFromDB(splSetId);
     }
 
     //rds 연결 확인용

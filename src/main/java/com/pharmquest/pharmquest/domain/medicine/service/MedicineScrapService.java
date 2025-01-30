@@ -4,56 +4,63 @@ import com.pharmquest.pharmquest.domain.medicine.data.Medicine;
 import com.pharmquest.pharmquest.domain.medicine.repository.MedRepository;
 import com.pharmquest.pharmquest.domain.medicine.repository.MedicineScrapRepository;
 import com.pharmquest.pharmquest.domain.mypage.data.MedicineScrap;
+import com.pharmquest.pharmquest.domain.token.JwtUtil;
 import com.pharmquest.pharmquest.domain.user.data.User;
 import com.pharmquest.pharmquest.domain.user.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
 @Service
+@RequiredArgsConstructor
 public class MedicineScrapService {
+
     private final MedicineScrapRepository scrapRepository;
-    private final UserRepository userRepository;
-    private final MedRepository medRepository;
+    private final MedRepository medicineRepository;
+    private final JwtUtil jwtUtil;
 
-    public MedicineScrapService(MedicineScrapRepository scrapRepository, UserRepository userRepository, MedRepository medRepository) {
-        this.scrapRepository = scrapRepository;
-        this.userRepository = userRepository;
-        this.medRepository = medRepository;
-    }
-
-    /** ✅ 1. 약물 스크랩 추가 */
+    /* 스크랩 추가 */
     @Transactional
-    public void addScrap(Long userId, Long medicineId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 ID를 가진 사용자가 없습니다: " + userId));
+    public void addScrap(String authorizationHeader, Long medicineId) {
+        User user = jwtUtil.getUserFromHeader(authorizationHeader);  // 🔥 JWT에서 userId 가져오기
+        Medicine medicine = medicineRepository.findById(medicineId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 약물을 찾을 수 없습니다."));
 
-        Medicine medicine = medRepository.findById(medicineId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 ID를 가진 약물이 없습니다: " + medicineId));
-
-        // 이미 스크랩한 경우 예외 처리
-        if (scrapRepository.findByUserIdAndMedicineId(userId, medicineId).isPresent()) {
+        // 이미 스크랩했는지 확인
+        if (scrapRepository.existsByUserAndMedicine(user, medicine)) {
             throw new IllegalStateException("이미 스크랩한 약물입니다.");
         }
 
-        MedicineScrap scrap = new MedicineScrap(user, medicine);
+        MedicineScrap scrap = new MedicineScrap();
+        scrap.setUser(user);
+        scrap.setMedicine(medicine);
+
         scrapRepository.save(scrap);
     }
 
-    /** ✅ 2. 특정 사용자의 스크랩 목록 조회 */
-    public List<Medicine> getScrappedMedicines(Long userId) {
-        return scrapRepository.findByUserId(userId).stream()
+    /* 스크랩 목록 조회 */
+    @Transactional(readOnly = true)
+    public List<Medicine> getScrappedMedicines(String authorizationHeader) {
+        User user = jwtUtil.getUserFromHeader(authorizationHeader);  // 🔥 JWT에서 userId 가져오기
+        List<MedicineScrap> scraps = scrapRepository.findByUser(user);
+
+        return scraps.stream()
                 .map(MedicineScrap::getMedicine)
                 .collect(Collectors.toList());
     }
 
-    /** ✅ 3. 스크랩 삭제 */
+    /* 스크랩 삭제 */
     @Transactional
-    public void removeScrap(Long userId, Long medicineId) {
-        if (!scrapRepository.findByUserIdAndMedicineId(userId, medicineId).isPresent()) {
-            throw new IllegalStateException("스크랩하지 않은 약물입니다.");
-        }
-        scrapRepository.deleteByUserIdAndMedicineId(userId, medicineId);
+    public void removeScrap(String authorizationHeader, Long medicineId) {
+        User user = jwtUtil.getUserFromHeader(authorizationHeader);  // 🔥 JWT에서 userId 가져오기
+        Medicine medicine = medicineRepository.findById(medicineId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 약물을 찾을 수 없습니다."));
+
+        MedicineScrap scrap = scrapRepository.findByUserAndMedicine(user, medicine)
+                .orElseThrow(() -> new IllegalArgumentException("스크랩한 적 없는 약물입니다."));
+
+        scrapRepository.delete(scrap);
     }
 }

@@ -4,6 +4,7 @@ import com.pharmquest.pharmquest.domain.mypage.converter.MyPageConverter;
 import com.pharmquest.pharmquest.domain.mypage.web.dto.MyPageResponseDTO;
 import com.pharmquest.pharmquest.domain.pharmacy.data.enums.PharmacyCountry;
 import com.pharmquest.pharmquest.domain.pharmacy.service.PharmacyDetailsService;
+import com.pharmquest.pharmquest.domain.supplements.data.Enum.CategoryKeyword;
 import com.pharmquest.pharmquest.domain.supplements.data.Supplements;
 import com.pharmquest.pharmquest.domain.supplements.data.mapping.SupplementsScrap;
 import com.pharmquest.pharmquest.domain.supplements.repository.SupplementsScrapRepository;
@@ -18,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -29,14 +31,13 @@ public class MyPageServiceImpl implements MyPageService {
     private final SupplementsScrapRepository supplementsScrapRepository;
 
         @Override
-        public Page<MyPageResponseDTO.SupplementsResponseDto> getScrapSupplements(Long userId, Pageable pageable) {
+        public Page<MyPageResponseDTO.SupplementsResponseDto> getScrapSupplements(Long userId, Pageable pageable, CategoryKeyword category) {
 
-            Page<SupplementsScrap> supplementsScrapPage  = supplementsScrapRepository.findSupplementsByUserId(userId, pageable);
-            if (supplementsScrapPage.isEmpty()) {
-                throw new NoSuchElementException("스크랩한 영양제가 없습니다.");
-            }
+            Page<SupplementsScrap> supplementsScrapPage = supplementsScrapRepository.findSupplementsByUserId(userId, pageable);
+
             List<MyPageResponseDTO.SupplementsResponseDto> supplementsDtos = supplementsScrapPage.stream()
-                    .map(supplementsScrap -> myPageConverter.toSupplementsDto(supplementsScrap.getSupplements()))
+                    .map(supplementsScrap -> myPageConverter.toSupplementsDto(supplementsScrap.getSupplements(), category))
+                    .filter(Objects::nonNull)
                     .toList();
 
             return new PageImpl<>(supplementsDtos, pageable, supplementsScrapPage.getTotalElements());

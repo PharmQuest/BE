@@ -23,7 +23,7 @@ public class SupplementsScrapController {
     @PatchMapping("/{supplementId}/scrap")
     @Operation(summary = "영양제 스크랩 API", description = "영양제 스크랩 변경(스크랩 추가)")
     public ApiResponse<SupplementsScrapResponseDTO> scrapSupplement(
-            @Parameter(description = "영양제 ID", hidden = true) @RequestHeader(value = "authorization") String authorizationHeader,
+            @Parameter(description = "영양제 ID", hidden = true) @RequestHeader(value = "authorization", required = false) String authorizationHeader,
             @PathVariable Long supplementId
     ) {
         if (authorizationHeader == null || authorizationHeader.isEmpty()) {

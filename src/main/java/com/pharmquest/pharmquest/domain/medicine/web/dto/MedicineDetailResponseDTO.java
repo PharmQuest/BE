@@ -1,5 +1,10 @@
 package com.pharmquest.pharmquest.domain.medicine.web.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+
+@Data
+@AllArgsConstructor
 public class MedicineDetailResponseDTO {
     private String brandName; // openfda.brand_name
     private String genericName; // openfda.generic_name

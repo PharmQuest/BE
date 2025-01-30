@@ -62,11 +62,10 @@ public class GooglePlaceDetailsResponse {
             return addressComponents == null ? List.of() : addressComponents;
         }
 
-        // 지역 반환
-        public List<String> getEnglishLocationList() {
+        // 지역 목록( 범위별 명칭 )을 리스트에 담아 반환
+        public List<String> getLocationList() {
 
             if (addressComponents == null || addressComponents.isEmpty()) {
-//                return "Unknown";
                 return List.of("Unknown");
             }
 
@@ -79,18 +78,12 @@ public class GooglePlaceDetailsResponse {
 
             int size = locationList.size();
             if (size == 0) {
-//                return "Unknown";
                 return List.of("Unknown");
             }
 
             // 지역 키워드를 규모 큰 순서로 3개 이하가 되도록 설정
             locationList =  locationList.subList(Math.max(0, size - 3), size);
             return locationList;
-//            String listString = locationList.toString();
-
-            // listString 얖옆에 [] 제거, 중간에 ',' 제거
-//            listString = listString.substring(1, listString.length()-1).replaceAll(",", "");
-//            return listString;
         }
 
     }

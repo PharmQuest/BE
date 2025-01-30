@@ -1,7 +1,5 @@
 package com.pharmquest.pharmquest.domain.post.web.dto;
 
-import com.pharmquest.pharmquest.domain.post.data.enums.PostCategory;
-import com.pharmquest.pharmquest.domain.post.data.mapping.Comment;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,7 +14,7 @@ public class PostResponseDTO {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class CreatePostResultDTO {
+    public static class postResultDTO {
         Long postId;
         LocalDateTime createdAt;
     }
@@ -73,7 +71,7 @@ public class PostResponseDTO {
         Boolean isBestPost;
         Boolean isLiked;
         Boolean isScraped;
-        Boolean isReported;
+        Boolean isOwnPost;
         List<CommentResponseDTO.CommentDTO> comments;
         Integer listSize;
         Integer totalPage;
@@ -98,6 +96,16 @@ public class PostResponseDTO {
     @AllArgsConstructor
     public static  class CreatePostScrapResponseDTO{
         Long postLikeId;
+        LocalDateTime createdAt;
+    }
+
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static  class CreatePostReportResponseDTO{
+        Long postReportId;
         LocalDateTime createdAt;
     }
 

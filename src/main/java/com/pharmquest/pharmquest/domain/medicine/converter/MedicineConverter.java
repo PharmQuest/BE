@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pharmquest.pharmquest.domain.medicine.data.MedicineCategoryMapper;
 import com.pharmquest.pharmquest.domain.medicine.repository.MedicineRepository;
 import com.pharmquest.pharmquest.domain.medicine.service.TranslationService;
+import com.pharmquest.pharmquest.domain.medicine.web.dto.MedicineDetailResponseDTO;
 import com.pharmquest.pharmquest.domain.medicine.web.dto.MedicineResponseDTO;
 import org.springframework.stereotype.Component;
 
@@ -43,6 +44,41 @@ public class MedicineConverter {
                 country
         );
     }
+
+    public MedicineDetailResponseDTO convertToDetail(JsonNode result) {
+        String brandName = translate(getFirstValue(result, "openfda.brand_name"));
+        String genericName = translate(getFirstValue(result, "openfda.generic_name"));
+        String category = MedicineCategoryMapper.getCategory(
+                getFirstValue(result, "purpose"),
+                getFirstValue(result, "active_ingredient"),
+                "",
+                getFirstValue(result, "openfda.route")
+        );
+        String substanceName = translate(getFirstValue(result, "openfda.substance_name"));
+        String activeIngredient = translate(getFirstValue(result, "active_ingredient"));
+        String purpose = translate(getFirstValue(result, "purpose"));
+        String indicationsAndUsage = translate(getFirstValue(result, "indications_and_usage"));
+        String dosageAndAdministration = translate(getFirstValue(result, "dosage_and_administration"));
+
+        String splSetId = getFirstValue(result, "openfda.spl_set_id");
+        String imgUrl = fetchImageUrl(splSetId);
+        String country = "미국";
+
+        return new MedicineDetailResponseDTO(
+                brandName,
+                genericName,
+                substanceName,
+                activeIngredient,
+                purpose,
+                indicationsAndUsage,
+                dosageAndAdministration,
+                splSetId,
+                imgUrl,
+                category,
+                country
+        );
+    }
+
 
     // 번역 없이 변환
     public MedicineResponseDTO convertWithoutTranslation(JsonNode result) {

@@ -32,7 +32,7 @@ public class NaverShoppingServiceImpl implements NaverShoppingService {
 
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(naverApiUrl)
                 .queryParam("query", query)
-                .queryParam("display", 20);
+                .queryParam("display", 30);
 
         ResponseEntity<Map> response = restTemplate.exchange(
                 builder.build().encode().toUri(),

@@ -1,8 +1,10 @@
 package com.pharmquest.pharmquest.domain.mypage.service;
 
+import com.pharmquest.pharmquest.domain.mypage.converter.MyPageConverter;
 import com.pharmquest.pharmquest.domain.mypage.web.dto.MyPageResponseDTO;
 import com.pharmquest.pharmquest.domain.pharmacy.data.enums.PharmacyCountry;
 import com.pharmquest.pharmquest.domain.pharmacy.service.PharmacyDetailsService;
+import com.pharmquest.pharmquest.domain.supplements.data.Enum.CategoryKeyword;
 import com.pharmquest.pharmquest.domain.supplements.data.Supplements;
 import com.pharmquest.pharmquest.domain.supplements.data.mapping.SupplementsScrap;
 import com.pharmquest.pharmquest.domain.supplements.repository.SupplementsScrapRepository;
@@ -13,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -20,29 +23,31 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 @Slf4j
 public class MyPageServiceImpl implements MyPageService {
-
+    private final MyPageConverter myPageConverter;
     private final PharmacyDetailsService pharmacyDetailsService;
     private final SupplementsScrapRepository supplementsScrapRepository;
-
     private final int PAGE_SIZE = 10;
 
     @Override
-    public List<Supplements> getScrapSupplements(Long userId) {
+    public Page<MyPageResponseDTO.SupplementsResponseDto> getScrapSupplements(Long userId, Pageable pageable, CategoryKeyword category) {
 
-        List<SupplementsScrap> supplementsScrapList = supplementsScrapRepository.findSupplementsByUserId(userId);
-        if (supplementsScrapList.isEmpty()) {
-            throw new NoSuchElementException("스크랩한 영양제가 없습니다.");
-        }
 
-        return supplementsScrapList.stream()
-                .map(SupplementsScrap::getSupplements) // SupplementsScrap에서 supplements 값을 추출
+        Page<SupplementsScrap> supplementsScrapPage = supplementsScrapRepository.findSupplementsByUserId(userId, pageable);
+
+        List<MyPageResponseDTO.SupplementsResponseDto> supplementsDtos = supplementsScrapPage.stream()
+                .map(supplementsScrap -> myPageConverter.toSupplementsDto(supplementsScrap.getSupplements(), category))
+                .filter(Objects::nonNull)
                 .toList();
+
+        return new PageImpl<>(supplementsDtos, pageable, supplementsScrapPage.getTotalElements());
+
     }
 
     @Override

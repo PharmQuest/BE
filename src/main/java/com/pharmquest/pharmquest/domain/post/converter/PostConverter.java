@@ -76,6 +76,7 @@ public class PostConverter {
                 .title(post.getTitle())
                 .content(post.getContent())
                 .category(post.getCategory().getKoreanName())
+                .country(post.getCountry().getKoreanName())
                 .scrapeCount(post.getScraps().size())
                 .likeCount(post.getLikes().size())
                 .commentCount(post.getComments().size())

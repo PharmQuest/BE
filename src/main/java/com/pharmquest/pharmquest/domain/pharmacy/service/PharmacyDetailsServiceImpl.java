@@ -11,7 +11,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 
@@ -21,6 +25,8 @@ public class PharmacyDetailsServiceImpl implements PharmacyDetailsService {
 
     private final WebClient webClient;
     private final String GOOGLE_PLACES_API_URL = "https://maps.googleapis.com/maps/api/place/details/json";
+    private final String GOOGLE_PLACE_IMG_URL = "https://maps.googleapis.com/maps/api/place/photo?";
+    private final int IMG_MAX_SIZE = 86;
     private final TranslationService translationService;
 
     @Value("${place.details.api-key}")
@@ -59,7 +65,7 @@ public class PharmacyDetailsServiceImpl implements PharmacyDetailsService {
                 .longitude(detailsResult.getGeometry().getLocation().getLng())
                 .country(getCountryName(response))
 //                .periods(detailsResult.getOpeningHours().getPeriods())
-                .imgUrl("imgURL")
+                .imgUrl(getImageBase64(getPhotoReference(response)))
                 .build();
     }
 
@@ -124,6 +130,35 @@ public class PharmacyDetailsServiceImpl implements PharmacyDetailsService {
             throw new CommonExceptionHandler(ErrorStatus.PLACE_NO_RESULT);
         }
         return false;
+    }
+
+    // photo_reference과 api key 이용하여 이미미 요청 후 -> Base64 인코딩된 url 반환
+    private String getImageBase64(String photoReference) {
+        String url = GOOGLE_PLACE_IMG_URL + "maxwidth=" + IMG_MAX_SIZE + "&maxheight" + IMG_MAX_SIZE + "&photo_reference=" + photoReference + "&key=" + API_KEY;
+        try {
+            byte[] imageBytes = downloadImage(url);
+            return "data:image/jpeg;base64," + Base64.getEncoder().encodeToString(imageBytes);
+        }catch (IOException e) {
+            return "기본 IMG";
+        }
+    }
+
+    // 여러 사진들 중 하나의 photo_reference 반환
+    // getImageBase64()의 파라미터로 사용
+    private String getPhotoReference(GooglePlaceDetailsResponse response) {
+
+        List<GooglePlaceDetailsResponse.Photo> photos = response.getResult().getPhotos();
+        // 사진이 없으면 일단 빈 문자열 반환
+        if (photos.isEmpty()) {
+            return "";
+        }
+        return photos.get(0).getPhotoReference();
+    }
+
+    private byte[] downloadImage(String imageUrl) throws IOException {
+        try (InputStream in = new URL(imageUrl).openStream()) {
+            return in.readAllBytes();
+        }
     }
 
 }

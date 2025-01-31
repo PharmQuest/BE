@@ -1,7 +1,6 @@
 package com.pharmquest.pharmquest.domain.mypage.web.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.pharmquest.pharmquest.domain.pharmacy.web.dto.GooglePlaceDetailsResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

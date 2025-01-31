@@ -4,7 +4,6 @@ import com.pharmquest.pharmquest.domain.mypage.converter.MyPageConverter;
 import com.pharmquest.pharmquest.domain.mypage.service.MyPageService;
 import com.pharmquest.pharmquest.domain.mypage.web.dto.MyPageResponseDTO;
 import com.pharmquest.pharmquest.domain.supplements.data.Enum.CategoryKeyword;
-import com.pharmquest.pharmquest.domain.supplements.data.Supplements;
 import com.pharmquest.pharmquest.domain.token.JwtUtil;
 import com.pharmquest.pharmquest.domain.user.data.User;
 import com.pharmquest.pharmquest.global.apiPayload.ApiResponse;

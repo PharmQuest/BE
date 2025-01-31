@@ -53,12 +53,12 @@ public class PharmacyDetailsServiceImpl implements PharmacyDetailsService {
         return MyPageResponseDTO.PharmacyDto.builder()
                 .name(detailsResult.getName())
                 .placeId(placeId)
-                .openNow(detailsResult.getOpeningHours().getOpenNow())
+//                .openNow(detailsResult.getOpeningHours().getOpenNow())
                 .region(getTranslatedLocation(response, detailsResult.getLocationList()))
                 .latitude(detailsResult.getGeometry().getLocation().getLat())
                 .longitude(detailsResult.getGeometry().getLocation().getLng())
                 .country(getCountryName(response))
-                .periods(detailsResult.getOpeningHours().getPeriods())
+//                .periods(detailsResult.getOpeningHours().getPeriods())
                 .imgUrl("imgURL")
                 .build();
     }
@@ -67,6 +67,9 @@ public class PharmacyDetailsServiceImpl implements PharmacyDetailsService {
     private String getTranslatedLocation(GooglePlaceDetailsResponse response, List<String> locationList) {
 
         String targetLanguage = PharmacyCountry.getLanguage(getCountryName(response));
+        if (locationList.isEmpty()) {
+            return "주소 미제공";
+        }
 
         List<String> translatedLocation = new ArrayList<>(locationList.stream()
                 .map(location -> {
@@ -78,6 +81,7 @@ public class PharmacyDetailsServiceImpl implements PharmacyDetailsService {
                     }
                 }).toList());
 
+        // 한국의 경우 주소를 한국식으로 변경
         if ("ko".equals(targetLanguage)) {
             Collections.reverse(translatedLocation);
         }
@@ -115,7 +119,7 @@ public class PharmacyDetailsServiceImpl implements PharmacyDetailsService {
 
         if (response.getResult() != null && response.getResult().getTypes() != null) {
             List<String> types = response.getResult().getTypes();
-            return types.contains("pharmacy") || types.contains("drugstore"); // 약국 중에 장소 타입이 pharmacy 아니고 drugstore로 적혀있는 곳도 있음
+            return types.contains("pharmacy") || types.contains("drugstore") || types.contains("hospital") || types.contains("health"); // 약국 중에 장소 타입이 pharmacy 아니고 drugstore로 적혀있는 곳도 있음
         }else if(response.getResult() == null){
             throw new CommonExceptionHandler(ErrorStatus.PLACE_NO_RESULT);
         }

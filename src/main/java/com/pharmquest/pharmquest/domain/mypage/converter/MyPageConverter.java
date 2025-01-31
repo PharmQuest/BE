@@ -3,6 +3,8 @@ package com.pharmquest.pharmquest.domain.mypage.converter;
 import com.pharmquest.pharmquest.domain.mypage.web.dto.MyPageResponseDTO;
 import com.pharmquest.pharmquest.domain.supplements.data.Enum.CategoryKeyword;
 import com.pharmquest.pharmquest.domain.supplements.data.Supplements;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import com.pharmquest.pharmquest.domain.supplements.repository.SupplementsCategoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -43,10 +45,13 @@ public class MyPageConverter {
         }
     }
 
-    public static MyPageResponseDTO.PharmacyResponse toPharmaciesDto(List<MyPageResponseDTO.PharmacyDto> pharmacyDtoList) {
+    public static MyPageResponseDTO.PharmacyResponse toPharmaciesResponse(Page<MyPageResponseDTO.PharmacyDto> pharmacies) {
+
+        List<MyPageResponseDTO.PharmacyDto> list = pharmacies.stream().toList();
+
         return MyPageResponseDTO.PharmacyResponse.builder()
-                .pharmacies(pharmacyDtoList)
-                .count(pharmacyDtoList.size())
+                .pharmacies(list)
+                .count((int) pharmacies.getTotalElements())
                 .build();
     }
 }

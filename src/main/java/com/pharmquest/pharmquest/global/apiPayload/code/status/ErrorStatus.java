@@ -36,6 +36,11 @@ public enum ErrorStatus implements BaseErrorCode {
     SUPPLEMENTS_NO_SEARCH_RESULT(HttpStatus.NOT_FOUND, "SUPP4001", "검색 결과가 없습니다."),
     SUPPLEMENTS_NO_KEYWORD(HttpStatus.BAD_REQUEST, "SUPP4002", "검색어를 입력해주세요."),
     AUTHORIZATION_HEADER_NOT_FOUND(HttpStatus.UNAUTHORIZED, "AUTH4001", "로그인이 필요한 서비스입니다."),
+
+    // my page
+    INVALID_PAGE_NUMBER(HttpStatus.BAD_REQUEST, "MYPAGE4001", "페이지 번호가 1보다 작을 수 없습니다."),
+    PAGE_NUMBER_EXCEEDS_TOTAL(HttpStatus.BAD_REQUEST, "MYAPGE4002", "페이지 번호 전체 페이지 수를 초과하였습니다."),
+
     ;
 
     private final HttpStatus httpStatus;

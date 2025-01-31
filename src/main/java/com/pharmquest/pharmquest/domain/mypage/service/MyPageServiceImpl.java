@@ -64,9 +64,9 @@ public class MyPageServiceImpl implements MyPageService {
 
         // 잘못된 페이지 요청 방지
         int totalPages = (int) Math.floor((double) totalElements / PAGE_SIZE);
-        if (page < 1) {
+        if (page < 1) { // 1보다 작은 경우
             throw new CommonExceptionHandler(ErrorStatus.INVALID_PAGE_NUMBER);
-        } else if (page > totalPages) {
+        } else if (page-1 > totalPages) { // 페이지 수 초과
             throw new CommonExceptionHandler(ErrorStatus.PAGE_NUMBER_EXCEEDS_TOTAL);
         }
 

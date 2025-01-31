@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -39,7 +40,7 @@ public class GooglePlaceDetailsResponse {
 
         @JsonProperty("name")
         public String getName() {
-            return name == null ? "Unknown" : name;
+            return name == null ? "이름 미제공" : name;
         }
 
         @JsonProperty("formatted_address")
@@ -66,7 +67,8 @@ public class GooglePlaceDetailsResponse {
         public List<String> getLocationList() {
 
             if (addressComponents == null || addressComponents.isEmpty()) {
-                return List.of("Unknown");
+                // 정보 미제공 시 빈 List 반환. 이후에 대체 문자열로 변환
+                return new ArrayList<>();
             }
 
             // 지역 키워드 중 political 가진 country가 아닌 키워드 추출하여 list에 저장
@@ -78,7 +80,8 @@ public class GooglePlaceDetailsResponse {
 
             int size = locationList.size();
             if (size == 0) {
-                return List.of("Unknown");
+                // 마땅한 정보 없을 시 빈 List 반환. 이후에 대체 문자열로 변환
+                return new ArrayList<>();
             }
 
             // 지역 키워드를 규모 큰 순서로 3개 이하가 되도록 설정
@@ -97,12 +100,12 @@ public class GooglePlaceDetailsResponse {
 
         @JsonProperty("long_name")
         public String getLongName() {
-            return longName == null ? "" : longName;
+            return longName == null ? "위치 미제공" : longName;
         }
 
         @JsonProperty("short_name")
         public String getShortName() {
-            return shortName == null ? "" : shortName;
+            return shortName == null ? "위치 미제공" : shortName;
         }
 
         @JsonProperty("types")

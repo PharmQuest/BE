@@ -22,6 +22,7 @@ public class SupplementsResponseDTO {
         private String category2;
         private String category3;
         private String category4;
+        private String link;
     }
 
     // 응답용 DTO
@@ -82,6 +83,9 @@ public class SupplementsResponseDTO {
         private String category2;
         private String category3;
         private String category4;
+        private String dosage;
+        private String purpose;
+        private String warning;
         private List<String> categories;
         private List<RelatedSupplementDto> relatedSupplements;
     }

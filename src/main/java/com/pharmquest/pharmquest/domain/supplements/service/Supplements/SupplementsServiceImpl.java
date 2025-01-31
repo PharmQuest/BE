@@ -152,8 +152,7 @@ public class SupplementsServiceImpl implements SupplementsService {
 
     private void saveNaverSupplements() {
         List<String> supplementsNames = Arrays.asList(
-                "일본 인기 영양제",
-                "중국 인기 영양제"
+                "한국 인기 영양제"
         );
 
         supplementsNames.forEach(searchKeyword ->
@@ -230,10 +229,8 @@ public class SupplementsServiceImpl implements SupplementsService {
     private Country getCountryFromSearchKeyword(String keyword) {
         if (keyword.contains("미국")) {
             return Country.USA;
-        } else if (keyword.contains("일본")) {
-            return Country.JAPAN;
-        } else if (keyword.contains("중국")) {
-            return Country.CHINA;
+        } else if (keyword.contains("한국")) {
+            return Country.KOREA;
         } else {
             return Country.NONE;
         }

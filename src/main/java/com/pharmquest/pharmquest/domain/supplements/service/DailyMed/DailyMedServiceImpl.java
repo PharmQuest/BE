@@ -42,7 +42,7 @@ public class DailyMedServiceImpl implements DailyMedService {
 
             if (response.getBody() != null && response.getBody().getData() != null) {
                 return response.getBody().getData().stream()
-                        .limit(30)
+                        .limit(100)
                         .map(item -> DailyMedResponseDTO.ExtractedInfo.builder()
                                 .setid(item.getSetid())
                                 .title(item.getTitle())
@@ -76,14 +76,20 @@ public class DailyMedServiceImpl implements DailyMedService {
             String processedTitle = removeManufacturerFromTitle(title);
             String fullTitle = processedTitle.replaceAll("\\(.*?\\)", "").trim() + " / " + translate(processedTitle.replaceAll("\\(.*?\\)", "").trim());
             String imageUrl = fetchImageUrl(setId);
+            String dosage = translate(extractSectionText(document, "34068-7"));
+            String purpose = translate(extractSectionText(document, "34067-9"));
+            String warning = translate(extractSectionText(document, "34071-1"));
 
+            if (dosage == null || purpose == null || warning == null) {
+                return null;
+            }
 
             return DailyMedResponseDTO.DetailInfo.builder()
                     .title(fullTitle)
                     .manufacturer(manufacturer)
-                    .dosage(translate(extractSectionText(document, "34068-7")))
-                    .purpose(translate(extractSectionText(document, "34067-9")))
-                    .warning(translate(extractSectionText(document, "34071-1")))
+                    .dosage(dosage)
+                    .purpose(purpose)
+                    .warning(warning)
                     .imageUrl(imageUrl)
                     .build();
 

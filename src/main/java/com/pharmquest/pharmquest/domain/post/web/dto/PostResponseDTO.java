@@ -64,6 +64,7 @@ public class PostResponseDTO {
         String title;
         String content;
         String category;
+        String country;
         Integer scrapeCount;
         Integer likeCount;
         Integer commentCount;

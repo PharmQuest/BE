@@ -6,12 +6,9 @@ import com.pharmquest.pharmquest.domain.supplements.data.Supplements;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import com.pharmquest.pharmquest.domain.supplements.repository.SupplementsCategoryRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor

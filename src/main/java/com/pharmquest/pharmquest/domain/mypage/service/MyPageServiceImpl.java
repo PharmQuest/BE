@@ -5,7 +5,6 @@ import com.pharmquest.pharmquest.domain.mypage.web.dto.MyPageResponseDTO;
 import com.pharmquest.pharmquest.domain.pharmacy.data.enums.PharmacyCountry;
 import com.pharmquest.pharmquest.domain.pharmacy.service.PharmacyDetailsService;
 import com.pharmquest.pharmquest.domain.supplements.data.Enum.CategoryKeyword;
-import com.pharmquest.pharmquest.domain.supplements.data.Supplements;
 import com.pharmquest.pharmquest.domain.supplements.data.mapping.SupplementsScrap;
 import com.pharmquest.pharmquest.domain.supplements.repository.SupplementsScrapRepository;
 import com.pharmquest.pharmquest.domain.user.data.User;
@@ -22,7 +21,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Objects;
 
 @Service
@@ -82,4 +80,5 @@ public class MyPageServiceImpl implements MyPageService {
 
         return new PageImpl<>(pharmacyDtoList.subList(start, end), pageable, totalElements);
     }
+
 }

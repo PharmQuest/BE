@@ -11,9 +11,6 @@ import java.util.List;
 
 public interface MyPageService {
 
-    List<Supplements> getScrapSupplements(Long userId);
     Page<MyPageResponseDTO.PharmacyDto> getScrapPharmacies(User user, String country, Integer page);
-
     Page<MyPageResponseDTO.SupplementsResponseDto> getScrapSupplements(Long userId, Pageable pageable, CategoryKeyword category);
-    List<MyPageResponseDTO.PharmacyDto> getScrapPharmacies(User user, String country);
 }

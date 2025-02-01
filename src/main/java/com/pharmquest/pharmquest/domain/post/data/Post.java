@@ -53,6 +53,11 @@ public class Post extends BaseEntity {
 
     private boolean isDeleted = false;
 
+    @Lob
+    @Column(columnDefinition = "TEXT")
+    @Setter
+    private String postImgURL;
+
     // 매핑
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
     private List<PostLike> likes = new ArrayList<>();

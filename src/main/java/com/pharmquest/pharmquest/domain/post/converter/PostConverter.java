@@ -22,13 +22,13 @@ public class PostConverter {
                 .build();
     }
 
-    public static Post toPost(PostRequestDTO.CreatePostDTO request) {
-
+    public static Post toPost(PostRequestDTO.CreatePostDTO request, String imageUrl) {
         return Post.builder()
                 .title(request.getTitle())
                 .content(request.getContent())
                 .category(request.getCategory())
                 .country(request.getCountry())
+                .postImgURL(imageUrl)
                 .build();
     }
 

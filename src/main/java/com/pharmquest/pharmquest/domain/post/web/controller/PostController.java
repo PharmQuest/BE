@@ -26,7 +26,9 @@ import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
@@ -40,17 +42,19 @@ public class PostController {
     private final PostCommentService postCommentService;
     private final PostReportService postReportService;
 
-    @PostMapping("/posts")
+    @PostMapping(value = "/posts", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "게시글 작성 API")
     public ApiResponse<PostResponseDTO.postResultDTO> createPost(
-            @Parameter (hidden = true) @RequestHeader("Authorization") String authorizationHeader,
-            @RequestBody @Valid PostRequestDTO.CreatePostDTO request) {
+            @Parameter(hidden = true) @RequestHeader("Authorization") String authorizationHeader,
+            @RequestPart("request") @Valid PostRequestDTO.CreatePostDTO request,
+            @RequestPart(value = "file", required = false) MultipartFile file) {
 
         User user = jwtUtil.getUserFromHeader(authorizationHeader);
 
-        Post post = postCommandService.registerPost(user.getId(), request);
+        Post post = postCommandService.registerPost(user.getId(), request, file);
         return ApiResponse.onSuccess(PostConverter.toPostResultDTO(post));
     }
+
 
     @DeleteMapping("/posts/{post_id}")
     @Operation(summary = "게시글 삭제 API")

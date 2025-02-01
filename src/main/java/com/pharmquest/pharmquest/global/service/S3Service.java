@@ -52,6 +52,26 @@ public class S3Service {
         return fileUrl;
     }
 
+    public String uploadPostImg(MultipartFile file) {
+        String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename(); // 고유한 파일명 생성
+
+        try {
+            ObjectMetadata metadata = new ObjectMetadata();
+            metadata.setContentType(file.getContentType());
+            metadata.setContentLength(file.getSize());
+
+            PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, fileName, file.getInputStream(), metadata);
+
+            amazonS3.putObject(putObjectRequest);
+        } catch (IOException e) {
+            throw new RuntimeException("파일 업로드 실패", e);
+        }
+
+        String fileUrl = amazonS3.getUrl(bucketName, fileName).toString(); // 업로드된 파일 URL 반환
+
+        return fileUrl;
+    }
+
     //단순 조회용도 테스트 목적
     public List<S3File> getAllFiles() {
         return s3FileRepository.findAll();

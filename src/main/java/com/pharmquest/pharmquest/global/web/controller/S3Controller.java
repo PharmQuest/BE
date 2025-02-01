@@ -1,17 +1,20 @@
 package com.pharmquest.pharmquest.global.web.controller;
 
+import com.pharmquest.pharmquest.global.data.S3File;
 import com.pharmquest.pharmquest.global.service.S3Service;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.Parameter; // ✅ ApiParam 대신 사용
+import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/s3")
@@ -32,5 +35,14 @@ public class S3Controller {
             @RequestParam("file") MultipartFile file) {
         String fileUrl = s3Service.uploadFile(file);
         return ResponseEntity.ok(fileUrl);
+    }
+
+    @Operation(summary = "업로드된 파일 목록 조회", description = "S3에 업로드된 파일의 정보를 조회합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "파일 목록 조회 성공")
+    })
+    @GetMapping("/files")
+    public ResponseEntity<List<S3File>> getAllFiles() {
+        return ResponseEntity.ok(s3Service.getAllFiles());
     }
 }

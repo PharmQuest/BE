@@ -20,6 +20,7 @@ public class S3Service {
 
     private final AmazonS3 amazonS3;
     private final S3FileRepository s3FileRepository;
+    //s3 적용할때 db가 바뀌니까 관련 repository도 추가해야함
     @Value("${cloud.aws.s3.bucket}")
     private String bucketName;
 
@@ -41,7 +42,7 @@ public class S3Service {
 
         String fileUrl = amazonS3.getUrl(bucketName, fileName).toString(); // 업로드된 파일 URL 반환
 
-        // DB에 저장
+        // DB에 저장 (향후 이용시 db를 수정해야함 S3Service안에 업로드가 필요한 메소드 작성할 때 db명도 맞게 수정하면 됨)
         S3File s3File = S3File.builder()
                 .fileName(fileName)
                 .fileUrl(fileUrl)
@@ -51,6 +52,7 @@ public class S3Service {
         return fileUrl;
     }
 
+    //단순 조회용도 테스트 목적
     public List<S3File> getAllFiles() {
         return s3FileRepository.findAll();
     }

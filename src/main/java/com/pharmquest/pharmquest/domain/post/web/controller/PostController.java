@@ -95,7 +95,10 @@ public class PostController {
 
     @GetMapping("/posts/{post_id}")
     @Operation(summary = "게시글 상세조회 API")
-    public ApiResponse<PostResponseDTO.PostDetailDTO> getPost(@Parameter (hidden = true) @RequestHeader("Authorization") String authorizationHeader,@PathVariable(name = "post_id")Long postId, @RequestParam(name="page")Integer page){
+    public ApiResponse<PostResponseDTO.PostDetailDTO> getPost
+            (@Parameter (hidden = true) @RequestHeader("Authorization") String authorizationHeader,
+             @PathVariable(name = "post_id")Long postId,
+             @RequestParam(name="page")Integer page){
      
         User user = jwtUtil.getUserFromHeader(authorizationHeader);
 

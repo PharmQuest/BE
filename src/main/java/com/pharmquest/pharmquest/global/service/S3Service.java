@@ -1,7 +1,6 @@
 package com.pharmquest.pharmquest.global.service;
 
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import lombok.RequiredArgsConstructor;
@@ -30,10 +29,9 @@ public class S3Service {
             metadata.setContentType(file.getContentType());
             metadata.setContentLength(file.getSize());
 
-            PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, fileName, file.getInputStream(), metadata)
-                    .withCannedAcl(CannedAccessControlList.PublicRead); // Public 권한 부여
+            PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, fileName, file.getInputStream(), metadata);
 
-            amazonS3.putObject(putObjectRequest);
+            amazonS3.putObject(putObjectRequest); // ✅ ACL 설정 제거
 
         } catch (IOException e) {
             throw new RuntimeException("파일 업로드 실패", e);

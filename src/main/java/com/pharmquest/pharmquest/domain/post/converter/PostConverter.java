@@ -83,6 +83,7 @@ public class PostConverter {
                 .isLiked(isLiked)
                 .isScraped(isScraped)
                 .isOwnPost(isOwnPost)
+                .imageUrl(post.getPostImgURL())
                 .comments(topLevelComment)
                 .isFirst(parentCommentsPage.isFirst())
                 .isLast(parentCommentsPage.isLast())

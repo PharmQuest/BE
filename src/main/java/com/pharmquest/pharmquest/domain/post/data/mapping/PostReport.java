@@ -7,7 +7,6 @@ import com.pharmquest.pharmquest.global.data.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
-
 @Entity
 @Getter
 @Setter

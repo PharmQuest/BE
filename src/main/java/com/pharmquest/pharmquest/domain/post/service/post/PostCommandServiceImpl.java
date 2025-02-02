@@ -176,7 +176,7 @@ public class PostCommandServiceImpl implements PostCommandService {
         }
 
         //이미지를 삭제하고 싶을 때
-        else if (request.getDeleteImgae() && imageFile == null) {
+        if (request.getDeleteImgae() && imageFile == null) {
             post.setPostImgURL(null);
         }
 

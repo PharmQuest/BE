@@ -59,7 +59,19 @@ public class MyPageController {
     ) {
         Pageable pageable = PageRequest.of(page, 10);
         User user = jwtUtil.getUserFromHeader(authorizationHeader);
-        Page<MyPageResponseDTO.ScrapPostResponseDTO> scrapedPost = myPageService.getScrapPosts(user.getId(), pageable);
-        return ApiResponse.onSuccess(scrapedPost);
+        Page<MyPageResponseDTO.ScrapPostResponseDTO> Post = myPageService.getScrapPosts(user.getId(), pageable);
+        return ApiResponse.onSuccess(Post);
+    }
+
+    @GetMapping("/myactivities/post")
+    @Operation(summary = "나의활동 - 내가 작성한 게시물 조회 API")
+    public ApiResponse<Page<MyPageResponseDTO.PostResponseDTO>> getMyPost(
+            @Parameter (hidden = true) @RequestHeader("Authorization") String authorizationHeader,
+            @Parameter(description = "페이지 번호") @RequestParam(defaultValue = "0") int page
+    ) {
+        Pageable pageable = PageRequest.of(page, 10);
+        User user = jwtUtil.getUserFromHeader(authorizationHeader);
+        Page<MyPageResponseDTO.PostResponseDTO> myPost = myPageService.getMyPosts(user.getId(), pageable);
+        return ApiResponse.onSuccess(myPost);
     }
 }

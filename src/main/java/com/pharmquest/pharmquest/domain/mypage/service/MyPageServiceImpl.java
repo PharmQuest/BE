@@ -5,6 +5,8 @@ import com.pharmquest.pharmquest.domain.mypage.data.PostScrap;
 import com.pharmquest.pharmquest.domain.mypage.web.dto.MyPageResponseDTO;
 import com.pharmquest.pharmquest.domain.pharmacy.data.enums.PharmacyCountry;
 import com.pharmquest.pharmquest.domain.pharmacy.service.PharmacyDetailsService;
+import com.pharmquest.pharmquest.domain.post.data.Post;
+import com.pharmquest.pharmquest.domain.post.repository.post.PostRepository;
 import com.pharmquest.pharmquest.domain.post.repository.scrap.PostScrapRepository;
 import com.pharmquest.pharmquest.domain.supplements.data.Enum.CategoryKeyword;
 import com.pharmquest.pharmquest.domain.supplements.data.mapping.SupplementsScrap;
@@ -35,6 +37,7 @@ public class MyPageServiceImpl implements MyPageService {
     private final PharmacyDetailsService pharmacyDetailsService;
     private final SupplementsScrapRepository supplementsScrapRepository;
     private final PostScrapRepository postScrapRepository;
+    private final PostRepository postRepository;
 
     private final int PAGE_SIZE = 10;
 
@@ -68,6 +71,23 @@ public class MyPageServiceImpl implements MyPageService {
                 .toList();
 
         return new PageImpl<>(scrapedPostDTO, pageable, postScrapPage.getTotalPages());
+    }
+
+    @Override
+    public Page<MyPageResponseDTO.PostResponseDTO> getMyPosts(Long userId, Pageable pageable) {
+        Page<Post> postPage = postRepository.findPostByUserId(userId, pageable);
+
+        if (postPage.isEmpty()) {
+            return new PageImpl<>(new ArrayList<>(), pageable, postPage.getTotalElements());
+        } else {
+
+            List<MyPageResponseDTO.PostResponseDTO> PostDTO = postPage.stream()
+                    .map(myPageConverter::toPostDto)
+                    .filter(Objects::nonNull)
+                    .toList();
+
+            return new PageImpl<>(PostDTO, pageable, postPage.getTotalPages());
+        }
     }
 
     @Override

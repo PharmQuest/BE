@@ -7,8 +7,10 @@ import com.pharmquest.pharmquest.domain.post.data.enums.Country;
 import com.pharmquest.pharmquest.domain.post.data.enums.PostCategory;
 import com.pharmquest.pharmquest.domain.post.data.enums.ReportType;
 import com.pharmquest.pharmquest.domain.post.data.mapping.Comment;
+import com.pharmquest.pharmquest.domain.post.data.mapping.CommentLike;
 import com.pharmquest.pharmquest.domain.post.data.mapping.PostLike;
 import com.pharmquest.pharmquest.domain.post.data.mapping.PostReport;
+import com.pharmquest.pharmquest.domain.post.service.comment.CommentLikeService;
 import com.pharmquest.pharmquest.domain.post.service.post.PostCommandService;
 import com.pharmquest.pharmquest.domain.post.service.comment.PostCommentService;
 import com.pharmquest.pharmquest.domain.post.service.like.PostLikeService;
@@ -41,6 +43,7 @@ public class PostController {
     private final JwtUtil jwtUtil;
     private final PostCommentService postCommentService;
     private final PostReportService postReportService;
+    private final CommentLikeService commentLikeService;
 
     @PostMapping(value = "/posts", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "게시글 작성 API")
@@ -187,6 +190,18 @@ public class PostController {
 
         Comment createdComment = postCommentService.addComment(user.getId(),postId, parentsId,requestDTO);
         return ApiResponse.onSuccess(PostCommentConverter.toCreateCommentResultDTO(createdComment));
+    }
+
+    @PostMapping("/comments/{comment_id}/likes")
+    @Operation(summary = "댓글 좋아요 API")
+    public ApiResponse<CommentResponseDTO.CreateCommentLikeResponseDTO> createCommentLike(
+            @Parameter (hidden = true) @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable(name = "comment_id") Long commentId){
+
+        User user = jwtUtil.getUserFromHeader(authorizationHeader);
+
+        CommentLike commentLike = commentLikeService.createCommentLike(user.getId(), commentId);
+        return ApiResponse.onSuccess(PostCommentConverter.toCommentLikeDTO(commentLike));
     }
 
 

@@ -1,7 +1,12 @@
 package com.pharmquest.pharmquest.domain.post.converter;
+import com.pharmquest.pharmquest.domain.post.data.Post;
 import com.pharmquest.pharmquest.domain.post.data.mapping.Comment;
+import com.pharmquest.pharmquest.domain.post.data.mapping.CommentLike;
+import com.pharmquest.pharmquest.domain.post.data.mapping.PostLike;
 import com.pharmquest.pharmquest.domain.post.web.dto.CommentRequestDTO;
 import com.pharmquest.pharmquest.domain.post.web.dto.CommentResponseDTO;
+import com.pharmquest.pharmquest.domain.post.web.dto.PostResponseDTO;
+import com.pharmquest.pharmquest.domain.user.data.User;
 
 
 import java.time.LocalDateTime;
@@ -25,6 +30,7 @@ public class PostCommentConverter {
                 .content(comment.getContent())
                 .userId(comment.getUser().getId())
                 .userName(comment.getUser().getEmail().substring(0, comment.getUser().getEmail().indexOf("@")))
+                .likeCount(comment.getLikes().size())
                 .createdAt(comment.getCreatedAt())
                 .parentId(comment.getParent() != null ? comment.getParent().getId():null)
                 .parentName(comment.getParent() != null ? comment.getParent().getUser().getEmail().substring(0, comment.getParent().getUser().getEmail().indexOf("@")): null)
@@ -43,6 +49,17 @@ public class PostCommentConverter {
     public static CommentResponseDTO.CreateCommentResultDTO toCreateCommentResultDTO(Comment comment) {
         return CommentResponseDTO.CreateCommentResultDTO.builder()
                 .commentId(comment.getId())
+                .createdAt(LocalDateTime.now())
+                .build();
+    }
+
+    public static CommentLike toCommentLike(User user, Comment comment) {
+        return CommentLike.builder().user(user).comment(comment).build();
+    }
+
+    public static CommentResponseDTO.CreateCommentLikeResponseDTO toCommentLikeDTO(CommentLike commentLike) {
+        return CommentResponseDTO.CreateCommentLikeResponseDTO.builder()
+                .commentLikeId(commentLike.getId())
                 .createdAt(LocalDateTime.now())
                 .build();
     }

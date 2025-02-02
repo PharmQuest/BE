@@ -71,15 +71,20 @@ public class SupplementsServiceImpl implements SupplementsService {
     //영양제 검색
     @Override
     public Page<SupplementsResponseDTO.SupplementsSearchResponseDto> searchSupplements(String keyword, Country country, Pageable pageable, Long userId) {
+        Pageable pageableWithSort = PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                Sort.by(Sort.Direction.DESC, "scrapCount")
+        );
         Page<Supplements> supplementsPage;
         if (keyword == null) {
             throw new CommonExceptionHandler(ErrorStatus.SUPPLEMENTS_NO_KEYWORD);
         }
 
         if (country != null) {
-            supplementsPage = supplementsRepository.findByNameContainingAndCountry(keyword, country, pageable);
+            supplementsPage = supplementsRepository.findByNameContainingAndCountry(keyword, country, pageableWithSort);
         } else {
-            supplementsPage = supplementsRepository.findByNameContaining(keyword, pageable);
+            supplementsPage = supplementsRepository.findByNameContaining(keyword, pageableWithSort);
         }
 
         if (supplementsPage.isEmpty()) {
@@ -90,7 +95,7 @@ public class SupplementsServiceImpl implements SupplementsService {
                 .map(supplement -> supplementsConverter.toSearchDto(supplement, userId))
                 .collect(Collectors.toList());
 
-        return new PageImpl<>(dtoList, pageable, supplementsPage.getTotalElements());
+        return new PageImpl<>(dtoList, pageableWithSort, supplementsPage.getTotalElements());
     }
 
     //영양제 상세조회

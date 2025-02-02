@@ -6,11 +6,9 @@ import com.pharmquest.pharmquest.domain.post.data.Post;
 import com.pharmquest.pharmquest.domain.post.data.enums.Country;
 import com.pharmquest.pharmquest.domain.post.data.enums.PostCategory;
 import com.pharmquest.pharmquest.domain.post.data.enums.ReportType;
-import com.pharmquest.pharmquest.domain.post.data.mapping.Comment;
-import com.pharmquest.pharmquest.domain.post.data.mapping.CommentLike;
-import com.pharmquest.pharmquest.domain.post.data.mapping.PostLike;
-import com.pharmquest.pharmquest.domain.post.data.mapping.PostReport;
+import com.pharmquest.pharmquest.domain.post.data.mapping.*;
 import com.pharmquest.pharmquest.domain.post.service.comment.CommentLikeService;
+import com.pharmquest.pharmquest.domain.post.service.comment.CommentReportService;
 import com.pharmquest.pharmquest.domain.post.service.post.PostCommandService;
 import com.pharmquest.pharmquest.domain.post.service.comment.PostCommentService;
 import com.pharmquest.pharmquest.domain.post.service.like.PostLikeService;
@@ -44,6 +42,7 @@ public class PostController {
     private final PostCommentService postCommentService;
     private final PostReportService postReportService;
     private final CommentLikeService commentLikeService;
+    private final CommentReportService commentReportService;
 
     @PostMapping(value = "/posts", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "게시글 작성 API")
@@ -242,5 +241,19 @@ public class PostController {
 
         commentLikeService.deleteCommentLike(user.getId(), commentId);
         return ApiResponse.onSuccess("좋아요가 삭제되었습니다");
+    }
+
+    @PostMapping("/comments/{comment_id}/reports")
+    @Operation(summary = "댓글 신고 API")
+    public ApiResponse<CommentResponseDTO.CreateCommentReportResponseDTO> createCommentLike(
+            @Parameter (hidden = true)
+            @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable(name = "comment_id")Long commentId,
+            @RequestParam(name = "type") ReportType reportType){
+
+        User user = jwtUtil.getUserFromHeader(authorizationHeader);
+
+        CommentReport commentReport = commentReportService.createReport(user.getId(), commentId, reportType);
+        return ApiResponse.onSuccess(PostCommentConverter.toCommentReportDTO(commentReport));
     }
 }

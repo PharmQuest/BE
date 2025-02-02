@@ -11,4 +11,6 @@ public interface MyPageService {
     Page<MyPageResponseDTO.PharmacyDto> getScrapPharmacies(User user, String country, Integer page);
     Page<MyPageResponseDTO.SupplementsResponseDto> getScrapSupplements(Long userId, Pageable pageable, CategoryKeyword category);
     Page<MyPageResponseDTO.ScrapPostResponseDTO> getScrapPosts(Long userId, Pageable pageable);
+    Page<MyPageResponseDTO.PostResponseDTO> getMyPosts(Long userId, Pageable pageable);
+
 }

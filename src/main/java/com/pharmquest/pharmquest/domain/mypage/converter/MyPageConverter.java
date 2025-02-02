@@ -49,11 +49,24 @@ public class MyPageConverter {
                 .writerName(post.getUser().getName())
                 .title(post.getTitle())
                 .category(post.getCategory())
-                .content(post.getContent().substring(0,40))
+                .content(post.getContent().length() <= 40 ? post.getContent() : post.getContent().substring(0, 40))
                 .commentCount(post.getComments().size())
                 .scrapeCount(post.getScraps().size())
                 .likeCount(post.getLikes().size())
-                .createdAt(post.getCreatedAt())
+                .createdAt(post.getCreatedAt().toLocalDate())
+                .build();
+    }
+
+    public MyPageResponseDTO.PostResponseDTO toPostDto(Post post) {
+        return MyPageResponseDTO.PostResponseDTO.builder()
+                .postId(post.getId())
+                .title(post.getTitle())
+                .category(post.getCategory())
+                .content(post.getContent().length() <= 40 ? post.getContent() : post.getContent().substring(0, 40))
+                .commentCount(post.getComments().size())
+                .scrapeCount(post.getScraps().size())
+                .likeCount(post.getLikes().size())
+                .createdAt(post.getCreatedAt().toLocalDate())
                 .build();
     }
 

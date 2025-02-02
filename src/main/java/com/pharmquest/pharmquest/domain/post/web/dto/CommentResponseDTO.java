@@ -46,4 +46,13 @@ public class CommentResponseDTO {
         LocalDateTime createdAt;
     }
 
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static  class CreateCommentReportResponseDTO{
+        Long commentReportId;
+        LocalDateTime createdAt;
+    }
+
 }

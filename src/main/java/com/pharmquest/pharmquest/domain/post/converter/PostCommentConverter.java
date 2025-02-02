@@ -1,9 +1,14 @@
 package com.pharmquest.pharmquest.domain.post.converter;
 
+import com.pharmquest.pharmquest.domain.post.data.Post;
+import com.pharmquest.pharmquest.domain.post.data.enums.ReportType;
 import com.pharmquest.pharmquest.domain.post.data.mapping.Comment;
 import com.pharmquest.pharmquest.domain.post.data.mapping.CommentLike;
+import com.pharmquest.pharmquest.domain.post.data.mapping.CommentReport;
+import com.pharmquest.pharmquest.domain.post.data.mapping.PostReport;
 import com.pharmquest.pharmquest.domain.post.web.dto.CommentRequestDTO;
 import com.pharmquest.pharmquest.domain.post.web.dto.CommentResponseDTO;
+import com.pharmquest.pharmquest.domain.post.web.dto.PostResponseDTO;
 import com.pharmquest.pharmquest.domain.user.data.User;
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -50,7 +55,10 @@ public class PostCommentConverter {
     }
 
     public static CommentLike toCommentLike(User user, Comment comment) {
-        return CommentLike.builder().user(user).comment(comment).build();
+        return CommentLike.builder()
+                .user(user)
+                .comment(comment)
+                .build();
     }
 
     public static CommentResponseDTO.CreateCommentLikeResponseDTO toCommentLikeDTO(CommentLike commentLike) {
@@ -59,4 +67,20 @@ public class PostCommentConverter {
                 .createdAt(LocalDateTime.now())
                 .build();
     }
+
+    public static CommentReport toCommentReport(User user, Comment comment, ReportType reportType) {
+        return CommentReport.builder()
+                .user(user)
+                .comment(comment)
+                .type(reportType)
+                .build();
+    }
+
+    public static CommentResponseDTO.CreateCommentReportResponseDTO toCommentReportDTO(CommentReport commentReport) {
+        return CommentResponseDTO.CreateCommentReportResponseDTO.builder()
+                .commentReportId(commentReport.getId())
+                .createdAt(LocalDateTime.now())
+                .build();
+    }
+
 }

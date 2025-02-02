@@ -180,7 +180,7 @@ public class PostController {
 
     @PostMapping("/posts/{post_id}/comments")
     @Operation(summary = "게시글 댓글, 답글 작성 API")
-    public ApiResponse<CommentResponseDTO.CreateCommentResultDTO> createComment(
+    public ApiResponse<CommentResponseDTO.commentResultDTO> createComment(
             @Parameter (hidden = true) @RequestHeader("Authorization") String authorizationHeader,
             @PathVariable(name = "post_id")Long postId,
             @RequestParam(name="parentsId", required = false)Long parentsId,
@@ -189,7 +189,33 @@ public class PostController {
         User user = jwtUtil.getUserFromHeader(authorizationHeader);
 
         Comment createdComment = postCommentService.addComment(user.getId(),postId, parentsId,requestDTO);
-        return ApiResponse.onSuccess(PostCommentConverter.toCreateCommentResultDTO(createdComment));
+        return ApiResponse.onSuccess(PostCommentConverter.toCommentResultDTO(createdComment));
+    }
+
+
+    @PatchMapping("/comments/{comment_id}/update")
+    @Operation(summary = "댓글 수정 API")
+    public ApiResponse<CommentResponseDTO.commentResultDTO> updateComment(
+            @Parameter (hidden = true) @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable Long comment_id,
+            @RequestBody @Valid CommentRequestDTO.UpdateCommentDTO request) {
+
+        User user = jwtUtil.getUserFromHeader(authorizationHeader);
+
+       Comment comment = postCommentService.updateComment(user.getId(),comment_id,request);
+        return ApiResponse.onSuccess(PostCommentConverter.toCommentResultDTO(comment));
+    }
+
+    @PatchMapping("/comments/{comment_id}/delete")
+    @Operation(summary = "댓글 삭제 API")
+    public ApiResponse<String> deleteComment(
+            @Parameter (hidden = true) @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable Long comment_id) {
+
+        User user = jwtUtil.getUserFromHeader(authorizationHeader);
+
+        Comment comment = postCommentService.deleteComment(user.getId(),comment_id);
+        return ApiResponse.onSuccess("댓글이 삭제되었습니다.");
     }
 
     @PostMapping("/comments/{comment_id}/likes")

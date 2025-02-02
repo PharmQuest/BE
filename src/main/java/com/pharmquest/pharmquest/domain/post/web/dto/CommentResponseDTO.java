@@ -14,7 +14,7 @@ public class CommentResponseDTO {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class CreateCommentResultDTO {
+    public static class commentResultDTO {
         Long commentId;
         LocalDateTime createdAt;
     }

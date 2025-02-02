@@ -1,13 +1,10 @@
 package com.pharmquest.pharmquest.domain.post.data.mapping;
 
-import com.pharmquest.pharmquest.domain.mypage.data.PostScrap;
 import com.pharmquest.pharmquest.domain.post.data.Post;
 import com.pharmquest.pharmquest.domain.user.data.User;
 import com.pharmquest.pharmquest.global.data.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
-import net.minidev.json.annotate.JsonIgnore;
-
 import java.util.ArrayList;
 import java.util.List;
 

@@ -21,5 +21,5 @@ public interface PostCommandService {
 
     void deletePost(Long userId, Long postId);
 
-    Post updatePost(Long userId, Long postId, PostRequestDTO.UpdatePostDTO request);
+    Post updatePost(Long userId, Long postId, PostRequestDTO.UpdatePostDTO request, MultipartFile imageFile);
 }

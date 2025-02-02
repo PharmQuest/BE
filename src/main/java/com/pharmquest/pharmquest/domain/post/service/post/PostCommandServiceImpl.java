@@ -150,7 +150,7 @@ public class PostCommandServiceImpl implements PostCommandService {
 
     @Override
     @Transactional
-    public Post updatePost(Long userId, Long postId, PostRequestDTO.UpdatePostDTO request) {
+    public Post updatePost(Long userId, Long postId, PostRequestDTO.UpdatePostDTO request, MultipartFile imageFile) {
 
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new PostHandler(ErrorStatus.POST_NOT_EXIST));
@@ -167,6 +167,17 @@ public class PostCommandServiceImpl implements PostCommandService {
         }
         if (request.getCategory() != null) {
             post.setCategory(request.getCategory());
+        }
+
+        String imageUrl = null;
+        if (imageFile != null && !imageFile.isEmpty()) {
+            imageUrl = s3Service.uploadPostImg(imageFile);
+            post.setPostImgURL(imageUrl);
+        }
+
+        //이미지를 삭제하고 싶을 때
+        else if (request.getDeleteImgae() && imageFile == null) {
+            post.setPostImgURL(null);
         }
 
         return post;

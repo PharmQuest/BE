@@ -71,16 +71,17 @@ public class PostController {
         return ApiResponse.onSuccess("게시글이 삭제되었습니다.");
     }
 
-    @PatchMapping("/posts/{post_id}")
+    @PatchMapping(value = "/posts/{post_id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "게시글 수정 API")
     public ApiResponse<PostResponseDTO.postResultDTO> updatePost(
             @Parameter (hidden = true) @RequestHeader("Authorization") String authorizationHeader,
             @PathVariable Long post_id,
-            @RequestBody @Valid PostRequestDTO.UpdatePostDTO request) {
+            @RequestPart("request") @Valid PostRequestDTO.UpdatePostDTO request,
+            @RequestPart(value = "file", required = false) MultipartFile file) {
 
         User user = jwtUtil.getUserFromHeader(authorizationHeader);
 
-         Post post = postCommandService.updatePost(user.getId(),post_id,request);
+         Post post = postCommandService.updatePost(user.getId(),post_id,request,file);
         return ApiResponse.onSuccess(PostConverter.toPostResultDTO(post));
     }
     @GetMapping("/posts/lists")

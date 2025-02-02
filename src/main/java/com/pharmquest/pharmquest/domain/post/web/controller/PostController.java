@@ -201,8 +201,20 @@ public class PostController {
         User user = jwtUtil.getUserFromHeader(authorizationHeader);
 
         CommentLike commentLike = commentLikeService.createCommentLike(user.getId(), commentId);
+
         return ApiResponse.onSuccess(PostCommentConverter.toCommentLikeDTO(commentLike));
     }
 
 
+    @DeleteMapping("/comments/{comment_id}/likes")
+    @Operation(summary = "댓글 좋아요 취소 API")
+    public ApiResponse<String> deleteCommentLike(
+            @Parameter (hidden = true) @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable(name = "comment_id")Long commentId){
+
+        User user = jwtUtil.getUserFromHeader(authorizationHeader);
+
+        commentLikeService.deleteCommentLike(user.getId(), commentId);
+        return ApiResponse.onSuccess("좋아요가 삭제되었습니다");
+    }
 }

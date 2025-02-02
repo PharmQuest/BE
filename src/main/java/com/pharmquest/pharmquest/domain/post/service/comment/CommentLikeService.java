@@ -8,7 +8,6 @@ public interface CommentLikeService {
     CommentLike createCommentLike(
             Long userId, Long commentId);
 
-//    void deleteCommentLike(
-//            Long userId, Long commentId);
-//}
+    void deleteCommentLike(
+            Long userId, Long commentId);
 }

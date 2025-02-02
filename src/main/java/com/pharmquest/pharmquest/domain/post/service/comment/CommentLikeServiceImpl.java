@@ -1,18 +1,15 @@
 package com.pharmquest.pharmquest.domain.post.service.comment;
 
 import com.pharmquest.pharmquest.domain.post.converter.PostCommentConverter;
-import com.pharmquest.pharmquest.domain.post.converter.PostLikeConverter;
-import com.pharmquest.pharmquest.domain.post.data.Post;
 import com.pharmquest.pharmquest.domain.post.data.mapping.Comment;
 import com.pharmquest.pharmquest.domain.post.data.mapping.CommentLike;
-import com.pharmquest.pharmquest.domain.post.data.mapping.PostLike;
 import com.pharmquest.pharmquest.domain.post.repository.comment.CommentLikeRepository;
 import com.pharmquest.pharmquest.domain.post.repository.comment.PostCommentRepository;
-import com.pharmquest.pharmquest.domain.post.repository.like.PostLikeRepository;
 import com.pharmquest.pharmquest.domain.post.repository.post.PostRepository;
-import com.pharmquest.pharmquest.domain.post.service.like.PostLikeService;
 import com.pharmquest.pharmquest.domain.user.data.User;
 import com.pharmquest.pharmquest.domain.user.repository.UserRepository;
+import com.pharmquest.pharmquest.global.apiPayload.code.status.ErrorStatus;
+import com.pharmquest.pharmquest.global.apiPayload.exception.handler.CommentHandler;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,7 +22,6 @@ public class CommentLikeServiceImpl implements CommentLikeService {
 
     private final CommentLikeRepository commentLikeRepository;
     private final UserRepository userRepository;
-    private final PostRepository postRepository;
     private final PostCommentRepository commentRepository;
 
     @Override
@@ -37,9 +33,10 @@ public class CommentLikeServiceImpl implements CommentLikeService {
         User user = userRepository.findById(userId).orElseThrow(EntityNotFoundException::new);
 
         Comment comment = commentRepository.findById(commentId).orElseThrow(EntityNotFoundException::new);
+        System.out.println("찾은 CommentLike: " + commentLike);  // 디버깅 출력
 
         if (commentLike.isPresent()) {
-            throw new IllegalStateException("이미 좋아요를 누른 게시물 입니다.");
+            throw new CommentHandler(ErrorStatus.COMMENT_LIKE_ALREADY_EXISTS);
         }
 
         // 좋아요가 없으면 새로 추가
@@ -48,17 +45,17 @@ public class CommentLikeServiceImpl implements CommentLikeService {
 
     }
 
-//    @Override
-//    public void deletePostLike(Long userId, Long postId) {
-//
-//        Optional<PostLike> postLike =
-//                postLikeRepository.findByPostIdAndUserId(postId, userId);
-//
-//        if (postLike.isEmpty()) {
-//            throw new IllegalStateException("좋아요를 누르지 않은 게시물 입니다.");
-//        }
-//
-//        postLikeRepository.delete(postLike.get());
-//
-//    }
+    @Override
+    public void deleteCommentLike(Long userId, Long commentId) {
+
+        Optional<CommentLike> commentLike =
+                commentLikeRepository.findByCommentIdAndUserId(commentId,userId);
+
+        if (commentLike.isEmpty()) {
+            throw new CommentHandler(ErrorStatus.COMMENT_LIKE_NOT_EXIST);
+        }
+
+        commentLikeRepository.delete(commentLike.get());
+
+    }
 }

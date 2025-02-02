@@ -16,9 +16,7 @@ import com.pharmquest.pharmquest.global.apiPayload.code.status.ErrorStatus;
 import com.pharmquest.pharmquest.global.apiPayload.exception.handler.CommonExceptionHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.pharmquest.pharmquest.domain.supplements.data.Enum.CategoryKeyword;
@@ -43,23 +41,29 @@ public class SupplementsServiceImpl implements SupplementsService {
     //영양제 리스트 조회
     @Override
     public Page<SupplementsResponseDTO.SupplementsDto> getSupplements(CategoryKeyword category, Pageable pageable, Long userId) {
+        Pageable pageableWithSort = PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                Sort.by(Sort.Direction.DESC, "scrapCount")
+        );
+
         Page<Supplements> supplementsPage;
         if (category == null || category == CategoryKeyword.valueOf("전체")) {
-            supplementsPage = supplementsRepository.findAll(pageable);
+            supplementsPage = supplementsRepository.findAll(pageableWithSort);
         }
         else {
             List<Long> supplementIds = supplementsCategoryRepository.findSupplementIdByCategoryName(category.toString());
             if (supplementIds.isEmpty()) {
-                return new PageImpl<>(new ArrayList<>(), pageable, 0);
+                return new PageImpl<>(new ArrayList<>(), pageableWithSort, 0);
             }
-            supplementsPage = supplementsRepository.findByIdIn(supplementIds, pageable);
+            supplementsPage = supplementsRepository.findByIdIn(supplementIds, pageableWithSort);
         }
 
         return new PageImpl<>(
                 supplementsPage.getContent().stream()
                         .map(supplement -> supplementsConverter.toDto(supplement, userId))
                         .collect(Collectors.toList()),
-                pageable,
+                pageableWithSort,
                 supplementsPage.getTotalElements()
         );
     }
@@ -67,15 +71,20 @@ public class SupplementsServiceImpl implements SupplementsService {
     //영양제 검색
     @Override
     public Page<SupplementsResponseDTO.SupplementsSearchResponseDto> searchSupplements(String keyword, Country country, Pageable pageable, Long userId) {
+        Pageable pageableWithSort = PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                Sort.by(Sort.Direction.DESC, "scrapCount")
+        );
         Page<Supplements> supplementsPage;
         if (keyword == null) {
             throw new CommonExceptionHandler(ErrorStatus.SUPPLEMENTS_NO_KEYWORD);
         }
 
         if (country != null) {
-            supplementsPage = supplementsRepository.findByNameContainingAndCountry(keyword, country, pageable);
+            supplementsPage = supplementsRepository.findByNameContainingAndCountry(keyword, country, pageableWithSort);
         } else {
-            supplementsPage = supplementsRepository.findByNameContaining(keyword, pageable);
+            supplementsPage = supplementsRepository.findByNameContaining(keyword, pageableWithSort);
         }
 
         if (supplementsPage.isEmpty()) {
@@ -86,7 +95,7 @@ public class SupplementsServiceImpl implements SupplementsService {
                 .map(supplement -> supplementsConverter.toSearchDto(supplement, userId))
                 .collect(Collectors.toList());
 
-        return new PageImpl<>(dtoList, pageable, supplementsPage.getTotalElements());
+        return new PageImpl<>(dtoList, pageableWithSort, supplementsPage.getTotalElements());
     }
 
     //영양제 상세조회

@@ -1,12 +1,13 @@
 package com.pharmquest.pharmquest.domain.mypage.web.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.pharmquest.pharmquest.domain.pharmacy.web.dto.GooglePlaceDetailsResponse;
+import com.pharmquest.pharmquest.domain.post.data.enums.PostCategory;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class MyPageResponseDTO {
@@ -44,5 +45,21 @@ public class MyPageResponseDTO {
     public static class PharmacyResponse {
         private List<PharmacyDto> pharmacies;
         private Integer count;
+    }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ScrapPostResponseDTO {
+        Long postId;
+        String writerName;
+        String title;
+        String content;
+        PostCategory category;
+        Integer scrapeCount;
+        Integer likeCount;
+        Integer commentCount;
+        LocalDateTime createdAt;
     }
 }

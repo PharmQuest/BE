@@ -1,6 +1,7 @@
 package com.pharmquest.pharmquest.domain.mypage.converter;
 
 import com.pharmquest.pharmquest.domain.mypage.web.dto.MyPageResponseDTO;
+import com.pharmquest.pharmquest.domain.post.data.Post;
 import com.pharmquest.pharmquest.domain.supplements.data.Enum.CategoryKeyword;
 import com.pharmquest.pharmquest.domain.supplements.data.Supplements;
 import lombok.RequiredArgsConstructor;
@@ -40,6 +41,20 @@ public class MyPageConverter {
                 return null;
             }
         }
+    }
+
+    public MyPageResponseDTO.ScrapPostResponseDTO toScrapedPostDto(Post post) {
+        return MyPageResponseDTO.ScrapPostResponseDTO.builder()
+                .postId(post.getId())
+                .writerName(post.getUser().getName())
+                .title(post.getTitle())
+                .category(post.getCategory())
+                .content(post.getContent().substring(0,40))
+                .commentCount(post.getComments().size())
+                .scrapeCount(post.getScraps().size())
+                .likeCount(post.getLikes().size())
+                .createdAt(post.getCreatedAt())
+                .build();
     }
 
     public static MyPageResponseDTO.PharmacyResponse toPharmaciesResponse(Page<MyPageResponseDTO.PharmacyDto> pharmacies) {

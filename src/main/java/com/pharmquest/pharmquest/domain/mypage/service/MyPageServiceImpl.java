@@ -1,9 +1,11 @@
 package com.pharmquest.pharmquest.domain.mypage.service;
 
 import com.pharmquest.pharmquest.domain.mypage.converter.MyPageConverter;
+import com.pharmquest.pharmquest.domain.mypage.data.PostScrap;
 import com.pharmquest.pharmquest.domain.mypage.web.dto.MyPageResponseDTO;
 import com.pharmquest.pharmquest.domain.pharmacy.data.enums.PharmacyCountry;
 import com.pharmquest.pharmquest.domain.pharmacy.service.PharmacyDetailsService;
+import com.pharmquest.pharmquest.domain.post.repository.scrap.PostScrapRepository;
 import com.pharmquest.pharmquest.domain.supplements.data.Enum.CategoryKeyword;
 import com.pharmquest.pharmquest.domain.supplements.data.mapping.SupplementsScrap;
 import com.pharmquest.pharmquest.domain.supplements.repository.SupplementsScrapRepository;
@@ -20,6 +22,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -31,6 +34,8 @@ public class MyPageServiceImpl implements MyPageService {
     private final MyPageConverter myPageConverter;
     private final PharmacyDetailsService pharmacyDetailsService;
     private final SupplementsScrapRepository supplementsScrapRepository;
+    private final PostScrapRepository postScrapRepository;
+
     private final int PAGE_SIZE = 10;
 
     @Override
@@ -46,6 +51,23 @@ public class MyPageServiceImpl implements MyPageService {
 
         return new PageImpl<>(supplementsDtos, pageable, supplementsScrapPage.getTotalElements());
 
+    }
+
+    @Override
+    public Page<MyPageResponseDTO.ScrapPostResponseDTO> getScrapPosts(Long userId, Pageable pageable) {
+
+        Page<PostScrap> postScrapPage = postScrapRepository.findPostByUserId(userId, pageable);
+
+        if (postScrapPage.isEmpty()) {
+            return new PageImpl<>(new ArrayList<>(), pageable, postScrapPage.getTotalElements());
+        }
+
+        List<MyPageResponseDTO.ScrapPostResponseDTO> scrapedPostDTO = postScrapPage.stream()
+                .map(postScrap -> myPageConverter.toScrapedPostDto(postScrap.getPost()))
+                .filter(Objects::nonNull)
+                .toList();
+
+        return new PageImpl<>(scrapedPostDTO, pageable, postScrapPage.getTotalPages());
     }
 
     @Override

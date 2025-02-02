@@ -26,7 +26,7 @@ public class PharmacyDetailsServiceImpl implements PharmacyDetailsService {
     private final WebClient webClient;
     private final String GOOGLE_PLACES_API_URL = "https://maps.googleapis.com/maps/api/place/details/json";
     private final String GOOGLE_PLACE_IMG_URL = "https://maps.googleapis.com/maps/api/place/photo?";
-    private final int IMG_MAX_SIZE = 86;
+    private final int IMG_MAX_SIZE = 200;
     private final TranslationService translationService;
 
     @Value("${place.details.api-key}")
@@ -65,7 +65,7 @@ public class PharmacyDetailsServiceImpl implements PharmacyDetailsService {
                 .longitude(detailsResult.getGeometry().getLocation().getLng())
                 .country(getCountryName(response))
 //                .periods(detailsResult.getOpeningHours().getPeriods())
-                .imgUrl(getImageBase64(getPhotoReference(response)))
+                .imgUrl(getImageURL(getPhotoReference(response)))
                 .build();
     }
 
@@ -133,13 +133,13 @@ public class PharmacyDetailsServiceImpl implements PharmacyDetailsService {
     }
 
     // photo_reference과 api key 이용하여 이미미 요청 후 -> Base64 인코딩된 url 반환
-    private String getImageBase64(String photoReference) {
+    private String getImageURL(String photoReference) {
         String url = GOOGLE_PLACE_IMG_URL + "maxwidth=" + IMG_MAX_SIZE + "&maxheight" + IMG_MAX_SIZE + "&photo_reference=" + photoReference + "&key=" + API_KEY;
         try {
             byte[] imageBytes = downloadImage(url);
             return "data:image/jpeg;base64," + Base64.getEncoder().encodeToString(imageBytes);
-        }catch (IOException e) {
-            return "기본 IMG";
+        }catch (Exception e) { // 문제 있으면 기본 사진 반환
+            return "https://umc-pharmquest.s3.ap-northeast-2.amazonaws.com/d09fa082-76d2-4c17-ad0a-e4800814ec61_pharm_default_img_1.jpg";
         }
     }
 

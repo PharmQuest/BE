@@ -66,6 +66,26 @@ public class PostCommentServiceImpl implements PostCommentService {
 
     }
 
+    @Override
+    @Transactional
+    public Comment updateComment(Long userId, Long commentId, CommentRequestDTO.UpdateCommentDTO request) {
+        Comment comment = postCommentRepository.findById(commentId)
+                .orElseThrow(() -> new CommentHandler(ErrorStatus.COMMENT_NOT_EXIST));
+
+        // 댓글 작성자 확인
+        if (!userId.equals(comment.getUser().getId())) {
+            throw new CommentHandler(ErrorStatus.NOT_COMMENT_AUTHOR);
+        }
+
+        if (request.getContent() != null && !request.getContent().isEmpty()) {
+            comment.setContent(request.getContent());
+        }
+
+        return comment;
+    }
+
+
+
     // 최상위 부모 댓글 찾기
     private Comment findTopLevelParent(Comment comment) {
         while (comment.getParent() != null) {

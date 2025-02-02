@@ -21,10 +21,12 @@ public enum ErrorStatus implements BaseErrorCode {
     POST_NOT_EXIST(HttpStatus.NOT_FOUND, "POST4005", "해당하는 게시글이 존재하지 않습니다."),
     POST_LIKE_NOT_EXIST(HttpStatus.NOT_FOUND, "POST4006", "좋아요를 누르지 않은 게시글입니다."),
     POST_LIKE_ALREADY_EXISTS(HttpStatus.CONFLICT, "POST4005", "이미 좋아요를 누른 게시글입니다."),
+    NOT_POST_AUTHOR(HttpStatus.BAD_REQUEST, "POST4006", "해당하는 게시글의 작성자가 아닙니다."),
 
+    //comments
     COMMENT_NOT_EXIST(HttpStatus.NOT_FOUND, "COMMENT4001", "해당하는 댓글이 존재하지 않습니다."),
     COMMENT_NOT_IN_POST(HttpStatus.BAD_REQUEST, "COMMENT4002", "해당하는 댓글이 게시글의 댓글 목록에 존재하지 않습니다."),
-    NOT_POST_AUTHOR(HttpStatus.BAD_REQUEST, "COMMENT4003", "해당하는 게시글의 작성자가 아닙니다."),
+    NOT_COMMENT_AUTHOR(HttpStatus.BAD_REQUEST, "COMMENT4003", "해당하는 댓글의 작성자가 아닙니다."),
     COMMENT_LIKE_NOT_EXIST(HttpStatus.NOT_FOUND, "COMMENT4004", "좋아요를 누르지 않은 댓글입니다."),
     COMMENT_LIKE_ALREADY_EXISTS(HttpStatus.CONFLICT, "COMMENT4005", "이미 좋아요를 누른 댓글입니다."),
 

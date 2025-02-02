@@ -154,9 +154,6 @@ public class PostCommandServiceImpl implements PostCommandService {
     @Transactional
     public Post updatePost(Long userId, Long postId, PostRequestDTO.UpdatePostDTO request) {
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("해당하는 유저를 찾을 수 없습니다. ID: " + userId));
-
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new PostHandler(ErrorStatus.POST_NOT_EXIST));
 

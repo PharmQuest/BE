@@ -1,11 +1,8 @@
 package com.pharmquest.pharmquest.domain.post.converter;
-import com.pharmquest.pharmquest.domain.post.data.Post;
 import com.pharmquest.pharmquest.domain.post.data.mapping.Comment;
 import com.pharmquest.pharmquest.domain.post.data.mapping.CommentLike;
-import com.pharmquest.pharmquest.domain.post.data.mapping.PostLike;
 import com.pharmquest.pharmquest.domain.post.web.dto.CommentRequestDTO;
 import com.pharmquest.pharmquest.domain.post.web.dto.CommentResponseDTO;
-import com.pharmquest.pharmquest.domain.post.web.dto.PostResponseDTO;
 import com.pharmquest.pharmquest.domain.user.data.User;
 
 
@@ -46,8 +43,8 @@ public class PostCommentConverter {
     }
 
 
-    public static CommentResponseDTO.CreateCommentResultDTO toCreateCommentResultDTO(Comment comment) {
-        return CommentResponseDTO.CreateCommentResultDTO.builder()
+    public static CommentResponseDTO.commentResultDTO toCommentResultDTO(Comment comment) {
+        return CommentResponseDTO.commentResultDTO.builder()
                 .commentId(comment.getId())
                 .createdAt(LocalDateTime.now())
                 .build();

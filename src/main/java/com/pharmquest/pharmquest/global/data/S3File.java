@@ -8,6 +8,7 @@ import lombok.Builder;
 
 import java.time.LocalDateTime;
 
+//s3 등록 로직만 확인하기 위해 테스트 용도 db 생성
 @Entity
 @Getter
 @NoArgsConstructor

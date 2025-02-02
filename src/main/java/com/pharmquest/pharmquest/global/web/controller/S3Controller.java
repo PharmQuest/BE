@@ -32,10 +32,11 @@ public class S3Controller {
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> uploadFile(
             @Parameter(description = "업로드할 파일", required = true)
-            @RequestParam("file") MultipartFile file) {
+            @RequestParam("file") MultipartFile file) { //file로 설정해야 swagger에서 파일 등록 가능
         String fileUrl = s3Service.uploadFile(file);
         return ResponseEntity.ok(fileUrl);
     }
+
 
     @Operation(summary = "업로드된 파일 목록 조회", description = "S3에 업로드된 파일의 정보를 조회합니다.")
     @ApiResponses(value = {

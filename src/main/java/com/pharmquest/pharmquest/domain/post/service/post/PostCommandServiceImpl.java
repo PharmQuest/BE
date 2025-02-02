@@ -19,6 +19,7 @@ import com.pharmquest.pharmquest.domain.user.data.User;
 import com.pharmquest.pharmquest.domain.user.repository.UserRepository;
 import com.pharmquest.pharmquest.global.apiPayload.code.status.ErrorStatus;
 import com.pharmquest.pharmquest.global.apiPayload.exception.handler.PostHandler;
+import com.pharmquest.pharmquest.global.service.S3Service;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -26,6 +27,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -36,21 +38,23 @@ public class PostCommandServiceImpl implements PostCommandService {
 
     private final PostRepository postRepository;
     private final PostLikeRepository likeRepository;
-    private final PostReportRepository reportRepository;
     private final PostScrapRepository scrapRepository;
     private final PostCommentRepository commentRepository;
+    private final S3Service s3Service;
 
     private final UserRepository userRepository;
 
     //게시글 등록
     @Override
-    public Post registerPost(Long userId, PostRequestDTO.CreatePostDTO request ) {
-
-        Post newPost = PostConverter.toPost(request);
+    public Post registerPost(Long userId, PostRequestDTO.CreatePostDTO request, MultipartFile imageFile) {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("해당하는 유저를 찾을 수 없습니다. ID: " + userId));
-                newPost.setUser(user);
+
+        String imageUrl = null;
+        if (imageFile != null && !imageFile.isEmpty()) {
+            imageUrl = s3Service.uploadPostImg(imageFile);
+        }
 
         if (request.getTitle() == null || request.getTitle().isEmpty()) {
             throw new PostHandler(ErrorStatus.TITLE_NOT_PROVIDED);
@@ -59,6 +63,8 @@ public class PostCommandServiceImpl implements PostCommandService {
             throw new PostHandler(ErrorStatus.CONTENT_NOT_PROVIDED);
         }
 
+        Post newPost = PostConverter.toPost(request,imageUrl);
+        newPost.setUser(user);
         return postRepository.save(newPost);
     }
 

@@ -6,6 +6,8 @@ import com.pharmquest.pharmquest.domain.mypage.web.dto.MyPageResponseDTO;
 import com.pharmquest.pharmquest.domain.pharmacy.data.enums.PharmacyCountry;
 import com.pharmquest.pharmquest.domain.pharmacy.service.PharmacyDetailsService;
 import com.pharmquest.pharmquest.domain.post.data.Post;
+import com.pharmquest.pharmquest.domain.post.data.mapping.Comment;
+import com.pharmquest.pharmquest.domain.post.repository.comment.PostCommentRepository;
 import com.pharmquest.pharmquest.domain.post.repository.post.PostRepository;
 import com.pharmquest.pharmquest.domain.post.repository.scrap.PostScrapRepository;
 import com.pharmquest.pharmquest.domain.supplements.data.Enum.CategoryKeyword;
@@ -38,6 +40,7 @@ public class MyPageServiceImpl implements MyPageService {
     private final SupplementsScrapRepository supplementsScrapRepository;
     private final PostScrapRepository postScrapRepository;
     private final PostRepository postRepository;
+    private final PostCommentRepository postCommentRepository;
 
     private final int PAGE_SIZE = 10;
 
@@ -87,6 +90,22 @@ public class MyPageServiceImpl implements MyPageService {
                     .toList();
 
             return new PageImpl<>(PostDTO, pageable, postPage.getTotalPages());
+        }
+    }
+
+    @Override
+    public Page<MyPageResponseDTO.CommentResponseDTO> getMyComments(Long userId, Pageable pageable) {
+        Page<Comment> commentPage = postCommentRepository.findCommentByUserId(userId, pageable);
+
+        if (commentPage.isEmpty()) {
+            return new PageImpl<>(new ArrayList<>(), pageable, commentPage.getTotalElements());
+        } else {
+            List<MyPageResponseDTO.CommentResponseDTO> CommentDTO = commentPage.stream()
+                    .map(myPageConverter::toCommentDto)
+                    .filter(Objects::nonNull)
+                    .toList();
+
+            return new PageImpl<>(CommentDTO, pageable, commentPage.getTotalPages());
         }
     }
 

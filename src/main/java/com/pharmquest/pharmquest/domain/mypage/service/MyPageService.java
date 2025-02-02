@@ -12,5 +12,7 @@ public interface MyPageService {
     Page<MyPageResponseDTO.SupplementsResponseDto> getScrapSupplements(Long userId, Pageable pageable, CategoryKeyword category);
     Page<MyPageResponseDTO.ScrapPostResponseDTO> getScrapPosts(Long userId, Pageable pageable);
     Page<MyPageResponseDTO.PostResponseDTO> getMyPosts(Long userId, Pageable pageable);
+    Page<MyPageResponseDTO.CommentResponseDTO> getMyComments(Long userId, Pageable pageable);
+
 
 }

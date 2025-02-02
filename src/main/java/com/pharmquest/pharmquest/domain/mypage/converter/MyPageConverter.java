@@ -2,6 +2,7 @@ package com.pharmquest.pharmquest.domain.mypage.converter;
 
 import com.pharmquest.pharmquest.domain.mypage.web.dto.MyPageResponseDTO;
 import com.pharmquest.pharmquest.domain.post.data.Post;
+import com.pharmquest.pharmquest.domain.post.data.mapping.Comment;
 import com.pharmquest.pharmquest.domain.supplements.data.Enum.CategoryKeyword;
 import com.pharmquest.pharmquest.domain.supplements.data.Supplements;
 import lombok.RequiredArgsConstructor;
@@ -77,6 +78,16 @@ public class MyPageConverter {
         return MyPageResponseDTO.PharmacyResponse.builder()
                 .pharmacies(list)
                 .count((int) pharmacies.getTotalElements())
+                .build();
+    }
+
+    public MyPageResponseDTO.CommentResponseDTO toCommentDto(Comment comment) {
+        return MyPageResponseDTO.CommentResponseDTO.builder()
+                .commentId(comment.getId())
+                .title(comment.getPost().getTitle())
+                .postId(comment.getPost().getId())
+                .content(comment.getContent())
+                .createdAt(comment.getCreatedAt().toLocalDate())
                 .build();
     }
 }

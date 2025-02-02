@@ -11,6 +11,7 @@ import com.pharmquest.pharmquest.domain.user.repository.UserRepository;
 import com.pharmquest.pharmquest.global.apiPayload.code.status.ErrorStatus;
 import com.pharmquest.pharmquest.global.apiPayload.exception.handler.CommentHandler;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +24,7 @@ public class CommentReportServiceImpl implements CommentReportService {
     private final UserRepository userRepository;
 
     @Override
+    @Transactional
     public CommentReport createReport(Long userId, Long commentId, ReportType reportType) {
         if (commentReportRepository.findByCommentIdAndUserId(commentId, userId).isPresent()) {
             throw new IllegalStateException("이미 신고한 게시물 입니다.");

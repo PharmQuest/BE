@@ -78,4 +78,16 @@ public class MyPageResponseDTO {
         Integer commentCount;
         LocalDate createdAt;
     }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class CommentResponseDTO {
+        Long postId;
+        Long commentId;
+        String title;
+        String content;
+        LocalDate createdAt;
+    }
 }

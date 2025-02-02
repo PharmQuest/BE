@@ -1,5 +1,6 @@
 package com.pharmquest.pharmquest.domain.post.repository.post;
 
+import com.pharmquest.pharmquest.domain.mypage.data.PostScrap;
 import com.pharmquest.pharmquest.domain.post.data.Post;
 import com.pharmquest.pharmquest.domain.post.data.enums.PostCategory;
 import org.springframework.data.domain.Page;
@@ -27,5 +28,8 @@ public interface PostRepository extends JpaRepository<Post, Long>, PostRepositor
     @Query("SELECT p FROM Post p WHERE p.isDeleted = false AND p.id NOT IN " +
             "(SELECT pr.post.id FROM PostReport pr WHERE pr.user.id = :userId)")
     Page<Post> findAllVisiblePostsExcludingReportedByUser(@Param("userId") Long userId, Pageable pageable);
+
+    Page<Post> findPostByUserId(Long userId, Pageable pageable);
+
 
 }

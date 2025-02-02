@@ -84,6 +84,21 @@ public class PostCommentServiceImpl implements PostCommentService {
         return comment;
     }
 
+    @Override
+    @Transactional
+    public Comment deleteComment(Long userId, Long commentId) {
+        Comment comment = postCommentRepository.findById(commentId)
+                .orElseThrow(() -> new CommentHandler(ErrorStatus.COMMENT_NOT_EXIST));
+
+        // 댓글 작성자 확인
+        if (!userId.equals(comment.getUser().getId())) {
+            throw new CommentHandler(ErrorStatus.NOT_COMMENT_AUTHOR);
+        }
+
+        comment.setDeleted(true);
+
+        return comment;
+    }
 
 
     // 최상위 부모 댓글 찾기

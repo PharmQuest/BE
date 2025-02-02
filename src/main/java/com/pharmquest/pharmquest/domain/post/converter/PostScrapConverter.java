@@ -4,7 +4,6 @@ import com.pharmquest.pharmquest.domain.mypage.data.PostScrap;
 import com.pharmquest.pharmquest.domain.post.data.Post;
 import com.pharmquest.pharmquest.domain.post.web.dto.PostResponseDTO;
 import com.pharmquest.pharmquest.domain.user.data.User;
-
 import java.time.LocalDateTime;
 
 public class PostScrapConverter {

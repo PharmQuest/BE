@@ -193,9 +193,9 @@ public class PostController {
     }
 
 
-    @PatchMapping("/comments/{comment_id}")
+    @PatchMapping("/comments/{comment_id}/update")
     @Operation(summary = "댓글 수정 API")
-    public ApiResponse<CommentResponseDTO.commentResultDTO> updatePost(
+    public ApiResponse<CommentResponseDTO.commentResultDTO> updateComment(
             @Parameter (hidden = true) @RequestHeader("Authorization") String authorizationHeader,
             @PathVariable Long comment_id,
             @RequestBody @Valid CommentRequestDTO.UpdateCommentDTO request) {
@@ -204,6 +204,18 @@ public class PostController {
 
        Comment comment = postCommentService.updateComment(user.getId(),comment_id,request);
         return ApiResponse.onSuccess(PostCommentConverter.toCommentResultDTO(comment));
+    }
+
+    @PatchMapping("/comments/{comment_id}/delete")
+    @Operation(summary = "댓글 삭제 API")
+    public ApiResponse<String> deleteComment(
+            @Parameter (hidden = true) @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable Long comment_id) {
+
+        User user = jwtUtil.getUserFromHeader(authorizationHeader);
+
+        Comment comment = postCommentService.deleteComment(user.getId(),comment_id);
+        return ApiResponse.onSuccess("댓글이 삭제되었습니다.");
     }
 
     @PostMapping("/comments/{comment_id}/likes")

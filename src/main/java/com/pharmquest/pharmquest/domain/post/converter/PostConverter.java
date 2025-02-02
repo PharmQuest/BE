@@ -5,11 +5,8 @@ import com.pharmquest.pharmquest.domain.post.data.mapping.Comment;
 import com.pharmquest.pharmquest.domain.post.web.dto.CommentResponseDTO;
 import com.pharmquest.pharmquest.domain.post.web.dto.PostRequestDTO;
 import com.pharmquest.pharmquest.domain.post.web.dto.PostResponseDTO;
-import com.pharmquest.pharmquest.domain.user.data.User;
 import org.springframework.data.domain.Page;
-
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 

@@ -3,6 +3,7 @@ package com.pharmquest.pharmquest.domain.mypage.web.controller;
 import com.pharmquest.pharmquest.domain.mypage.converter.MyPageConverter;
 import com.pharmquest.pharmquest.domain.mypage.service.MyPageService;
 import com.pharmquest.pharmquest.domain.mypage.web.dto.MyPageResponseDTO;
+import com.pharmquest.pharmquest.domain.pharmacy.data.enums.PharmacyCountry;
 import com.pharmquest.pharmquest.domain.supplements.data.Enum.CategoryKeyword;
 import com.pharmquest.pharmquest.domain.token.JwtUtil;
 import com.pharmquest.pharmquest.domain.user.data.User;
@@ -14,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -42,12 +44,13 @@ public class MyPageController {
     @GetMapping("/pharmacy")
     @Operation(summary = "스크랩한 약국 조회 API")
     public ApiResponse<MyPageResponseDTO.PharmacyResponse> getScrapedPharmacy(
-            @Parameter (hidden = true) @RequestHeader("Authorization") String authorizationHeader,
-            @RequestParam("country") String country,
-            @RequestParam(defaultValue = "1", value = "page") Integer page
+            @Parameter (hidden = true) @RequestHeader(value = "Authorization") String authorizationHeader,
+            @RequestParam("country")PharmacyCountry country,
+            @RequestParam(defaultValue = "1", value = "page") Integer page,
+            @RequestParam(defaultValue = "1", value = "size") Integer size       
     ) {
         User user = jwtUtil.getUserFromHeader(authorizationHeader);
-        Page<MyPageResponseDTO.PharmacyDto> pharmacies = myPageService.getScrapPharmacies(user, country, page);
+        Page<MyPageResponseDTO.PharmacyDto> pharmacies = myPageService.getScrapPharmacies(user, country, page, size);
         return ApiResponse.of(SuccessStatus.MY_PAGE_PHARMACY, MyPageConverter.toPharmaciesResponse(pharmacies));
     }
 

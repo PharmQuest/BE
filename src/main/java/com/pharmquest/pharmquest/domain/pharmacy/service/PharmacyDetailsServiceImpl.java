@@ -2,6 +2,7 @@ package com.pharmquest.pharmquest.domain.pharmacy.service;
 
 import com.pharmquest.pharmquest.domain.medicine.service.TranslationService;
 import com.pharmquest.pharmquest.domain.mypage.web.dto.MyPageResponseDTO;
+import com.pharmquest.pharmquest.domain.pharmacy.ImageUtil;
 import com.pharmquest.pharmquest.domain.pharmacy.data.enums.PharmacyCountry;
 import com.pharmquest.pharmquest.domain.pharmacy.web.dto.GooglePlaceDetailsResponse;
 import com.pharmquest.pharmquest.global.apiPayload.code.status.ErrorStatus;
@@ -11,12 +12,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -24,17 +19,17 @@ import java.util.List;
 public class PharmacyDetailsServiceImpl implements PharmacyDetailsService {
 
     private final WebClient webClient;
+    private final ImageUtil imageUtil;
     private final String GOOGLE_PLACES_API_URL = "https://maps.googleapis.com/maps/api/place/details/json";
-    private final String GOOGLE_PLACE_IMG_URL = "https://maps.googleapis.com/maps/api/place/photo?";
-    private final int IMG_MAX_SIZE = 200;
     private final TranslationService translationService;
 
     @Value("${place.details.api-key}")
     private String API_KEY;
 
-    public PharmacyDetailsServiceImpl(WebClient.Builder webClientBuilder, TranslationService translationService) {
+    public PharmacyDetailsServiceImpl(WebClient.Builder webClientBuilder, TranslationService translationService, ImageUtil imageUtil) {
         this.webClient = webClientBuilder.baseUrl(GOOGLE_PLACES_API_URL).build();
         this.translationService = translationService;
+        this.imageUtil = imageUtil;
     }
 
     @Override
@@ -59,13 +54,13 @@ public class PharmacyDetailsServiceImpl implements PharmacyDetailsService {
         return MyPageResponseDTO.PharmacyDto.builder()
                 .name(detailsResult.getName())
                 .placeId(placeId)
-//                .openNow(detailsResult.getOpeningHours().getOpenNow())
+//                .openNow(detailsResult.getOpeningHours().getOpenNow()) // 혹시나 나중에 추가할 수도 있어서 남겨둠
                 .region(getTranslatedLocation(response, detailsResult.getLocationList()))
                 .latitude(detailsResult.getGeometry().getLocation().getLat())
                 .longitude(detailsResult.getGeometry().getLocation().getLng())
                 .country(getCountryName(response))
-//                .periods(detailsResult.getOpeningHours().getPeriods())
-                .imgUrl(getImageURL(getPhotoReference(response)))
+//                .periods(detailsResult.getOpeningHours().getPeriods()) // 혹시나 나중에 추가할 수도 있어서 남겨둠
+                .imgUrl(imageUtil.getImageURL(response))
                 .build();
     }
 
@@ -76,24 +71,13 @@ public class PharmacyDetailsServiceImpl implements PharmacyDetailsService {
         if (locationList.isEmpty()) {
             return "주소 미제공";
         }
-
-        List<String> translatedLocation = new ArrayList<>(locationList.stream()
-                .map(location -> {
-                    try {
-                        return translationService.translateText(location, targetLanguage).trim();
-                    } catch (Exception e) {
-                        log.error("Translation failed: {}", e.getMessage());
-                        return location.trim();
-                    }
-                }).toList());
-
-        // 한국의 경우 주소를 한국식으로 변경
-        if ("ko".equals(targetLanguage)) {
-            Collections.reverse(translatedLocation);
+        String location = String.join(" ", locationList);
+        try {
+            return translationService.translateText(location, targetLanguage);
+        } catch (Exception e) {
+            log.error("Translation failed: {}", e.getMessage());
+            return location.trim();
         }
-
-        // ex) ["Beverly Hills", "Los Angeles County", "California"] -> "Beverly Hills Los Angeles County California"
-        return String.join(" ", translatedLocation);
     }
 
     // 상세정보로부터 국가 이름 가져옴
@@ -130,35 +114,6 @@ public class PharmacyDetailsServiceImpl implements PharmacyDetailsService {
             throw new CommonExceptionHandler(ErrorStatus.PLACE_NO_RESULT);
         }
         return false;
-    }
-
-    // photo_reference과 api key 이용하여 이미미 요청 후 -> Base64 인코딩된 url 반환
-    private String getImageURL(String photoReference) {
-        String url = GOOGLE_PLACE_IMG_URL + "maxwidth=" + IMG_MAX_SIZE + "&maxheight" + IMG_MAX_SIZE + "&photo_reference=" + photoReference + "&key=" + API_KEY;
-        try {
-            byte[] imageBytes = downloadImage(url);
-            return "data:image/jpeg;base64," + Base64.getEncoder().encodeToString(imageBytes);
-        }catch (Exception e) { // 문제 있으면 기본 사진 반환
-            return "https://umc-pharmquest.s3.ap-northeast-2.amazonaws.com/d09fa082-76d2-4c17-ad0a-e4800814ec61_pharm_default_img_1.jpg";
-        }
-    }
-
-    // 여러 사진들 중 하나의 photo_reference 반환
-    // getImageBase64()의 파라미터로 사용
-    private String getPhotoReference(GooglePlaceDetailsResponse response) {
-
-        List<GooglePlaceDetailsResponse.Photo> photos = response.getResult().getPhotos();
-        // 사진이 없으면 일단 빈 문자열 반환
-        if (photos.isEmpty()) {
-            return "";
-        }
-        return photos.get(0).getPhotoReference();
-    }
-
-    private byte[] downloadImage(String imageUrl) throws IOException {
-        try (InputStream in = new URL(imageUrl).openStream()) {
-            return in.readAllBytes();
-        }
     }
 
 }

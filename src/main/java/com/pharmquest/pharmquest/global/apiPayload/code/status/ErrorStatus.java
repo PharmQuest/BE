@@ -48,7 +48,7 @@ public enum ErrorStatus implements BaseErrorCode {
     // my page
     INVALID_PAGE_NUMBER(HttpStatus.BAD_REQUEST, "MYPAGE4001", "페이지 번호가 1보다 작을 수 없습니다."),
     PAGE_NUMBER_EXCEEDS_TOTAL(HttpStatus.BAD_REQUEST, "MYAPGE4002", "페이지 번호 전체 페이지 수를 초과하였습니다."),
-
+    INVALID_SIZE_NUMBER(HttpStatus.BAD_REQUEST, "MYAPGE4003", "사이즈 번호가 1보다 작을 수 없습니다."),
     ;
 
     private final HttpStatus httpStatus;

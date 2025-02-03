@@ -39,7 +39,6 @@ public class SupplementsResponseDTO {
         private int scrapCount;
         private String category4;
         private List<String> categories;
-        private AdResponseDTO.AdResponseDto adResponse;
     }
 
     @Builder
@@ -50,6 +49,7 @@ public class SupplementsResponseDTO {
         private int amountCount;
         private int currentPage;
         private int currentCount;
+        private AdResponseDTO.AdResponseDto adResponse;
         private List<SupplementsDto> supplements;
     }
 
@@ -68,7 +68,6 @@ public class SupplementsResponseDTO {
         private int amountCount;
         private String category4;
         private List<String> categories;
-        private AdResponseDTO.AdResponseDto adResponse;
     }
 
     @Builder
@@ -79,6 +78,7 @@ public class SupplementsResponseDTO {
         private int amountCount;
         private int currentPage;
         private int currentCount;
+        private AdResponseDTO.AdResponseDto adResponse;
         private List<SupplementsSearchResponseDto> supplements;
     }
 

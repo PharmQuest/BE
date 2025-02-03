@@ -8,6 +8,7 @@ import com.pharmquest.pharmquest.domain.supplements.data.mapping.SupplementsCate
 import com.pharmquest.pharmquest.domain.supplements.repository.CategoryRepository;
 import com.pharmquest.pharmquest.domain.supplements.repository.SupplementsCategoryRepository;
 import com.pharmquest.pharmquest.domain.supplements.repository.SupplementsRepository;
+import com.pharmquest.pharmquest.domain.supplements.service.Advertisement.AdvertisementService;
 import com.pharmquest.pharmquest.domain.supplements.service.DailyMed.DailyMedService;
 import com.pharmquest.pharmquest.domain.supplements.service.Naver.NaverShoppingService;
 import com.pharmquest.pharmquest.domain.supplements.web.dto.DailyMedResponseDTO;
@@ -37,6 +38,7 @@ public class SupplementsServiceImpl implements SupplementsService {
     private final SupplementsRepository supplementsRepository;
     private final SupplementsConverter supplementsConverter;
     private final CategoryRepository categoryRepository;
+    private final AdvertisementService advertisementService;
 
     //영양제 리스트 조회
     @Override
@@ -68,6 +70,7 @@ public class SupplementsServiceImpl implements SupplementsService {
                 .amountCount((int) supplementsPage.getTotalElements())
                 .currentPage(supplementsPage.getNumber() + 1)
                 .currentCount(supplementsPage.getNumberOfElements())
+                .adResponse(advertisementService.getAdvertisementByPage(supplementsPage.getNumber() + 1))
                 .supplements(supplementsPage.getContent().stream()
                         .map(supplement -> supplementsConverter.toDto(supplement, userId))
                         .collect(Collectors.toList()))
@@ -101,6 +104,7 @@ public class SupplementsServiceImpl implements SupplementsService {
                 .amountCount((int) supplementsPage.getTotalElements())
                 .currentPage(supplementsPage.getNumber() + 1)
                 .currentCount(supplementsPage.getNumberOfElements())
+                .adResponse(advertisementService.getAdvertisementByPage(supplementsPage.getNumber() + 1))
                 .supplements(supplementsPage.getContent().stream()
                         .map(supplement -> supplementsConverter.toSearchDto(supplement, userId))
                         .collect(Collectors.toList()))

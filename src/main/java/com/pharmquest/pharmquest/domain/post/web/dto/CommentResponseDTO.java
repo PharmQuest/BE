@@ -14,7 +14,7 @@ public class CommentResponseDTO {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class CreateCommentResultDTO {
+    public static class commentResultDTO {
         Long commentId;
         LocalDateTime createdAt;
     }
@@ -31,6 +31,28 @@ public class CommentResponseDTO {
         private LocalDateTime createdAt;
         private Long parentId;
         private String parentName;
+        private Boolean isOwnPost;
+        private Integer likeCount;
+        private Boolean isLiked;
         private List<CommentDTO> replies;
     }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static  class CreateCommentLikeResponseDTO{
+        Long commentLikeId;
+        LocalDateTime createdAt;
+    }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static  class CreateCommentReportResponseDTO{
+        Long commentReportId;
+        LocalDateTime createdAt;
+    }
+
 }

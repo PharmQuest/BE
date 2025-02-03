@@ -7,6 +7,8 @@ import com.pharmquest.pharmquest.domain.post.repository.like.PostLikeRepository;
 import com.pharmquest.pharmquest.domain.post.repository.post.PostRepository;
 import com.pharmquest.pharmquest.domain.user.data.User;
 import com.pharmquest.pharmquest.domain.user.repository.UserRepository;
+import com.pharmquest.pharmquest.global.apiPayload.code.status.ErrorStatus;
+import com.pharmquest.pharmquest.global.apiPayload.exception.handler.PostHandler;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -30,7 +32,7 @@ public class PostLikeServiceImpl implements PostLikeService {
         Post post = postRepository.findById(postId).orElseThrow(EntityNotFoundException::new);
 
         if (postLike.isPresent()) {
-            throw new IllegalStateException("이미 좋아요를 누른 게시물 입니다.");
+            throw new PostHandler(ErrorStatus.POST_LIKE_ALREADY_EXISTS);
         }
 
         // 좋아요가 없으면 새로 추가
@@ -46,7 +48,7 @@ public class PostLikeServiceImpl implements PostLikeService {
                 postLikeRepository.findByPostIdAndUserId(postId, userId);
 
         if (postLike.isEmpty()) {
-            throw new IllegalStateException("좋아요를 누르지 않은 게시물 입니다.");
+            throw new PostHandler(ErrorStatus.POST_LIKE_NOT_EXIST);
         }
 
         postLikeRepository.delete(postLike.get());

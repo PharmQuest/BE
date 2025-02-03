@@ -6,9 +6,9 @@ import com.pharmquest.pharmquest.domain.post.data.Post;
 import com.pharmquest.pharmquest.domain.post.data.enums.Country;
 import com.pharmquest.pharmquest.domain.post.data.enums.PostCategory;
 import com.pharmquest.pharmquest.domain.post.data.enums.ReportType;
-import com.pharmquest.pharmquest.domain.post.data.mapping.Comment;
-import com.pharmquest.pharmquest.domain.post.data.mapping.PostLike;
-import com.pharmquest.pharmquest.domain.post.data.mapping.PostReport;
+import com.pharmquest.pharmquest.domain.post.data.mapping.*;
+import com.pharmquest.pharmquest.domain.post.service.comment.CommentLikeService;
+import com.pharmquest.pharmquest.domain.post.service.comment.CommentReportService;
 import com.pharmquest.pharmquest.domain.post.service.post.PostCommandService;
 import com.pharmquest.pharmquest.domain.post.service.comment.PostCommentService;
 import com.pharmquest.pharmquest.domain.post.service.like.PostLikeService;
@@ -41,6 +41,8 @@ public class PostController {
     private final JwtUtil jwtUtil;
     private final PostCommentService postCommentService;
     private final PostReportService postReportService;
+    private final CommentLikeService commentLikeService;
+    private final CommentReportService commentReportService;
 
     @PostMapping(value = "/posts", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "게시글 작성 API")
@@ -69,16 +71,17 @@ public class PostController {
         return ApiResponse.onSuccess("게시글이 삭제되었습니다.");
     }
 
-    @PatchMapping("/posts/{post_id}")
+    @PatchMapping(value = "/posts/{post_id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "게시글 수정 API")
     public ApiResponse<PostResponseDTO.postResultDTO> updatePost(
             @Parameter (hidden = true) @RequestHeader("Authorization") String authorizationHeader,
             @PathVariable Long post_id,
-            @RequestBody @Valid PostRequestDTO.UpdatePostDTO request) {
+            @RequestPart("request") @Valid PostRequestDTO.UpdatePostDTO request,
+            @RequestPart(value = "file", required = false) MultipartFile file) {
 
         User user = jwtUtil.getUserFromHeader(authorizationHeader);
 
-         Post post = postCommandService.updatePost(user.getId(),post_id,request);
+         Post post = postCommandService.updatePost(user.getId(),post_id,request,file);
         return ApiResponse.onSuccess(PostConverter.toPostResultDTO(post));
     }
     @GetMapping("/posts/lists")
@@ -177,7 +180,7 @@ public class PostController {
 
     @PostMapping("/posts/{post_id}/comments")
     @Operation(summary = "게시글 댓글, 답글 작성 API")
-    public ApiResponse<CommentResponseDTO.CreateCommentResultDTO> createComment(
+    public ApiResponse<CommentResponseDTO.commentResultDTO> createComment(
             @Parameter (hidden = true) @RequestHeader("Authorization") String authorizationHeader,
             @PathVariable(name = "post_id")Long postId,
             @RequestParam(name="parentsId", required = false)Long parentsId,
@@ -186,8 +189,72 @@ public class PostController {
         User user = jwtUtil.getUserFromHeader(authorizationHeader);
 
         Comment createdComment = postCommentService.addComment(user.getId(),postId, parentsId,requestDTO);
-        return ApiResponse.onSuccess(PostCommentConverter.toCreateCommentResultDTO(createdComment));
+        return ApiResponse.onSuccess(PostCommentConverter.toCommentResultDTO(createdComment));
     }
 
 
+    @PatchMapping("/comments/{comment_id}/update")
+    @Operation(summary = "댓글 수정 API")
+    public ApiResponse<CommentResponseDTO.commentResultDTO> updateComment(
+            @Parameter (hidden = true) @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable Long comment_id,
+            @RequestBody @Valid CommentRequestDTO.UpdateCommentDTO request) {
+
+        User user = jwtUtil.getUserFromHeader(authorizationHeader);
+
+       Comment comment = postCommentService.updateComment(user.getId(),comment_id,request);
+        return ApiResponse.onSuccess(PostCommentConverter.toCommentResultDTO(comment));
+    }
+
+    @PatchMapping("/comments/{comment_id}/delete")
+    @Operation(summary = "댓글 삭제 API")
+    public ApiResponse<String> deleteComment(
+            @Parameter (hidden = true) @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable Long comment_id) {
+
+        User user = jwtUtil.getUserFromHeader(authorizationHeader);
+
+        Comment comment = postCommentService.deleteComment(user.getId(),comment_id);
+        return ApiResponse.onSuccess("댓글이 삭제되었습니다.");
+    }
+
+    @PostMapping("/comments/{comment_id}/likes")
+    @Operation(summary = "댓글 좋아요 API")
+    public ApiResponse<CommentResponseDTO.CreateCommentLikeResponseDTO> createCommentLike(
+            @Parameter (hidden = true) @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable(name = "comment_id") Long commentId){
+
+        User user = jwtUtil.getUserFromHeader(authorizationHeader);
+
+        CommentLike commentLike = commentLikeService.createCommentLike(user.getId(), commentId);
+
+        return ApiResponse.onSuccess(PostCommentConverter.toCommentLikeDTO(commentLike));
+    }
+
+
+    @DeleteMapping("/comments/{comment_id}/likes")
+    @Operation(summary = "댓글 좋아요 취소 API")
+    public ApiResponse<String> deleteCommentLike(
+            @Parameter (hidden = true) @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable(name = "comment_id")Long commentId){
+
+        User user = jwtUtil.getUserFromHeader(authorizationHeader);
+
+        commentLikeService.deleteCommentLike(user.getId(), commentId);
+        return ApiResponse.onSuccess("좋아요가 삭제되었습니다");
+    }
+
+    @PostMapping("/comments/{comment_id}/reports")
+    @Operation(summary = "댓글 신고 API")
+    public ApiResponse<CommentResponseDTO.CreateCommentReportResponseDTO> createCommentLike(
+            @Parameter (hidden = true)
+            @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable(name = "comment_id")Long commentId,
+            @RequestParam(name = "type") ReportType reportType){
+
+        User user = jwtUtil.getUserFromHeader(authorizationHeader);
+
+        CommentReport commentReport = commentReportService.createReport(user.getId(), commentId, reportType);
+        return ApiResponse.onSuccess(PostCommentConverter.toCommentReportDTO(commentReport));
+    }
 }

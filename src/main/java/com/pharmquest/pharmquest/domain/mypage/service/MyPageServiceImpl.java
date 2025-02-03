@@ -1,9 +1,15 @@
 package com.pharmquest.pharmquest.domain.mypage.service;
 
 import com.pharmquest.pharmquest.domain.mypage.converter.MyPageConverter;
+import com.pharmquest.pharmquest.domain.mypage.data.PostScrap;
 import com.pharmquest.pharmquest.domain.mypage.web.dto.MyPageResponseDTO;
 import com.pharmquest.pharmquest.domain.pharmacy.data.enums.PharmacyCountry;
 import com.pharmquest.pharmquest.domain.pharmacy.service.PharmacyDetailsService;
+import com.pharmquest.pharmquest.domain.post.data.Post;
+import com.pharmquest.pharmquest.domain.post.data.mapping.Comment;
+import com.pharmquest.pharmquest.domain.post.repository.comment.PostCommentRepository;
+import com.pharmquest.pharmquest.domain.post.repository.post.PostRepository;
+import com.pharmquest.pharmquest.domain.post.repository.scrap.PostScrapRepository;
 import com.pharmquest.pharmquest.domain.supplements.data.Enum.CategoryKeyword;
 import com.pharmquest.pharmquest.domain.supplements.data.mapping.SupplementsScrap;
 import com.pharmquest.pharmquest.domain.supplements.repository.SupplementsScrapRepository;
@@ -20,6 +26,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -31,6 +38,9 @@ public class MyPageServiceImpl implements MyPageService {
     private final MyPageConverter myPageConverter;
     private final PharmacyDetailsService pharmacyDetailsService;
     private final SupplementsScrapRepository supplementsScrapRepository;
+    private final PostScrapRepository postScrapRepository;
+    private final PostRepository postRepository;
+    private final PostCommentRepository postCommentRepository;
 
     @Override
     public Page<MyPageResponseDTO.SupplementsResponseDto> getScrapSupplements(Long userId, Pageable pageable, CategoryKeyword category) {
@@ -49,6 +59,7 @@ public class MyPageServiceImpl implements MyPageService {
 
     @Override
     public Page<MyPageResponseDTO.PharmacyDto> getScrapPharmacies(User user, PharmacyCountry country, Integer page, Integer size) {
+
 
         // 스크랩된 전체 약국 placeId List
         List<String> pharmacyPlaceIdList = user.getPharmacyScraps();

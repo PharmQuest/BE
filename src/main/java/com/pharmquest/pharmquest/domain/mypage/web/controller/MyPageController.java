@@ -18,8 +18,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/mypage")
@@ -49,10 +47,46 @@ public class MyPageController {
             @Parameter (hidden = true) @RequestHeader(value = "Authorization") String authorizationHeader,
             @RequestParam("country")PharmacyCountry country,
             @RequestParam(defaultValue = "1", value = "page") Integer page,
-            @RequestParam(defaultValue = "1", value = "size") Integer size
+            @RequestParam(defaultValue = "1", value = "size") Integer size       
     ) {
         User user = jwtUtil.getUserFromHeader(authorizationHeader);
         Page<MyPageResponseDTO.PharmacyDto> pharmacies = myPageService.getScrapPharmacies(user, country, page, size);
         return ApiResponse.of(SuccessStatus.MY_PAGE_PHARMACY, MyPageConverter.toPharmaciesResponse(pharmacies));
+    }
+
+    @GetMapping("/activities/scrap")
+    @Operation(summary = "나의활동 - 스크랩한 게시물 조회 API")
+    public ApiResponse<Page<MyPageResponseDTO.ScrapPostResponseDTO>> getScrapedPost(
+            @Parameter (hidden = true) @RequestHeader("Authorization") String authorizationHeader,
+            @Parameter(description = "페이지 번호") @RequestParam(defaultValue = "0") int page
+    ) {
+        Pageable pageable = PageRequest.of(page, 10);
+        User user = jwtUtil.getUserFromHeader(authorizationHeader);
+        Page<MyPageResponseDTO.ScrapPostResponseDTO> Post = myPageService.getScrapPosts(user.getId(), pageable);
+        return ApiResponse.onSuccess(Post);
+    }
+
+    @GetMapping("/activities/comments")
+    @Operation(summary = "나의활동 - 내가 작성한 댓글 조회 API")
+    public ApiResponse<Page<MyPageResponseDTO.CommentResponseDTO>> getMyComments(
+            @Parameter (hidden = true) @RequestHeader("Authorization") String authorizationHeader,
+            @Parameter(description = "페이지 번호") @RequestParam(defaultValue = "0") int page
+    ) {
+        Pageable pageable = PageRequest.of(page, 5);
+        User user = jwtUtil.getUserFromHeader(authorizationHeader);
+        Page<MyPageResponseDTO.CommentResponseDTO> myComments = myPageService.getMyComments(user.getId(), pageable);
+        return ApiResponse.onSuccess(myComments);
+    }
+
+    @GetMapping("/activities/post")
+    @Operation(summary = "나의활동 - 내가 작성한 게시물 조회 API")
+    public ApiResponse<Page<MyPageResponseDTO.PostResponseDTO>> getMyPost(
+            @Parameter (hidden = true) @RequestHeader("Authorization") String authorizationHeader,
+            @Parameter(description = "페이지 번호") @RequestParam(defaultValue = "0") int page
+    ) {
+        Pageable pageable = PageRequest.of(page, 10);
+        User user = jwtUtil.getUserFromHeader(authorizationHeader);
+        Page<MyPageResponseDTO.PostResponseDTO> myPost = myPageService.getMyPosts(user.getId(), pageable);
+        return ApiResponse.onSuccess(myPost);
     }
 }

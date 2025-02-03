@@ -14,6 +14,8 @@ public interface MyPageService {
     Page<MyPageResponseDTO.ScrapPostResponseDTO> getScrapPosts(Long userId, Pageable pageable);
     Page<MyPageResponseDTO.PostResponseDTO> getMyPosts(Long userId, Pageable pageable);
     Page<MyPageResponseDTO.CommentResponseDTO> getMyComments(Long userId, Pageable pageable);
+    Page<MyPageResponseDTO.notificationResponseDTO> getNotification(Long userId, Pageable pageable);
+
 
 
 }

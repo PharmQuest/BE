@@ -89,4 +89,16 @@ public class MyPageController {
         Page<MyPageResponseDTO.PostResponseDTO> myPost = myPageService.getMyPosts(user.getId(), pageable);
         return ApiResponse.onSuccess(myPost);
     }
+
+    @GetMapping("/activities/notification")
+    @Operation(summary = "나의활동 - 알림 조회 API")
+    public ApiResponse<Page<MyPageResponseDTO.notificationResponseDTO>> getNotifications(
+            @Parameter (hidden = true) @RequestHeader("Authorization") String authorizationHeader,
+            @Parameter(description = "페이지 번호") @RequestParam(defaultValue = "0") int page
+    ) {
+        Pageable pageable = PageRequest.of(page, 5);
+        User user = jwtUtil.getUserFromHeader(authorizationHeader);
+        Page<MyPageResponseDTO.notificationResponseDTO> notification = myPageService.getNotification(user.getId(), pageable);
+        return ApiResponse.onSuccess(notification);
+    }
 }

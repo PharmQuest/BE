@@ -90,4 +90,14 @@ public class MyPageConverter {
                 .createdAt(comment.getCreatedAt().toLocalDate())
                 .build();
     }
+
+    public MyPageResponseDTO.notificationResponseDTO tonotificationCommentDTO(Comment comment) {
+        return MyPageResponseDTO.notificationResponseDTO.builder()
+                .postId(comment.getPost().getId())
+                .commentContent(comment.getContent())
+                .commentWriter(comment.getUser().getName())
+                .postTitle(comment.getPost().getTitle())
+                .createdAt(comment.getCreatedAt().toLocalDate())
+                .build();
+    }
 }

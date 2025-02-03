@@ -108,6 +108,21 @@ public class MyPageServiceImpl implements MyPageService {
     }
 
     @Override
+    public Page<MyPageResponseDTO.notificationResponseDTO> getNotification(Long userId, Pageable pageable) {
+        Page<Comment> notificationCommentPage = postCommentRepository.findUserRelatedComments(userId, pageable);
+
+        if (notificationCommentPage.isEmpty()) {
+            return new PageImpl<>(new ArrayList<>(), pageable, notificationCommentPage.getTotalElements());
+        } else{
+            List<MyPageResponseDTO.notificationResponseDTO> notificationCommentDTO = notificationCommentPage.stream()
+                    .map(myPageConverter::tonotificationCommentDTO)
+                    .filter(Objects::nonNull)
+                    .toList();
+            return new PageImpl<>(notificationCommentDTO, pageable, notificationCommentPage.getTotalPages());
+        }
+    }
+
+    @Override
     public Page<MyPageResponseDTO.PharmacyDto> getScrapPharmacies(User user, PharmacyCountry country, Integer page, Integer size) {
 
 

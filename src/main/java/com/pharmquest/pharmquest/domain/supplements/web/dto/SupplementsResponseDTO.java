@@ -39,6 +39,18 @@ public class SupplementsResponseDTO {
         private int scrapCount;
         private String category4;
         private List<String> categories;
+        private AdResponseDTO.AdResponseDto adResponse;
+    }
+
+    @Builder
+    @Getter
+    @AllArgsConstructor
+    public static class SupplementsPageResponseDto {
+        private int amountPage;
+        private int amountCount;
+        private int currentPage;
+        private int currentCount;
+        private List<SupplementsDto> supplements;
     }
 
     @Builder
@@ -52,8 +64,22 @@ public class SupplementsResponseDTO {
         private String brand;
         private boolean isScrapped;
         private int scrapCount;
+        private int amountPage;
+        private int amountCount;
         private String category4;
         private List<String> categories;
+        private AdResponseDTO.AdResponseDto adResponse;
+    }
+
+    @Builder
+    @Getter
+    @AllArgsConstructor
+    public static class SupplementsSearchPageResponseDto {
+        private int amountPage;
+        private int amountCount;
+        private int currentPage;
+        private int currentCount;
+        private List<SupplementsSearchResponseDto> supplements;
     }
 
     @Builder

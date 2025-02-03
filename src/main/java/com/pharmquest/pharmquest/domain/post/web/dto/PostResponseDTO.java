@@ -64,6 +64,7 @@ public class PostResponseDTO {
         String title;
         String content;
         String category;
+        String country;
         Integer scrapeCount;
         Integer likeCount;
         Integer commentCount;
@@ -72,6 +73,7 @@ public class PostResponseDTO {
         Boolean isLiked;
         Boolean isScraped;
         Boolean isOwnPost;
+        String imageUrl;
         List<CommentResponseDTO.CommentDTO> comments;
         Integer listSize;
         Integer totalPage;

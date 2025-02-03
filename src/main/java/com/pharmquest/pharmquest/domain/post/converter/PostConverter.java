@@ -5,11 +5,8 @@ import com.pharmquest.pharmquest.domain.post.data.mapping.Comment;
 import com.pharmquest.pharmquest.domain.post.web.dto.CommentResponseDTO;
 import com.pharmquest.pharmquest.domain.post.web.dto.PostRequestDTO;
 import com.pharmquest.pharmquest.domain.post.web.dto.PostResponseDTO;
-import com.pharmquest.pharmquest.domain.user.data.User;
 import org.springframework.data.domain.Page;
-
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,13 +19,13 @@ public class PostConverter {
                 .build();
     }
 
-    public static Post toPost(PostRequestDTO.CreatePostDTO request) {
-
+    public static Post toPost(PostRequestDTO.CreatePostDTO request, String imageUrl) {
         return Post.builder()
                 .title(request.getTitle())
                 .content(request.getContent())
                 .category(request.getCategory())
                 .country(request.getCountry())
+                .postImgURL(imageUrl)
                 .build();
     }
 
@@ -76,12 +73,14 @@ public class PostConverter {
                 .title(post.getTitle())
                 .content(post.getContent())
                 .category(post.getCategory().getKoreanName())
+                .country(post.getCountry().getKoreanName())
                 .scrapeCount(post.getScraps().size())
                 .likeCount(post.getLikes().size())
                 .commentCount(post.getComments().size())
                 .isLiked(isLiked)
                 .isScraped(isScraped)
                 .isOwnPost(isOwnPost)
+                .imageUrl(post.getPostImgURL())
                 .comments(topLevelComment)
                 .isFirst(parentCommentsPage.isFirst())
                 .isLast(parentCommentsPage.isLast())

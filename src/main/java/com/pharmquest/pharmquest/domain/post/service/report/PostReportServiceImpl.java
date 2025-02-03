@@ -25,29 +25,24 @@ public class PostReportServiceImpl implements PostReportService {
 
     @Override
     public PostReport createReport(Long userId, Long postId, ReportType reportType) {
-        Optional<PostReport> postReport =
-                postReportRepository.findByPostIdAndUserId(postId, userId);
-
-        User user = userRepository.findById(userId)
-                .orElseThrow(EntityNotFoundException::new);
-
-        Post post = postRepository.findById(postId)
-                .orElseThrow(EntityNotFoundException::new);
-
-        if (postReport.isPresent()) {
+        if (postReportRepository.findByPostIdAndUserId(postId, userId).isPresent()) {
             throw new IllegalStateException("이미 신고한 게시물 입니다.");
         }
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
+
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new EntityNotFoundException("Post not found with id: " + postId));
 
         PostReport newReport = PostReportConverter.toPostReport(user, post, reportType);
         postReportRepository.save(newReport);
 
         int reportCount = postReportRepository.countByPostId(postId);
-
-        // 신고 횟수가 30 이상이면 게시글 삭제 처리
         if (reportCount >= 30) {
             post.setDeleted(true);
-            postRepository.save(post);
         }
+
         return newReport;
     }
 }

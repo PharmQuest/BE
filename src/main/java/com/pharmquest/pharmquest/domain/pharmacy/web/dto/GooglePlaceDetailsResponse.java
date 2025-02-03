@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -32,6 +33,7 @@ public class GooglePlaceDetailsResponse {
         private OpeningHours openingHours;
         private Location geometry;
         private List<AddressComponent> addressComponents;
+        private List<Photo> photos;
 
         public List<String> getTypes() {
             return types;
@@ -39,7 +41,7 @@ public class GooglePlaceDetailsResponse {
 
         @JsonProperty("name")
         public String getName() {
-            return name == null ? "Unknown" : name;
+            return name == null ? "이름 미제공" : name;
         }
 
         @JsonProperty("formatted_address")
@@ -62,11 +64,17 @@ public class GooglePlaceDetailsResponse {
             return addressComponents == null ? List.of() : addressComponents;
         }
 
+        @JsonProperty("photos") // Google Place API의 "photos" 필드 매핑
+        public List<Photo> getPhotos() {
+            return photos == null ? List.of() : photos;
+        }
+
         // 지역 목록( 범위별 명칭 )을 리스트에 담아 반환
         public List<String> getLocationList() {
 
             if (addressComponents == null || addressComponents.isEmpty()) {
-                return List.of("Unknown");
+                // 정보 미제공 시 빈 List 반환. 이후에 대체 문자열로 변환
+                return new ArrayList<>();
             }
 
             // 지역 키워드 중 political 가진 country가 아닌 키워드 추출하여 list에 저장
@@ -78,7 +86,8 @@ public class GooglePlaceDetailsResponse {
 
             int size = locationList.size();
             if (size == 0) {
-                return List.of("Unknown");
+                // 마땅한 정보 없을 시 빈 List 반환. 이후에 대체 문자열로 변환
+                return new ArrayList<>();
             }
 
             // 지역 키워드를 규모 큰 순서로 3개 이하가 되도록 설정
@@ -97,12 +106,12 @@ public class GooglePlaceDetailsResponse {
 
         @JsonProperty("long_name")
         public String getLongName() {
-            return longName == null ? "" : longName;
+            return longName == null ? "위치 미제공" : longName;
         }
 
         @JsonProperty("short_name")
         public String getShortName() {
-            return shortName == null ? "" : shortName;
+            return shortName == null ? "위치 미제공" : shortName;
         }
 
         @JsonProperty("types")
@@ -187,6 +196,35 @@ public class GooglePlaceDetailsResponse {
         @JsonProperty("lng")
         public Double getLng() {
             return lng == null ? 0 : lng;
+        }
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class Photo {
+
+        private int height;
+        private int width;
+        private String photoReference;
+        private List<String> htmlAttributions;
+
+        @JsonProperty("height")
+        public int getHeight() {
+            return height;
+        }
+
+        @JsonProperty("width")
+        public int getWidth() {
+            return width;
+        }
+
+        @JsonProperty("photo_reference")
+        public String getPhotoReference() {
+            return photoReference == null ? "" : photoReference;
+        }
+
+        @JsonProperty("html_attributions")
+        public List<String> getHtmlAttributions() {
+            return htmlAttributions == null ? List.of() : htmlAttributions;
         }
     }
 }

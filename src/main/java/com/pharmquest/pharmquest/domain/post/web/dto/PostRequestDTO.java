@@ -45,6 +45,8 @@ public class PostRequestDTO {
         @Schema(description = "카테고리", nullable = true)
         PostCategory category;
 
+        Boolean deleteImgae;
+
     }
 
 }

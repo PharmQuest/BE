@@ -9,7 +9,6 @@ import com.pharmquest.pharmquest.domain.post.data.mapping.Comment;
 import com.pharmquest.pharmquest.domain.post.repository.comment.PostCommentRepository;
 import com.pharmquest.pharmquest.domain.post.repository.like.PostLikeRepository;
 import com.pharmquest.pharmquest.domain.post.repository.post.PostRepository;
-import com.pharmquest.pharmquest.domain.post.repository.report.PostReportRepository;
 import com.pharmquest.pharmquest.domain.post.repository.scrap.PostScrapRepository;
 import com.pharmquest.pharmquest.domain.post.specification.PostSpecification;
 import com.pharmquest.pharmquest.domain.post.web.dto.CommentResponseDTO;
@@ -19,6 +18,7 @@ import com.pharmquest.pharmquest.domain.user.data.User;
 import com.pharmquest.pharmquest.domain.user.repository.UserRepository;
 import com.pharmquest.pharmquest.global.apiPayload.code.status.ErrorStatus;
 import com.pharmquest.pharmquest.global.apiPayload.exception.handler.PostHandler;
+import com.pharmquest.pharmquest.global.service.S3Service;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -26,7 +26,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -36,21 +36,23 @@ public class PostCommandServiceImpl implements PostCommandService {
 
     private final PostRepository postRepository;
     private final PostLikeRepository likeRepository;
-    private final PostReportRepository reportRepository;
     private final PostScrapRepository scrapRepository;
     private final PostCommentRepository commentRepository;
+    private final S3Service s3Service;
 
     private final UserRepository userRepository;
 
     //게시글 등록
     @Override
-    public Post registerPost(Long userId, PostRequestDTO.CreatePostDTO request ) {
-
-        Post newPost = PostConverter.toPost(request);
+    public Post registerPost(Long userId, PostRequestDTO.CreatePostDTO request, MultipartFile imageFile) {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("해당하는 유저를 찾을 수 없습니다. ID: " + userId));
-                newPost.setUser(user);
+
+        String imageUrl = null;
+        if (imageFile != null && !imageFile.isEmpty()) {
+            imageUrl = s3Service.uploadPostImg(imageFile);
+        }
 
         if (request.getTitle() == null || request.getTitle().isEmpty()) {
             throw new PostHandler(ErrorStatus.TITLE_NOT_PROVIDED);
@@ -59,6 +61,8 @@ public class PostCommandServiceImpl implements PostCommandService {
             throw new PostHandler(ErrorStatus.CONTENT_NOT_PROVIDED);
         }
 
+        Post newPost = PostConverter.toPost(request,imageUrl);
+        newPost.setUser(user);
         return postRepository.save(newPost);
     }
 
@@ -146,10 +150,7 @@ public class PostCommandServiceImpl implements PostCommandService {
 
     @Override
     @Transactional
-    public Post updatePost(Long userId, Long postId, PostRequestDTO.UpdatePostDTO request) {
-
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("해당하는 유저를 찾을 수 없습니다. ID: " + userId));
+    public Post updatePost(Long userId, Long postId, PostRequestDTO.UpdatePostDTO request, MultipartFile imageFile) {
 
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new PostHandler(ErrorStatus.POST_NOT_EXIST));
@@ -166,6 +167,17 @@ public class PostCommandServiceImpl implements PostCommandService {
         }
         if (request.getCategory() != null) {
             post.setCategory(request.getCategory());
+        }
+
+        String imageUrl = null;
+        if (imageFile != null && !imageFile.isEmpty()) {
+            imageUrl = s3Service.uploadPostImg(imageFile);
+            post.setPostImgURL(imageUrl);
+        }
+
+        //이미지를 삭제하고 싶을 때
+        if (request.getDeleteImgae() && imageFile == null) {
+            post.setPostImgURL(null);
         }
 
         return post;

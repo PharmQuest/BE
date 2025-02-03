@@ -6,6 +6,7 @@ import com.pharmquest.pharmquest.domain.supplements.repository.SupplementsReposi
 import com.pharmquest.pharmquest.domain.supplements.web.dto.SupplementsResponseDTO;
 import com.pharmquest.pharmquest.domain.supplements.repository.SupplementsScrapRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
@@ -36,6 +37,7 @@ public class SupplementsConverter {
     public SupplementsResponseDTO.SupplementsDto toDto(Supplements supplement, Long userId) {
         List<String> categories = supplementsCategoryRepository.findCategoryNamesBySupplementId(supplement.getId());
         return SupplementsResponseDTO.SupplementsDto.builder()
+                .id(supplement.getId())
                 .name(supplement.getName())
                 .image(supplement.getImage())
                 .brand(supplement.getBrand())
@@ -49,6 +51,7 @@ public class SupplementsConverter {
     public SupplementsResponseDTO.SupplementsSearchResponseDto toSearchDto(Supplements supplement, Long userId) {
         List<String> categories = supplementsCategoryRepository.findCategoryNamesBySupplementId(supplement.getId());
         return SupplementsResponseDTO.SupplementsSearchResponseDto.builder()
+                .id(supplement.getId())
                 .name(supplement.getName())
                 .image(supplement.getImage())
                 .brand(supplement.getBrand())
@@ -74,6 +77,7 @@ public class SupplementsConverter {
         }
 
         return SupplementsResponseDTO.SupplementsDetailResponseDto.builder()
+                .id(supplement.getId())
                 .name(supplement.getName())
                 .image(supplement.getImage())
                 .brand(supplement.getBrand())
@@ -85,11 +89,15 @@ public class SupplementsConverter {
                 .category2(supplement.getCategory2())
                 .category3(supplement.getCategory3())
                 .category4(supplement.getCategory4())
+                .dosage(supplement.getDosage())
+                .purpose(supplement.getPurpose())
+                .warning(supplement.getWarning())
                 .categories(categories)
                 .relatedSupplements(relatedSupplements.stream()
                         .map(s -> SupplementsResponseDTO.RelatedSupplementDto.builder()
                                 .id(s.getId())
                                 .name(s.getName())
+                                .image(s.getImage())
                                 .brand(s.getBrand())
                                 .maker(s.getMaker())
                                 .isScrapped(isSupplementScrappedByUser(s, userId))

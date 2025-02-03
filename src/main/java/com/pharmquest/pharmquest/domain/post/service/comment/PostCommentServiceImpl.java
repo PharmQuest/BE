@@ -9,6 +9,7 @@ import com.pharmquest.pharmquest.domain.post.web.dto.CommentRequestDTO;
 import com.pharmquest.pharmquest.domain.user.data.User;
 import com.pharmquest.pharmquest.domain.user.repository.UserRepository;
 import com.pharmquest.pharmquest.global.apiPayload.code.status.ErrorStatus;
+import com.pharmquest.pharmquest.global.apiPayload.exception.handler.CommentHandler;
 import com.pharmquest.pharmquest.global.apiPayload.exception.handler.PostHandler;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -41,10 +42,10 @@ public class PostCommentServiceImpl implements PostCommentService {
 
         if (parentId != null) {
             Comment parentComment = postCommentRepository.findById(parentId)
-                    .orElseThrow(() -> new PostHandler(ErrorStatus.COMMENT_NOT_EXIST));
+                    .orElseThrow(() -> new CommentHandler(ErrorStatus.COMMENT_NOT_EXIST));
 
             if (!parentComment.getPost().getId().equals(postId)) {
-                throw new PostHandler(ErrorStatus.COMMENT_NOT_IN_POST);
+                throw new CommentHandler(ErrorStatus.COMMENT_NOT_IN_POST);
             }
 
             newComment.setParent(parentComment);
@@ -64,6 +65,41 @@ public class PostCommentServiceImpl implements PostCommentService {
         }
 
     }
+
+    @Override
+    @Transactional
+    public Comment updateComment(Long userId, Long commentId, CommentRequestDTO.UpdateCommentDTO request) {
+        Comment comment = postCommentRepository.findById(commentId)
+                .orElseThrow(() -> new CommentHandler(ErrorStatus.COMMENT_NOT_EXIST));
+
+        // 댓글 작성자 확인
+        if (!userId.equals(comment.getUser().getId())) {
+            throw new CommentHandler(ErrorStatus.NOT_COMMENT_AUTHOR);
+        }
+
+        if (request.getContent() != null && !request.getContent().isEmpty()) {
+            comment.setContent(request.getContent());
+        }
+
+        return comment;
+    }
+
+    @Override
+    @Transactional
+    public Comment deleteComment(Long userId, Long commentId) {
+        Comment comment = postCommentRepository.findById(commentId)
+                .orElseThrow(() -> new CommentHandler(ErrorStatus.COMMENT_NOT_EXIST));
+
+        // 댓글 작성자 확인
+        if (!userId.equals(comment.getUser().getId())) {
+            throw new CommentHandler(ErrorStatus.NOT_COMMENT_AUTHOR);
+        }
+
+        comment.setDeleted(true);
+
+        return comment;
+    }
+
 
     // 최상위 부모 댓글 찾기
     private Comment findTopLevelParent(Comment comment) {

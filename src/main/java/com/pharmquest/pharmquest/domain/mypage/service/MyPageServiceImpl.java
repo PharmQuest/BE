@@ -58,6 +58,56 @@ public class MyPageServiceImpl implements MyPageService {
     }
 
     @Override
+    public Page<MyPageResponseDTO.ScrapPostResponseDTO> getScrapPosts(Long userId, Pageable pageable) {
+
+        Page<PostScrap> postScrapPage = postScrapRepository.findPostByUserId(userId, pageable);
+
+        if (postScrapPage.isEmpty()) {
+            return new PageImpl<>(new ArrayList<>(), pageable, postScrapPage.getTotalElements());
+        }
+
+        List<MyPageResponseDTO.ScrapPostResponseDTO> scrapedPostDTO = postScrapPage.stream()
+                .map(postScrap -> myPageConverter.toScrapedPostDto(postScrap.getPost()))
+                .filter(Objects::nonNull)
+                .toList();
+
+        return new PageImpl<>(scrapedPostDTO, pageable, postScrapPage.getTotalPages());
+    }
+
+    @Override
+    public Page<MyPageResponseDTO.PostResponseDTO> getMyPosts(Long userId, Pageable pageable) {
+        Page<Post> postPage = postRepository.findPostByUserId(userId, pageable);
+
+        if (postPage.isEmpty()) {
+            return new PageImpl<>(new ArrayList<>(), pageable, postPage.getTotalElements());
+        } else {
+
+            List<MyPageResponseDTO.PostResponseDTO> PostDTO = postPage.stream()
+                    .map(myPageConverter::toPostDto)
+                    .filter(Objects::nonNull)
+                    .toList();
+
+            return new PageImpl<>(PostDTO, pageable, postPage.getTotalPages());
+        }
+    }
+
+    @Override
+    public Page<MyPageResponseDTO.CommentResponseDTO> getMyComments(Long userId, Pageable pageable) {
+        Page<Comment> commentPage = postCommentRepository.findCommentByUserId(userId, pageable);
+
+        if (commentPage.isEmpty()) {
+            return new PageImpl<>(new ArrayList<>(), pageable, commentPage.getTotalElements());
+        } else {
+            List<MyPageResponseDTO.CommentResponseDTO> CommentDTO = commentPage.stream()
+                    .map(myPageConverter::toCommentDto)
+                    .filter(Objects::nonNull)
+                    .toList();
+
+            return new PageImpl<>(CommentDTO, pageable, commentPage.getTotalPages());
+        }
+    }
+
+    @Override
     public Page<MyPageResponseDTO.PharmacyDto> getScrapPharmacies(User user, PharmacyCountry country, Integer page, Integer size) {
 
 

@@ -12,6 +12,7 @@ public enum ErrorStatus implements BaseErrorCode {
 
     // COMMON - 가장 일반적 응답
     _INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "COMMON500", "서버 에러, 관리자에게 문의 바랍니다"),
+    AUTHORIZATION_HEADER_NOT_FOUND(HttpStatus.UNAUTHORIZED, "AUTH4001", "로그인이 필요한 서비스입니다."),
 
     // posts
     ILLEGAL_COUNTRY(HttpStatus.BAD_REQUEST, "POST4001", "올바르지 않은 국가."),
@@ -43,7 +44,7 @@ public enum ErrorStatus implements BaseErrorCode {
     // supplement
     SUPPLEMENTS_NO_SEARCH_RESULT(HttpStatus.NOT_FOUND, "SUPP4001", "검색 결과가 없습니다."),
     SUPPLEMENTS_NO_KEYWORD(HttpStatus.BAD_REQUEST, "SUPP4002", "검색어를 입력해주세요."),
-    AUTHORIZATION_HEADER_NOT_FOUND(HttpStatus.UNAUTHORIZED, "AUTH4001", "로그인이 필요한 서비스입니다."),
+    SUPPLEMENTS_NO_FILTERED(HttpStatus.NOT_FOUND, "SUPP4003", "필터링된 결과가 없습니다."),
 
     // my page
     INVALID_PAGE_NUMBER(HttpStatus.BAD_REQUEST, "MYPAGE4001", "페이지 번호가 1보다 작을 수 없습니다."),

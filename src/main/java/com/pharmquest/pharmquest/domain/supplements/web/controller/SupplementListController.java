@@ -35,34 +35,34 @@ public class SupplementListController {
 
     @GetMapping("/lists")
     @Operation(summary = "영양제 조회 API", description = "영양제 목록 조회 및 카테고리 필터링")
-    public ApiResponse<List<SupplementsResponseDTO.SupplementsDto>> getSupplements(
+    public ApiResponse<SupplementsResponseDTO.SupplementsPageResponseDto> getSupplements(
             @Parameter(description = "카테고리") @RequestParam(required = false) CategoryKeyword category,
-            @Parameter(description = "페이지 번호", example = "0") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "페이지 번호", example = "1") @RequestParam(defaultValue = "1") int page,
             @Parameter(description = "사용자 ID", hidden = true) @RequestHeader(value = "authorization", required = false) String authorizationHeader
     ) {
         Long userId = null;
         if (authorizationHeader != null && !authorizationHeader.isEmpty()) {
             userId = jwtUtil.getUserFromHeader(authorizationHeader).getId();
         }
-        Pageable pageable = PageRequest.of(page, 10);
+        Pageable pageable = PageRequest.of(page-1, 20);
 
-        if (page == 0 && supplementsRepository.count() == 0) {
+        if (page == 1 && supplementsRepository.count() == 0) {
             supplementsService.saveSupplements();
         }
 
-        Page<SupplementsResponseDTO.SupplementsDto> supplementsPage = supplementsService.getSupplements(category, pageable, userId);
+        SupplementsResponseDTO.SupplementsPageResponseDto supplementsPage = supplementsService.getSupplements(category, pageable, userId);
 
-        return ApiResponse.onSuccess(supplementsPage.getContent());
+        return ApiResponse.onSuccess(supplementsPage);
     }
 
     @GetMapping("/search")
     @Operation(summary = "영양제 검색 API", description = "영양제 검색")
-    public ApiResponse<List<SupplementsResponseDTO.SupplementsSearchResponseDto>> searchSupplements(
+    public ApiResponse<SupplementsResponseDTO.SupplementsSearchPageResponseDto> searchSupplements(
             @Parameter(description = "키워드", hidden = true) @RequestHeader(value = "authorization", required = false) String authorizationHeader,
             @RequestParam(required = false) String keyword,
             @Parameter(description = "국가",schema = @Schema(allowableValues = {"USA", "KOREA"}))
             @RequestParam(required = false) Country country,
-            @Parameter(description = "페이지 번호") @RequestParam(defaultValue = "0") int page
+            @Parameter(description = "페이지 번호") @RequestParam(defaultValue = "1") int page
     ) {
         Long userId = null;
 
@@ -70,12 +70,12 @@ public class SupplementListController {
             userId = jwtUtil.getUserFromHeader(authorizationHeader).getId();
         }
 
-        Pageable pageable = PageRequest.of(page, 10);
+        Pageable pageable = PageRequest.of(page-1, 20);
 
-        Page<SupplementsResponseDTO.SupplementsSearchResponseDto> supplementsPage =
+        SupplementsResponseDTO.SupplementsSearchPageResponseDto supplementsPage =
                 supplementsService.searchSupplements(keyword, country, pageable, userId);
 
-        return ApiResponse.onSuccess(supplementsPage.getContent());
+        return ApiResponse.onSuccess(supplementsPage);
     }
 
     @GetMapping("/med")

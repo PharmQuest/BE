@@ -44,7 +44,7 @@ public class SupplementListController {
         if (authorizationHeader != null && !authorizationHeader.isEmpty()) {
             userId = jwtUtil.getUserFromHeader(authorizationHeader).getId();
         }
-        Pageable pageable = PageRequest.of(page, 10);
+        Pageable pageable = PageRequest.of(page, 20);
 
         if (page == 0 && supplementsRepository.count() == 0) {
             supplementsService.saveSupplements();
@@ -70,7 +70,7 @@ public class SupplementListController {
             userId = jwtUtil.getUserFromHeader(authorizationHeader).getId();
         }
 
-        Pageable pageable = PageRequest.of(page, 10);
+        Pageable pageable = PageRequest.of(page, 20);
 
         Page<SupplementsResponseDTO.SupplementsSearchResponseDto> supplementsPage =
                 supplementsService.searchSupplements(keyword, country, pageable, userId);

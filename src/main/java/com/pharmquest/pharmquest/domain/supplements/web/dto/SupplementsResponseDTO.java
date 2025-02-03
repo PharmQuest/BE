@@ -31,6 +31,7 @@ public class SupplementsResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class SupplementsDto {
+        private Long id;
         private String name;
         private String image;
         private String brand;
@@ -45,6 +46,7 @@ public class SupplementsResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class SupplementsSearchResponseDto {
+        private Long id;
         private String name;
         private String image;
         private String brand;
@@ -73,6 +75,7 @@ public class SupplementsResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class SupplementsDetailResponseDto {
+        private Long id;
         private String name;
         private String image;
         private String brand;

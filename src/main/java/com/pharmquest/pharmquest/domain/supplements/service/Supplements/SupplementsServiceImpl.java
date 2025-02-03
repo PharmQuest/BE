@@ -54,9 +54,13 @@ public class SupplementsServiceImpl implements SupplementsService {
         else {
             List<Long> supplementIds = supplementsCategoryRepository.findSupplementIdByCategoryName(category.toString());
             if (supplementIds.isEmpty()) {
-                return new PageImpl<>(new ArrayList<>(), pageableWithSort, 0);
+                throw new CommonExceptionHandler(ErrorStatus.SUPPLEMENTS_NO_FILTERED);
             }
             supplementsPage = supplementsRepository.findByIdIn(supplementIds, pageableWithSort);
+        }
+
+        if (supplementsPage.isEmpty()) {
+            throw new CommonExceptionHandler(ErrorStatus.SUPPLEMENTS_NO_FILTERED);
         }
 
         return new PageImpl<>(

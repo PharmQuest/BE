@@ -36,6 +36,7 @@ public class SupplementsConverter {
     public SupplementsResponseDTO.SupplementsDto toDto(Supplements supplement, Long userId) {
         List<String> categories = supplementsCategoryRepository.findCategoryNamesBySupplementId(supplement.getId());
         return SupplementsResponseDTO.SupplementsDto.builder()
+                .id(supplement.getId())
                 .name(supplement.getName())
                 .image(supplement.getImage())
                 .brand(supplement.getBrand())
@@ -49,6 +50,7 @@ public class SupplementsConverter {
     public SupplementsResponseDTO.SupplementsSearchResponseDto toSearchDto(Supplements supplement, Long userId) {
         List<String> categories = supplementsCategoryRepository.findCategoryNamesBySupplementId(supplement.getId());
         return SupplementsResponseDTO.SupplementsSearchResponseDto.builder()
+                .id(supplement.getId())
                 .name(supplement.getName())
                 .image(supplement.getImage())
                 .brand(supplement.getBrand())
@@ -74,6 +76,7 @@ public class SupplementsConverter {
         }
 
         return SupplementsResponseDTO.SupplementsDetailResponseDto.builder()
+                .id(supplement.getId())
                 .name(supplement.getName())
                 .image(supplement.getImage())
                 .brand(supplement.getBrand())

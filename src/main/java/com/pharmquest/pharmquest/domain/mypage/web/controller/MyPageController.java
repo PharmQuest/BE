@@ -3,6 +3,7 @@ package com.pharmquest.pharmquest.domain.mypage.web.controller;
 import com.pharmquest.pharmquest.domain.mypage.converter.MyPageConverter;
 import com.pharmquest.pharmquest.domain.mypage.service.MyPageService;
 import com.pharmquest.pharmquest.domain.mypage.web.dto.MyPageResponseDTO;
+import com.pharmquest.pharmquest.domain.pharmacy.data.enums.PharmacyCountry;
 import com.pharmquest.pharmquest.domain.supplements.data.Enum.CategoryKeyword;
 import com.pharmquest.pharmquest.domain.token.JwtUtil;
 import com.pharmquest.pharmquest.domain.user.data.User;
@@ -45,8 +46,8 @@ public class MyPageController {
     @GetMapping("/pharmacy")
     @Operation(summary = "스크랩한 약국 조회 API")
     public ApiResponse<MyPageResponseDTO.PharmacyResponse> getScrapedPharmacy(
-            @RequestHeader(value = "Authorization") String authorizationHeader,
-            @RequestParam("country") String country,
+            @Parameter (hidden = true) @RequestHeader(value = "Authorization") String authorizationHeader,
+            @RequestParam("country")PharmacyCountry country,
             @RequestParam(defaultValue = "1", value = "page") Integer page,
             @RequestParam(defaultValue = "1", value = "size") Integer size
     ) {

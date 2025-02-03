@@ -48,18 +48,18 @@ public class MyPageServiceImpl implements MyPageService {
     }
 
     @Override
-    public Page<MyPageResponseDTO.PharmacyDto> getScrapPharmacies(User user, String country, Integer page, Integer size) {
+    public Page<MyPageResponseDTO.PharmacyDto> getScrapPharmacies(User user, PharmacyCountry country, Integer page, Integer size) {
 
         // 스크랩된 전체 약국 placeId List
         List<String> pharmacyPlaceIdList = user.getPharmacyScraps();
 
-        // 국가 분류
-        String findingCountryName = PharmacyCountry.getCountryByName(country.toLowerCase()).getGoogleName(); // Query String으로 입력받은 국가의 google에 등록된 이름으로 변경
-
         // 찾는 국가의 약국만 필터링
         List<MyPageResponseDTO.PharmacyDto> pharmacyDtoList = pharmacyPlaceIdList.stream()
                 .map(pharmacyDetailsService::getPharmacyDtoByPlaceId)
-                .filter(pharmacyDto -> findingCountryName.equals(pharmacyDto.getCountry()) || findingCountryName.equals("all"))
+                .filter(
+                        pharmacyDto -> country.equals(PharmacyCountry.getCountryByGoogleName(pharmacyDto.getCountry()))
+                                    || country.equals(PharmacyCountry.ALL)
+                )
                 .toList();
 
         int totalElements = pharmacyDtoList.size();

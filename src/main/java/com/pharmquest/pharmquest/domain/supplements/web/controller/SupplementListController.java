@@ -37,16 +37,16 @@ public class SupplementListController {
     @Operation(summary = "영양제 조회 API", description = "영양제 목록 조회 및 카테고리 필터링")
     public ApiResponse<SupplementsResponseDTO.SupplementsPageResponseDto> getSupplements(
             @Parameter(description = "카테고리") @RequestParam(required = false) CategoryKeyword category,
-            @Parameter(description = "페이지 번호", example = "0") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "페이지 번호", example = "1") @RequestParam(defaultValue = "1") int page,
             @Parameter(description = "사용자 ID", hidden = true) @RequestHeader(value = "authorization", required = false) String authorizationHeader
     ) {
         Long userId = null;
         if (authorizationHeader != null && !authorizationHeader.isEmpty()) {
             userId = jwtUtil.getUserFromHeader(authorizationHeader).getId();
         }
-        Pageable pageable = PageRequest.of(page, 20);
+        Pageable pageable = PageRequest.of(page-1, 20);
 
-        if (page == 0 && supplementsRepository.count() == 0) {
+        if (page == 1 && supplementsRepository.count() == 0) {
             supplementsService.saveSupplements();
         }
 
@@ -62,7 +62,7 @@ public class SupplementListController {
             @RequestParam(required = false) String keyword,
             @Parameter(description = "국가",schema = @Schema(allowableValues = {"USA", "KOREA"}))
             @RequestParam(required = false) Country country,
-            @Parameter(description = "페이지 번호") @RequestParam(defaultValue = "0") int page
+            @Parameter(description = "페이지 번호") @RequestParam(defaultValue = "1") int page
     ) {
         Long userId = null;
 
@@ -70,7 +70,7 @@ public class SupplementListController {
             userId = jwtUtil.getUserFromHeader(authorizationHeader).getId();
         }
 
-        Pageable pageable = PageRequest.of(page, 20);
+        Pageable pageable = PageRequest.of(page-1, 20);
 
         SupplementsResponseDTO.SupplementsSearchPageResponseDto supplementsPage =
                 supplementsService.searchSupplements(keyword, country, pageable, userId);

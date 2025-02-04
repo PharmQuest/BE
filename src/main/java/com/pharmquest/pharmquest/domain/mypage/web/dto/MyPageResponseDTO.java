@@ -45,7 +45,14 @@ public class MyPageResponseDTO {
     @Getter
     public static class PharmacyResponse {
         private List<PharmacyDto> pharmacies;
-        private Integer count;
+        @JsonProperty("total_elements")
+        private Integer totalElements;
+        @JsonProperty("total_pages")
+        private Integer totalPages;
+        @JsonProperty("current_page")
+        private Integer currentPage;
+        @JsonProperty("elements_per_page")
+        private Integer elementsPerPage;
     }
 
     @Builder

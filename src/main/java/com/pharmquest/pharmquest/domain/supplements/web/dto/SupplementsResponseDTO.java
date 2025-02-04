@@ -35,6 +35,8 @@ public class SupplementsResponseDTO {
         private String name;
         private String image;
         private String brand;
+        private String productName;
+        private String country;
         private boolean isScrapped;
         private int scrapCount;
         private String category4;
@@ -62,6 +64,8 @@ public class SupplementsResponseDTO {
         private String name;
         private String image;
         private String brand;
+        private String productName;
+        private String country;
         private boolean isScrapped;
         private int scrapCount;
         private int amountPage;
@@ -106,6 +110,8 @@ public class SupplementsResponseDTO {
         private String image;
         private String brand;
         private String maker;
+        private String productName;
+        private String country;
         private boolean isScrapped;
         private int scrapCount;
         private String category1;

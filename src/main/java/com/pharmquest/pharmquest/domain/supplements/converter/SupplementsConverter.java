@@ -1,12 +1,12 @@
 package com.pharmquest.pharmquest.domain.supplements.converter;
 
+import com.pharmquest.pharmquest.domain.post.data.enums.Country;
 import com.pharmquest.pharmquest.domain.supplements.data.Supplements;
 import com.pharmquest.pharmquest.domain.supplements.repository.SupplementsCategoryRepository;
 import com.pharmquest.pharmquest.domain.supplements.repository.SupplementsRepository;
 import com.pharmquest.pharmquest.domain.supplements.web.dto.SupplementsResponseDTO;
 import com.pharmquest.pharmquest.domain.supplements.repository.SupplementsScrapRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
@@ -34,6 +34,20 @@ public class SupplementsConverter {
         return supplementsScrapRepository.existsByUserIdAndSupplementsId(userId, supplement.getId());
     }
 
+    private String processCountryName(Country country) {
+        if (country == Country.KOREA) {
+            return "한국";
+        }
+        else if (country == Country.USA) {
+            return "미국";
+        }
+        return "";
+    }
+
+    private String processProductName(String name) {
+        return name.replaceAll("^\\[(한국|미국)\\]\\s*", "");
+    }
+
     public SupplementsResponseDTO.SupplementsDto toDto(Supplements supplement, Long userId) {
         List<String> categories = supplementsCategoryRepository.findCategoryNamesBySupplementId(supplement.getId());
         return SupplementsResponseDTO.SupplementsDto.builder()
@@ -41,6 +55,8 @@ public class SupplementsConverter {
                 .name(supplement.getName())
                 .image(supplement.getImage())
                 .brand(supplement.getBrand())
+                .productName(processProductName(supplement.getName()))
+                .country(processCountryName(supplement.getCountry()))
                 .isScrapped(isSupplementScrappedByUser(supplement, userId))
                 .scrapCount(supplement.getScrapCount())
                 .category4(supplement.getCategory4())
@@ -55,6 +71,8 @@ public class SupplementsConverter {
                 .name(supplement.getName())
                 .image(supplement.getImage())
                 .brand(supplement.getBrand())
+                .productName(processProductName(supplement.getName()))
+                .country(processCountryName(supplement.getCountry()))
                 .isScrapped(isSupplementScrappedByUser(supplement, userId))
                 .scrapCount(supplement.getScrapCount())
                 .category4(supplement.getCategory4())
@@ -82,6 +100,8 @@ public class SupplementsConverter {
                 .image(supplement.getImage())
                 .brand(supplement.getBrand())
                 .maker(supplement.getMaker())
+                .productName(processProductName(supplement.getName()))
+                .country(processCountryName(supplement.getCountry()))
                 .isScrapped(isSupplementScrappedByUser(supplement, userId))
                 .scrapCount(supplement.getScrapCount())
                 .isScrapped(isSupplementScrappedByUser(supplement, userId))

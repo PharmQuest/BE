@@ -26,7 +26,7 @@ public class MedicineController {
     }
 
     // 번역된 약물 정보 검색
-    @GetMapping("test/search/ko")
+    @GetMapping("test/searchOpenAPI/ko")
     public List<MedicineResponseDTO> searchMedicines(
             @RequestParam(defaultValue = "openfda.product_type:OTC") String query,
             @RequestParam(defaultValue = "10") int limit) {
@@ -49,7 +49,7 @@ public class MedicineController {
     }
 
     // 번역되지 않은 약물 정보 검색
-    @GetMapping("test/search/english")
+    @GetMapping("test/searchOpenAPI/english")
     public List<MedicineResponseDTO> searchEnMedicines(
             @RequestParam(defaultValue = "openfda.product_type:OTC") String query,
             @RequestParam(defaultValue = "10") int limit) {
@@ -105,6 +105,17 @@ public class MedicineController {
     @GetMapping
     public List<Medicine> getAllMedicines() {
         return medRepository.findAll(); // DB에서 전체 데이터 조회
+    }
+
+    @GetMapping("/search")
+    @Operation(summary = "약물 검색 API", description = "카테고리 및 키워드를 이용해 약물을 검색합니다.")
+    public List<MedicineResponseDTO> searchMedicinesByCategoryAndKeyword(
+            @RequestParam(defaultValue = "전체") String category,
+            @RequestParam(defaultValue = "") String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        return medicineService.searchMedicinesByCategoryAndKeyword(category, keyword, page, size);
     }
 
 }

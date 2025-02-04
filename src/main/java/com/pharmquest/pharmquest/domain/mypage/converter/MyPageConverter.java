@@ -1,6 +1,8 @@
 package com.pharmquest.pharmquest.domain.mypage.converter;
 
 import com.pharmquest.pharmquest.domain.mypage.web.dto.MyPageResponseDTO;
+import com.pharmquest.pharmquest.domain.post.data.Post;
+import com.pharmquest.pharmquest.domain.post.data.mapping.Comment;
 import com.pharmquest.pharmquest.domain.supplements.data.Enum.CategoryKeyword;
 import com.pharmquest.pharmquest.domain.supplements.data.Supplements;
 import lombok.RequiredArgsConstructor;
@@ -42,6 +44,33 @@ public class MyPageConverter {
         }
     }
 
+    public MyPageResponseDTO.ScrapPostResponseDTO toScrapedPostDto(Post post) {
+        return MyPageResponseDTO.ScrapPostResponseDTO.builder()
+                .postId(post.getId())
+                .writerName(post.getUser().getName())
+                .title(post.getTitle())
+                .category(post.getCategory())
+                .content(post.getContent().length() <= 40 ? post.getContent() : post.getContent().substring(0, 40))
+                .commentCount(post.getComments().size())
+                .scrapeCount(post.getScraps().size())
+                .likeCount(post.getLikes().size())
+                .createdAt(post.getCreatedAt().toLocalDate())
+                .build();
+    }
+
+    public MyPageResponseDTO.PostResponseDTO toPostDto(Post post) {
+        return MyPageResponseDTO.PostResponseDTO.builder()
+                .postId(post.getId())
+                .title(post.getTitle())
+                .category(post.getCategory())
+                .content(post.getContent().length() <= 40 ? post.getContent() : post.getContent().substring(0, 40))
+                .commentCount(post.getComments().size())
+                .scrapeCount(post.getScraps().size())
+                .likeCount(post.getLikes().size())
+                .createdAt(post.getCreatedAt().toLocalDate())
+                .build();
+    }
+
     public static MyPageResponseDTO.PharmacyResponse toPharmaciesResponse(Page<MyPageResponseDTO.PharmacyDto> pharmacies) {
 
         List<MyPageResponseDTO.PharmacyDto> list = pharmacies.stream().toList();
@@ -49,6 +78,16 @@ public class MyPageConverter {
         return MyPageResponseDTO.PharmacyResponse.builder()
                 .pharmacies(list)
                 .count((int) pharmacies.getTotalElements())
+                .build();
+    }
+
+    public MyPageResponseDTO.CommentResponseDTO toCommentDto(Comment comment) {
+        return MyPageResponseDTO.CommentResponseDTO.builder()
+                .commentId(comment.getId())
+                .title(comment.getPost().getTitle())
+                .postId(comment.getPost().getId())
+                .content(comment.getContent())
+                .createdAt(comment.getCreatedAt().toLocalDate())
                 .build();
     }
 }

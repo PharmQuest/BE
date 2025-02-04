@@ -2,7 +2,6 @@ package com.pharmquest.pharmquest.domain.post.converter;
 
 import com.pharmquest.pharmquest.domain.post.data.Post;
 import com.pharmquest.pharmquest.domain.post.data.enums.ReportType;
-import com.pharmquest.pharmquest.domain.post.data.mapping.PostLike;
 import com.pharmquest.pharmquest.domain.post.data.mapping.PostReport;
 import com.pharmquest.pharmquest.domain.post.web.dto.PostResponseDTO;
 import com.pharmquest.pharmquest.domain.user.data.User;

@@ -33,6 +33,7 @@ public class GooglePlaceDetailsResponse {
         private OpeningHours openingHours;
         private Location geometry;
         private List<AddressComponent> addressComponents;
+        private List<Photo> photos;
 
         public List<String> getTypes() {
             return types;
@@ -61,6 +62,11 @@ public class GooglePlaceDetailsResponse {
         @JsonProperty("address_components")
         public List<AddressComponent> getAddressComponents() {
             return addressComponents == null ? List.of() : addressComponents;
+        }
+
+        @JsonProperty("photos") // Google Place API의 "photos" 필드 매핑
+        public List<Photo> getPhotos() {
+            return photos == null ? List.of() : photos;
         }
 
         // 지역 목록( 범위별 명칭 )을 리스트에 담아 반환
@@ -190,6 +196,35 @@ public class GooglePlaceDetailsResponse {
         @JsonProperty("lng")
         public Double getLng() {
             return lng == null ? 0 : lng;
+        }
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class Photo {
+
+        private int height;
+        private int width;
+        private String photoReference;
+        private List<String> htmlAttributions;
+
+        @JsonProperty("height")
+        public int getHeight() {
+            return height;
+        }
+
+        @JsonProperty("width")
+        public int getWidth() {
+            return width;
+        }
+
+        @JsonProperty("photo_reference")
+        public String getPhotoReference() {
+            return photoReference == null ? "" : photoReference;
+        }
+
+        @JsonProperty("html_attributions")
+        public List<String> getHtmlAttributions() {
+            return htmlAttributions == null ? List.of() : htmlAttributions;
         }
     }
 }

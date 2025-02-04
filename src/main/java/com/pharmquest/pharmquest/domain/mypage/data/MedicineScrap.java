@@ -24,4 +24,9 @@ public class MedicineScrap {
     @ManyToOne
     @JoinColumn(name = "medicine_id", referencedColumnName = "id", nullable = false)
     private Medicine medicine;
+
+    public MedicineScrap(User user, Medicine medicine) {
+        this.user = user;
+        this.medicine = medicine;
+    }
 }

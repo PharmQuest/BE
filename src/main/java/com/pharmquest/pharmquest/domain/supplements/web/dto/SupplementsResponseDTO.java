@@ -31,6 +31,7 @@ public class SupplementsResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class SupplementsDto {
+        private Long id;
         private String name;
         private String image;
         private String brand;
@@ -42,16 +43,43 @@ public class SupplementsResponseDTO {
 
     @Builder
     @Getter
+    @AllArgsConstructor
+    public static class SupplementsPageResponseDto {
+        private int amountPage;
+        private int amountCount;
+        private int currentPage;
+        private int currentCount;
+        private AdResponseDTO.AdResponseDto adResponse;
+        private List<SupplementsDto> supplements;
+    }
+
+    @Builder
+    @Getter
     @NoArgsConstructor
     @AllArgsConstructor
     public static class SupplementsSearchResponseDto {
+        private Long id;
         private String name;
         private String image;
         private String brand;
         private boolean isScrapped;
         private int scrapCount;
+        private int amountPage;
+        private int amountCount;
         private String category4;
         private List<String> categories;
+    }
+
+    @Builder
+    @Getter
+    @AllArgsConstructor
+    public static class SupplementsSearchPageResponseDto {
+        private int amountPage;
+        private int amountCount;
+        private int currentPage;
+        private int currentCount;
+        private AdResponseDTO.AdResponseDto adResponse;
+        private List<SupplementsSearchResponseDto> supplements;
     }
 
     @Builder
@@ -73,6 +101,7 @@ public class SupplementsResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class SupplementsDetailResponseDto {
+        private Long id;
         private String name;
         private String image;
         private String brand;

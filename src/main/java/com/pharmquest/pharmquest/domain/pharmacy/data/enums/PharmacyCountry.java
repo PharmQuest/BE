@@ -23,9 +23,17 @@ public enum PharmacyCountry {
     }
 
     // query string 으로 받은 국가 이름을 PharmacyCountry로 반환. 해당하는거 없을 경우 '전체' 반환
-    public static PharmacyCountry getCountryByName(String name) {
+    public static PharmacyCountry getCountryByParamName(String name) {
         return Arrays.stream(values())
                 .filter(country -> name.equals(country.paramName))
+                .findFirst()
+                .orElse(ALL);
+    }
+
+    // google api로 가져오는 이름에 일치하는 국가 반환
+    public static PharmacyCountry getCountryByGoogleName(String name) {
+        return Arrays.stream(values())
+                .filter(country -> name.equals(country.googleName))
                 .findFirst()
                 .orElse(ALL);
     }

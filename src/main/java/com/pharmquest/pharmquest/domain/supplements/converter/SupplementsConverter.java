@@ -120,6 +120,8 @@ public class SupplementsConverter {
                                 .image(s.getImage())
                                 .brand(s.getBrand())
                                 .maker(s.getMaker())
+                                .productName(processProductName(supplement.getName()))
+                                .country(processCountryName(supplement.getCountry()))
                                 .isScrapped(isSupplementScrappedByUser(s, userId))
                                 .scrapCount(s.getScrapCount())
                                 .build())

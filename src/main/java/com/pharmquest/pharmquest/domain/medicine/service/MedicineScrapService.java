@@ -19,12 +19,13 @@ public class MedicineScrapService {
 
     private final MedicineScrapRepository scrapRepository;
     private final MedRepository medicineRepository;
-    private final JwtUtil jwtUtil;
-
+    private final UserRepository userRepository;
     /* 스크랩 추가 */
     @Transactional
-    public void addScrap(String authorizationHeader, Long medicineId) {
-        User user = jwtUtil.getUserFromHeader(authorizationHeader);  // 🔥 JWT에서 userId 가져오기
+    public void addScrap(Long userId, Long medicineId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 유저를 찾을 수 없습니다."));
+
         Medicine medicine = medicineRepository.findById(medicineId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 약물을 찾을 수 없습니다."));
 
@@ -42,10 +43,11 @@ public class MedicineScrapService {
 
     /* 스크랩 목록 조회 */
     @Transactional(readOnly = true)
-    public List<Medicine> getScrappedMedicines(String authorizationHeader) {
-        User user = jwtUtil.getUserFromHeader(authorizationHeader);  // 🔥 JWT에서 userId 가져오기
-        List<MedicineScrap> scraps = scrapRepository.findByUser(user);
+    public List<Medicine> getScrappedMedicines(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 유저를 찾을 수 없습니다."));
 
+        List<MedicineScrap> scraps = scrapRepository.findByUser(user);
         return scraps.stream()
                 .map(MedicineScrap::getMedicine)
                 .collect(Collectors.toList());
@@ -53,8 +55,10 @@ public class MedicineScrapService {
 
     /* 스크랩 삭제 */
     @Transactional
-    public void removeScrap(String authorizationHeader, Long medicineId) {
-        User user = jwtUtil.getUserFromHeader(authorizationHeader);  // 🔥 JWT에서 userId 가져오기
+    public void removeScrap(Long userId, Long medicineId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 유저를 찾을 수 없습니다."));
+
         Medicine medicine = medicineRepository.findById(medicineId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 약물을 찾을 수 없습니다."));
 

@@ -71,13 +71,16 @@ public class MyPageConverter {
                 .build();
     }
 
-    public static MyPageResponseDTO.PharmacyResponse toPharmaciesResponse(Page<MyPageResponseDTO.PharmacyDto> pharmacies) {
+    public static MyPageResponseDTO.PharmacyResponse toPharmaciesResponse(Page<MyPageResponseDTO.PharmacyDto> pharmacies, int page, int size) {
 
         List<MyPageResponseDTO.PharmacyDto> list = pharmacies.stream().toList();
 
         return MyPageResponseDTO.PharmacyResponse.builder()
                 .pharmacies(list)
-                .count((int) pharmacies.getTotalElements())
+                .totalElements((int) pharmacies.getTotalElements())
+                .totalPages(pharmacies.getTotalPages())
+                .currentPage(page)
+                .elementsPerPage(size)
                 .build();
     }
 

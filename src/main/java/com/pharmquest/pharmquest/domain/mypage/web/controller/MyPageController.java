@@ -47,11 +47,11 @@ public class MyPageController {
             @Parameter (hidden = true) @RequestHeader(value = "Authorization") String authorizationHeader,
             @RequestParam("country")PharmacyCountry country,
             @RequestParam(defaultValue = "1", value = "page") Integer page,
-            @RequestParam(defaultValue = "1", value = "size") Integer size       
+            @RequestParam(defaultValue = "1", value = "size") Integer size
     ) {
         User user = jwtUtil.getUserFromHeader(authorizationHeader);
         Page<MyPageResponseDTO.PharmacyDto> pharmacies = myPageService.getScrapPharmacies(user, country, page, size);
-        return ApiResponse.of(SuccessStatus.MY_PAGE_PHARMACY, MyPageConverter.toPharmaciesResponse(pharmacies));
+        return ApiResponse.of(SuccessStatus.MY_PAGE_PHARMACY, MyPageConverter.toPharmaciesResponse(pharmacies, page, size));
     }
 
     @GetMapping("/activities/scrap")

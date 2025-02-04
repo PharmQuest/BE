@@ -33,6 +33,8 @@ public class SupplementsResponseDTO {
     public static class SupplementsDto {
         private Long id;
         private String name;
+        private String country;
+        private String productName;
         private String image;
         private String brand;
         private boolean isScrapped;
@@ -60,6 +62,8 @@ public class SupplementsResponseDTO {
     public static class SupplementsSearchResponseDto {
         private Long id;
         private String name;
+        private String country;
+        private String productName;
         private String image;
         private String brand;
         private boolean isScrapped;
@@ -89,6 +93,8 @@ public class SupplementsResponseDTO {
     public static class RelatedSupplementDto {
         private Long id;
         private String name;
+        private String country;
+        private String productName;
         private String image;
         private String brand;
         private String maker;
@@ -103,6 +109,8 @@ public class SupplementsResponseDTO {
     public static class SupplementsDetailResponseDto {
         private Long id;
         private String name;
+        private String country;
+        private String productName;
         private String image;
         private String brand;
         private String maker;

@@ -124,7 +124,7 @@ public class SupplementsServiceImpl implements SupplementsService {
     public boolean saveSupplements() {
         try {
             saveDailyMedSupplements();
-            saveNaverSupplements();
+//            saveNaverSupplements();
             return true;
         } catch (Exception e) {
             return false;
@@ -172,44 +172,44 @@ public class SupplementsServiceImpl implements SupplementsService {
                 .collect(Collectors.toList());
     }
 
-    private void saveNaverSupplements() {
-        List<String> supplementsNames = Arrays.asList(
-                "한국 인기 영양제"
-        );
-
-        supplementsNames.forEach(searchKeyword ->
-                naverShoppingService.loadProducts(searchKeyword).stream()
-                        .map(dto -> {
-                            try {
-                                Country country = getCountryFromSearchKeyword(searchKeyword);
-                                String cleanedName = cleanProductName(dto.getName(), country);
-
-                                if (supplementsRepository.existsByName(cleanedName)) {
-                                    return null;
-                                }
-                                return Supplements.builder()
-                                        .name(cleanedName)
-                                        .image(dto.getImage())
-                                        .brand(dto.getBrand())
-                                        .maker(dto.getMaker())
-                                        .category1(dto.getCategory1())
-                                        .category2(dto.getCategory2())
-                                        .category3(dto.getCategory3())
-                                        .category4(dto.getCategory4())
-                                        .dosage("")
-                                        .purpose("")
-                                        .warning("")
-                                        .country(country)
-                                        .scrapCount(0)
-                                        .build();
-                            } catch (Exception e) {
-                                return null;
-                            }
-                        })
-                        .filter(supplement -> supplement != null)
-                        .forEach(supplementsRepository::save)
-        );
-    }
+//    private void saveNaverSupplements() {
+//        List<String> supplementsNames = Arrays.asList(
+//                "한국 인기 영양제"
+//        );
+//
+//        supplementsNames.forEach(searchKeyword ->
+//                naverShoppingService.loadProducts(searchKeyword).stream()
+//                        .map(dto -> {
+//                            try {
+//                                Country country = getCountryFromSearchKeyword(searchKeyword);
+//                                String cleanedName = cleanProductName(dto.getName(), country);
+//
+//                                if (supplementsRepository.existsByName(cleanedName)) {
+//                                    return null;
+//                                }
+//                                return Supplements.builder()
+//                                        .name(cleanedName)
+//                                        .image(dto.getImage())
+//                                        .brand(dto.getBrand())
+//                                        .maker(dto.getMaker())
+//                                        .category1(dto.getCategory1())
+//                                        .category2(dto.getCategory2())
+//                                        .category3(dto.getCategory3())
+//                                        .category4(dto.getCategory4())
+//                                        .dosage("")
+//                                        .purpose("")
+//                                        .warning("")
+//                                        .country(country)
+//                                        .scrapCount(0)
+//                                        .build();
+//                            } catch (Exception e) {
+//                                return null;
+//                            }
+//                        })
+//                        .filter(supplement -> supplement != null)
+//                        .forEach(supplementsRepository::save)
+//        );
+//    }
 
     private void processCateogories(String text, Supplements supplement) {
         Arrays.stream(CategoryKeyword.values())

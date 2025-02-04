@@ -18,4 +18,5 @@ public interface MedicineService {
 
     MedicineDetailResponseDTO getMedicineBySplSetIdFromDB(String splSetId);
     List<MedicineResponseDTO> getMedicinesFromDBByCategory(String category, int page, int size);
+    List<MedicineResponseDTO> searchMedicinesByCategoryAndKeyword(String category, String keyword, int page, int size);
 }

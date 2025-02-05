@@ -14,6 +14,10 @@ public class AdvertisementServiceImpl implements AdvertisementService {
 
     public AdResponseDTO.AdResponseDto getAdvertisementByPage(int page) {
         long totalAds = advertisementRepository.count();
+        if (totalAds == 0) {
+            throw new EntityNotFoundException("No advertisements available");
+        }
+
         long adId = ((page - 1) % totalAds) + 1; // 모듈러 연산으로 광고 순환
 
         Advertisement ad = advertisementRepository.findById(adId)

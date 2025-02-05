@@ -18,12 +18,12 @@ import java.util.stream.Collectors;
 
 public class PostCommentConverter {
 
-    public static CommentResponseDTO.CommentDTO toComment(Comment comment) {
+    public static CommentResponseDTO.CommentDTO toComment(Comment comment,Boolean isLiked, Boolean isPostAuthor, Boolean isOwnComment) {
         // 댓글의 자식 댓글 불러오기
         List<CommentResponseDTO.CommentDTO> replies = Optional.ofNullable(comment.getChildren())
-                .orElse(Collections.emptyList())  // null인 경우 빈 리스트로 처리
+                .orElse(Collections.emptyList())  // null이면 빈 리스트 반환
                 .stream()
-                .map(PostCommentConverter::toComment)
+                .map(child -> PostCommentConverter.toComment(child, false, false, false)) // 기본값 사용
                 .collect(Collectors.toList());
 
         return CommentResponseDTO.CommentDTO.builder()
@@ -32,6 +32,9 @@ public class PostCommentConverter {
                 .userId(comment.getUser().getId())
                 .userName(comment.getUser().getEmail().substring(0, comment.getUser().getEmail().indexOf("@")))
                 .likeCount(comment.getLikes().size())
+                .isLiked(isLiked)
+                .isPostAuthor(isPostAuthor)
+                .isOwnComment(isOwnComment)
                 .createdAt(comment.getCreatedAt())
                 .parentId(comment.getParent() != null ? comment.getParent().getId():null)
                 .parentName(comment.getParent() != null ? comment.getParent().getUser().getEmail().substring(0, comment.getParent().getUser().getEmail().indexOf("@")): null)

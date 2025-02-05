@@ -60,16 +60,16 @@ public class PostController {
     }
 
 
-    @DeleteMapping("/posts/{post_id}")
+    @DeleteMapping("/posts")
     @Operation(summary = "게시글 삭제 API")
     public ApiResponse<String> deletePost(
             @Parameter (hidden = true) @RequestHeader("Authorization") String authorizationHeader,
-            @PathVariable Long post_id
+            @RequestParam List<Long> postIds
             ) {
 
         User user = jwtUtil.getUserFromHeader(authorizationHeader);
 
-        postCommandService.deletePost(user.getId(),post_id);
+        postCommandService.deletePost(user.getId(),postIds);
         return ApiResponse.onSuccess("게시글이 삭제되었습니다.");
     }
 

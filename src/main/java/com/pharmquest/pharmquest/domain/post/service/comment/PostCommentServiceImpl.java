@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -89,6 +90,7 @@ public class PostCommentServiceImpl implements PostCommentService {
     @Override
     @Transactional
     public void deleteComment(Long userId, List<Long> commentIds) {
+        List<Comment> deletedComments = new ArrayList<>();
 
         for (Long commentId : commentIds) {
             Comment comment = postCommentRepository.findById(commentId)
@@ -98,9 +100,9 @@ public class PostCommentServiceImpl implements PostCommentService {
             if (!userId.equals(comment.getUser().getId())) {
                 throw new CommentHandler(ErrorStatus.NOT_COMMENT_AUTHOR);
             }
-            postCommentRepository.delete(comment);
+            comment.setDeleted(true);
+            deletedComments.add(comment); // 삭제된 댓글을 리스트에 추가
         }
-
     }
 
 

@@ -1,6 +1,9 @@
 package com.pharmquest.pharmquest.domain.mypage.service;
 
+import com.pharmquest.pharmquest.domain.medicine.data.Medicine;
+import com.pharmquest.pharmquest.domain.medicine.repository.MedicineScrapRepository;
 import com.pharmquest.pharmquest.domain.mypage.converter.MyPageConverter;
+import com.pharmquest.pharmquest.domain.mypage.data.MedicineScrap;
 import com.pharmquest.pharmquest.domain.mypage.data.PostScrap;
 import com.pharmquest.pharmquest.domain.mypage.web.dto.MyPageResponseDTO;
 import com.pharmquest.pharmquest.domain.pharmacy.data.enums.PharmacyCountry;
@@ -14,6 +17,7 @@ import com.pharmquest.pharmquest.domain.supplements.data.Enum.CategoryKeyword;
 import com.pharmquest.pharmquest.domain.supplements.data.mapping.SupplementsScrap;
 import com.pharmquest.pharmquest.domain.supplements.repository.SupplementsScrapRepository;
 import com.pharmquest.pharmquest.domain.user.data.User;
+import com.pharmquest.pharmquest.domain.user.repository.UserRepository;
 import com.pharmquest.pharmquest.global.apiPayload.code.status.ErrorStatus;
 import com.pharmquest.pharmquest.global.apiPayload.exception.handler.CommonExceptionHandler;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -41,12 +46,17 @@ public class MyPageServiceImpl implements MyPageService {
     private final PostScrapRepository postScrapRepository;
     private final PostRepository postRepository;
     private final PostCommentRepository postCommentRepository;
+    private final MedicineScrapRepository medicineScrapRepository;
+
 
     @Override
     public Page<MyPageResponseDTO.SupplementsResponseDto> getScrapSupplements(Long userId, Pageable pageable, CategoryKeyword category) {
 
-
         Page<SupplementsScrap> supplementsScrapPage = supplementsScrapRepository.findSupplementsByUserId(userId, pageable);
+
+        if (supplementsScrapPage.isEmpty()) {
+            return new PageImpl<>(new ArrayList<>(), pageable, supplementsScrapPage.getTotalElements());
+        }
 
         List<MyPageResponseDTO.SupplementsResponseDto> supplementsDtos = supplementsScrapPage.stream()
                 .map(supplementsScrap -> myPageConverter.toSupplementsDto(supplementsScrap.getSupplements(), category))
@@ -54,7 +64,6 @@ public class MyPageServiceImpl implements MyPageService {
                 .toList();
 
         return new PageImpl<>(supplementsDtos, pageable, supplementsScrapPage.getTotalElements());
-
     }
 
     @Override
@@ -105,6 +114,24 @@ public class MyPageServiceImpl implements MyPageService {
 
             return new PageImpl<>(CommentDTO, pageable, commentPage.getTotalPages());
         }
+    }
+
+    @Override
+    public Page<MyPageResponseDTO.MedicineResponseDto> getScrapMedicines(Long userId, Pageable pageable, String requestCountry) {
+
+        String country = "전체".equals(requestCountry) ? null : requestCountry;
+        Page<MedicineScrap> medicinePage = medicineScrapRepository.findMedicineByUserIdAndCountry(userId, country, pageable);
+
+        if(medicinePage.isEmpty()) {
+            return new PageImpl<>(new ArrayList<>(), pageable, medicinePage.getTotalElements());
+        }
+
+        List<MyPageResponseDTO.MedicineResponseDto> medicineDto = medicinePage.stream()
+                .map(supplementsScrap -> myPageConverter.toMedicineDto(supplementsScrap.getMedicine()))
+                .filter(Objects::nonNull)
+                .toList();
+
+        return new PageImpl<>(medicineDto, pageable, medicinePage.getTotalElements());
     }
 
     @Override

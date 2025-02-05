@@ -26,6 +26,19 @@ public class MyPageResponseDTO {
 
     @Builder
     @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class MedicineResponseDto {
+        private Long id;
+        private String productName;
+        private String generalName;
+        private String productImage;
+        private String categories;
+        private String country;
+    }
+
+    @Builder
+    @Getter
     public static class PharmacyDto {
         private String name;
         @JsonProperty("place_id")

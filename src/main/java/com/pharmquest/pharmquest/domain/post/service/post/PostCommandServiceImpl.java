@@ -6,6 +6,7 @@ import com.pharmquest.pharmquest.domain.post.data.Post;
 import com.pharmquest.pharmquest.domain.post.data.enums.Country;
 import com.pharmquest.pharmquest.domain.post.data.enums.PostCategory;
 import com.pharmquest.pharmquest.domain.post.data.mapping.Comment;
+import com.pharmquest.pharmquest.domain.post.repository.comment.CommentLikeRepository;
 import com.pharmquest.pharmquest.domain.post.repository.comment.PostCommentRepository;
 import com.pharmquest.pharmquest.domain.post.repository.like.PostLikeRepository;
 import com.pharmquest.pharmquest.domain.post.repository.post.PostRepository;
@@ -38,6 +39,7 @@ public class PostCommandServiceImpl implements PostCommandService {
     private final PostLikeRepository likeRepository;
     private final PostScrapRepository scrapRepository;
     private final PostCommentRepository commentRepository;
+    private final CommentLikeRepository commentLikeRepository;
     private final S3Service s3Service;
 
     private final UserRepository userRepository;
@@ -109,7 +111,12 @@ public class PostCommandServiceImpl implements PostCommandService {
         );
 
         List<CommentResponseDTO.CommentDTO> topLevelComments = parentCommentsPage.getContent().stream()
-                .map(PostCommentConverter::toComment)
+                .map(comment -> {
+                    boolean isCommentLiked = commentLikeRepository.existsByCommentIdAndUserId(comment.getId(), userId);
+                    boolean isOwnComment = userId.equals(comment.getUser().getId());
+                    boolean isPostAuthor = post.getUser().getId().equals(comment.getUser().getId());
+                    return PostCommentConverter.toComment(comment, isCommentLiked, isPostAuthor, isOwnComment);
+                })
                 .collect(Collectors.toList());
 
 

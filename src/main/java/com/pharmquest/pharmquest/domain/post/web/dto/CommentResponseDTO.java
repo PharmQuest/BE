@@ -31,7 +31,8 @@ public class CommentResponseDTO {
         private LocalDateTime createdAt;
         private Long parentId;
         private String parentName;
-        private Boolean isOwnPost;
+        private Boolean isPostAuthor;
+        private Boolean isOwnComment;
         private Integer likeCount;
         private Boolean isLiked;
         private List<CommentDTO> replies;

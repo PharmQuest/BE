@@ -30,6 +30,8 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/community")
@@ -158,13 +160,14 @@ public class PostController {
         return ApiResponse.onSuccess(PostScrapConverter.toPostScrapDTO(postScrap));
     }
 
-    @DeleteMapping("/posts/{post_id}/scraps")
+    @DeleteMapping("/posts/scraps")
     @Operation(summary = "게시글 스크랩 취소 API")
-    public ApiResponse<String> deletePostScraps(@Parameter (hidden = true) @RequestHeader("Authorization") String authorizationHeader, @PathVariable(name = "post_id")Long postId){
+    public ApiResponse<String> deletePostScraps(@Parameter (hidden = true) @RequestHeader("Authorization") String authorizationHeader,
+                                                @RequestParam List<Long> postIds){
 
         User user = jwtUtil.getUserFromHeader(authorizationHeader);
 
-        postScrapService.deletePostScrap(user.getId(), postId);
+        postScrapService.deletePostScrap(user.getId(), postIds);
         return ApiResponse.onSuccess("스크랩이 취소되었습니다");
     }
 

@@ -97,4 +97,16 @@ public class MyPageResponseDTO {
         String content;
         LocalDate createdAt;
     }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class notificationResponseDTO {
+        Long postId;
+        String postTitle;
+        String commentWriter;
+        String commentContent;
+        LocalDate createdAt;
+    }
 }

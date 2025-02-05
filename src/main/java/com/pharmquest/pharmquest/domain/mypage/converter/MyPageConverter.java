@@ -47,7 +47,7 @@ public class MyPageConverter {
     public MyPageResponseDTO.ScrapPostResponseDTO toScrapedPostDto(Post post) {
         return MyPageResponseDTO.ScrapPostResponseDTO.builder()
                 .postId(post.getId())
-                .writerName(post.getUser().getName())
+                .writerName(post.getUser().getEmail().substring(0, post.getUser().getEmail().indexOf("@")))
                 .title(post.getTitle())
                 .category(post.getCategory())
                 .content(post.getContent().length() <= 40 ? post.getContent() : post.getContent().substring(0, 40))
@@ -90,6 +90,16 @@ public class MyPageConverter {
                 .title(comment.getPost().getTitle())
                 .postId(comment.getPost().getId())
                 .content(comment.getContent())
+                .createdAt(comment.getCreatedAt().toLocalDate())
+                .build();
+    }
+
+    public MyPageResponseDTO.notificationResponseDTO toNotificationCommentDTO(Comment comment) {
+        return MyPageResponseDTO.notificationResponseDTO.builder()
+                .postId(comment.getPost().getId())
+                .commentContent(comment.getContent())
+                .commentWriter(comment.getUser().getEmail().substring(0, comment.getUser().getEmail().indexOf("@")))
+                .postTitle(comment.getPost().getTitle())
                 .createdAt(comment.getCreatedAt().toLocalDate())
                 .build();
     }

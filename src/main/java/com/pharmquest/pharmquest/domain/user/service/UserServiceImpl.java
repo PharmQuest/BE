@@ -22,6 +22,7 @@ public class UserServiceImpl implements UserService{
         return UserDTO.UserResponseDto.builder()
                 .userId(user.getId())
                 .userName(user.getName())
+                .provider(user.getProvider())
                 .build();
     }
 }

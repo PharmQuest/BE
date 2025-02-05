@@ -33,6 +33,7 @@ public class CommentResponseDTO {
         private String parentName;
         private Boolean isPostAuthor;
         private Boolean isOwnComment;
+        private Boolean isDeleted;
         private Integer likeCount;
         private Boolean isLiked;
         private List<CommentDTO> replies;

@@ -35,6 +35,7 @@ public class PostCommentConverter {
                 .isLiked(isLiked)
                 .isPostAuthor(isPostAuthor)
                 .isOwnComment(isOwnComment)
+                .isDeleted(comment.isDeleted())
                 .createdAt(comment.getCreatedAt())
                 .parentId(comment.getParent() != null ? comment.getParent().getId():null)
                 .parentName(comment.getParent() != null ? comment.getParent().getUser().getEmail().substring(0, comment.getParent().getUser().getEmail().indexOf("@")): null)

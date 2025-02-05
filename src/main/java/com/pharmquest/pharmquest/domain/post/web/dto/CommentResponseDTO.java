@@ -19,7 +19,7 @@ public class CommentResponseDTO {
         LocalDateTime createdAt;
     }
 
-    @Builder
+    @Builder(toBuilder = true)  // toBuilder 속성 추가
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor

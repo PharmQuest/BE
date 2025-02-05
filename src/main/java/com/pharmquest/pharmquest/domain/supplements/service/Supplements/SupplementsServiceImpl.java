@@ -3,6 +3,7 @@ package com.pharmquest.pharmquest.domain.supplements.service.Supplements;
 import com.pharmquest.pharmquest.domain.post.data.enums.Country;
 import com.pharmquest.pharmquest.domain.supplements.converter.SupplementsConverter;
 import com.pharmquest.pharmquest.domain.supplements.data.Category;
+import com.pharmquest.pharmquest.domain.supplements.data.Enum.CategoryGroup;
 import com.pharmquest.pharmquest.domain.supplements.data.Supplements;
 import com.pharmquest.pharmquest.domain.supplements.data.mapping.SupplementsCategory;
 import com.pharmquest.pharmquest.domain.supplements.repository.CategoryRepository;
@@ -34,7 +35,6 @@ public class SupplementsServiceImpl implements SupplementsService {
 
     private final SupplementsCategoryRepository supplementsCategoryRepository;
     private final DailyMedService dailyMedService;
-    private final NaverShoppingService naverShoppingService;
     private final SupplementsRepository supplementsRepository;
     private final SupplementsConverter supplementsConverter;
     private final CategoryRepository categoryRepository;
@@ -42,7 +42,7 @@ public class SupplementsServiceImpl implements SupplementsService {
 
     //영양제 리스트 조회
     @Override
-    public SupplementsResponseDTO.SupplementsPageResponseDto getSupplements(CategoryKeyword category, Pageable pageable, Long userId) {
+    public SupplementsResponseDTO.SupplementsPageResponseDto getSupplements(CategoryGroup categoryGroup, Pageable pageable, Long userId) {
         Pageable pageableWithSort = PageRequest.of(
                 pageable.getPageNumber(),
                 pageable.getPageSize(),
@@ -50,11 +50,11 @@ public class SupplementsServiceImpl implements SupplementsService {
         );
 
         Page<Supplements> supplementsPage;
-        if (category == null || category == CategoryKeyword.valueOf("전체")) {
+        if (categoryGroup == null || categoryGroup == CategoryGroup.전체) {
             supplementsPage = supplementsRepository.findAll(pageableWithSort);
         }
         else {
-            List<Long> supplementIds = supplementsCategoryRepository.findSupplementIdByCategoryName(category.toString());
+            List<Long> supplementIds = supplementsCategoryRepository.findSupplementIdByCategoryName(categoryGroup.getCategories());
             if (supplementIds.isEmpty()) {
                 throw new CommonExceptionHandler(ErrorStatus.SUPPLEMENTS_NO_FILTERED);
             }

@@ -10,8 +10,8 @@ import java.util.List;
 
 @Repository
 public interface SupplementsCategoryRepository extends JpaRepository<SupplementsCategory, Long> {
-    @Query("SELECT sc.supplement.id FROM SupplementsCategory sc WHERE sc.category.name = :categoryName")
-    List<Long> findSupplementIdByCategoryName(@Param("categoryName") String categoryName);
+    @Query("SELECT sc.supplement.id FROM SupplementsCategory sc WHERE sc.category.name IN :categoryName")
+    List<Long> findSupplementIdByCategoryName(@Param("categoryName") List<String> categoryName);
 
     @Query("SELECT c.name FROM Category c JOIN SupplementsCategory sc ON c.id = sc.category.id WHERE sc.supplement.id = :supplementId")
     List<String> findCategoryNamesBySupplementId(@Param("supplementId") Long supplementId);

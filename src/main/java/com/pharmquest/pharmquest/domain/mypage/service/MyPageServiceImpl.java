@@ -115,7 +115,7 @@ public class MyPageServiceImpl implements MyPageService {
             return new PageImpl<>(new ArrayList<>(), pageable, notificationCommentPage.getTotalElements());
         } else{
             List<MyPageResponseDTO.notificationResponseDTO> notificationCommentDTO = notificationCommentPage.stream()
-                    .map(myPageConverter::tonotificationCommentDTO)
+                    .map(myPageConverter::toNotificationCommentDTO)
                     .filter(Objects::nonNull)
                     .toList();
             return new PageImpl<>(notificationCommentDTO, pageable, notificationCommentPage.getTotalPages());

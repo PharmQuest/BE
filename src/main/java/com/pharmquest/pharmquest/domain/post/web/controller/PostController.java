@@ -30,6 +30,8 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/community")
@@ -58,16 +60,16 @@ public class PostController {
     }
 
 
-    @DeleteMapping("/posts/{post_id}")
+    @DeleteMapping("/posts")
     @Operation(summary = "게시글 삭제 API")
     public ApiResponse<String> deletePost(
             @Parameter (hidden = true) @RequestHeader("Authorization") String authorizationHeader,
-            @PathVariable Long post_id
+            @RequestParam List<Long> postIds
             ) {
 
         User user = jwtUtil.getUserFromHeader(authorizationHeader);
 
-        postCommandService.deletePost(user.getId(),post_id);
+        postCommandService.deletePost(user.getId(),postIds);
         return ApiResponse.onSuccess("게시글이 삭제되었습니다.");
     }
 
@@ -158,13 +160,14 @@ public class PostController {
         return ApiResponse.onSuccess(PostScrapConverter.toPostScrapDTO(postScrap));
     }
 
-    @DeleteMapping("/posts/{post_id}/scraps")
+    @DeleteMapping("/posts/scraps")
     @Operation(summary = "게시글 스크랩 취소 API")
-    public ApiResponse<String> deletePostScraps(@Parameter (hidden = true) @RequestHeader("Authorization") String authorizationHeader, @PathVariable(name = "post_id")Long postId){
+    public ApiResponse<String> deletePostScraps(@Parameter (hidden = true) @RequestHeader("Authorization") String authorizationHeader,
+                                                @RequestParam List<Long> postIds){
 
         User user = jwtUtil.getUserFromHeader(authorizationHeader);
 
-        postScrapService.deletePostScrap(user.getId(), postId);
+        postScrapService.deletePostScrap(user.getId(), postIds);
         return ApiResponse.onSuccess("스크랩이 취소되었습니다");
     }
 
@@ -206,15 +209,15 @@ public class PostController {
         return ApiResponse.onSuccess(PostCommentConverter.toCommentResultDTO(comment));
     }
 
-    @PatchMapping("/comments/{comment_id}/delete")
+    @PatchMapping("/comments/delete")
     @Operation(summary = "댓글 삭제 API")
     public ApiResponse<String> deleteComment(
             @Parameter (hidden = true) @RequestHeader("Authorization") String authorizationHeader,
-            @PathVariable Long comment_id) {
+            @RequestParam List<Long> commentIds) {
 
         User user = jwtUtil.getUserFromHeader(authorizationHeader);
 
-        Comment comment = postCommentService.deleteComment(user.getId(),comment_id);
+        postCommentService.deleteComment(user.getId(),commentIds);
         return ApiResponse.onSuccess("댓글이 삭제되었습니다.");
     }
 

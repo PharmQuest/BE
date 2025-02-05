@@ -1,5 +1,6 @@
 package com.pharmquest.pharmquest.domain.mypage.converter;
 
+import com.pharmquest.pharmquest.domain.medicine.data.Medicine;
 import com.pharmquest.pharmquest.domain.mypage.web.dto.MyPageResponseDTO;
 import com.pharmquest.pharmquest.domain.post.data.Post;
 import com.pharmquest.pharmquest.domain.post.data.mapping.Comment;
@@ -68,6 +69,17 @@ public class MyPageConverter {
                 .scrapeCount(post.getScraps().size())
                 .likeCount(post.getLikes().size())
                 .createdAt(post.getCreatedAt().toLocalDate())
+                .build();
+    }
+
+    public MyPageResponseDTO.MedicineResponseDto toMedicineDto(Medicine medicine) {
+        return MyPageResponseDTO.MedicineResponseDto.builder()
+                .id(medicine.getId())
+                .productName(medicine.getBrandName())
+                .generalName(medicine.getSubstanceName())
+                .productImage(medicine.getImgUrl())
+                .country(medicine.getCountry())
+                .categories(medicine.getCategory())
                 .build();
     }
 

@@ -41,18 +41,6 @@ public class MedicineScrapService {
         scrapRepository.save(scrap);
     }
 
-    /* 스크랩 목록 조회 */
-    @Transactional(readOnly = true)
-    public List<Medicine> getScrappedMedicines(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 유저를 찾을 수 없습니다."));
-
-        List<MedicineScrap> scraps = scrapRepository.findByUser(user);
-        return scraps.stream()
-                .map(MedicineScrap::getMedicine)
-                .collect(Collectors.toList());
-    }
-
     /* 스크랩 삭제 */
     @Transactional
     public void removeScrap(Long userId, Long medicineId) {

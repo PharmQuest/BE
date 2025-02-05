@@ -30,14 +30,6 @@ public class MedicineScrapController {
         return ApiResponse.onSuccess("스크랩 성공!");
     }
 
-    /* 스크랩 목록 조회 */
-    @GetMapping("/list")
-    public ApiResponse<List<Medicine>> getScrappedMedicines(@Parameter(hidden = true) @RequestHeader("Authorization") String authorizationHeader) {
-        Long userId = jwtUtil.getUserFromHeader(authorizationHeader).getId();
-        List<Medicine> scrappedMedicines = scrapService.getScrappedMedicines(userId);
-        return ApiResponse.onSuccess(scrappedMedicines);
-    }
-
     /* 스크랩 삭제 */
     @DeleteMapping("/remove")
     public ApiResponse<String> removeScrap

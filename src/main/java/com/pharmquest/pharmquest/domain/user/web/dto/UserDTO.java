@@ -14,5 +14,6 @@ public class UserDTO {
     public static class UserResponseDto {
         private Long userId;
         private String userName;
+        private String provider;
     }
 }

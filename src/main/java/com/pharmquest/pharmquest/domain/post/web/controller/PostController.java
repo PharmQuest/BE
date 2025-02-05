@@ -209,15 +209,15 @@ public class PostController {
         return ApiResponse.onSuccess(PostCommentConverter.toCommentResultDTO(comment));
     }
 
-    @PatchMapping("/comments/{comment_id}/delete")
+    @PatchMapping("/comments/delete")
     @Operation(summary = "댓글 삭제 API")
     public ApiResponse<String> deleteComment(
             @Parameter (hidden = true) @RequestHeader("Authorization") String authorizationHeader,
-            @PathVariable Long comment_id) {
+            @RequestParam List<Long> commentIds) {
 
         User user = jwtUtil.getUserFromHeader(authorizationHeader);
 
-        Comment comment = postCommentService.deleteComment(user.getId(),comment_id);
+        postCommentService.deleteComment(user.getId(),commentIds);
         return ApiResponse.onSuccess("댓글이 삭제되었습니다.");
     }
 

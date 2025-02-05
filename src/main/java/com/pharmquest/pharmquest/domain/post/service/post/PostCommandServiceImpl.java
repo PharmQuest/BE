@@ -141,18 +141,18 @@ public class PostCommandServiceImpl implements PostCommandService {
     }
 
     @Override
-    public void deletePost(Long userId, Long postId) {
+    public void deletePost(Long userId, List<Long> postIds) {
 
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new PostHandler(ErrorStatus.POST_NOT_EXIST));
+        for(Long postId : postIds) {
+            Post post = postRepository.findById(postId)
+                    .orElseThrow(() -> new PostHandler(ErrorStatus.POST_NOT_EXIST));
 
-        if (!userId.equals(post.getUser().getId())) {
-            throw new PostHandler(ErrorStatus.NOT_POST_AUTHOR);
+            if (!userId.equals(post.getUser().getId())) {
+                throw new PostHandler(ErrorStatus.NOT_POST_AUTHOR);
+            }
+            // 게시글 삭제
+            postRepository.deleteById(postId);
         }
-
-        // 게시글 삭제
-        postRepository.deleteById(postId);
-
     }
 
     @Override

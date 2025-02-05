@@ -8,6 +8,8 @@ import com.pharmquest.pharmquest.domain.post.web.dto.PostResponseDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 
 public interface PostCommandService {
 
@@ -19,7 +21,7 @@ public interface PostCommandService {
 
     Page<Post> searchPostsDynamically(Long userId, String keyword, Country country, PostCategory category, Integer page);
 
-    void deletePost(Long userId, Long postId);
+    void deletePost(Long userId, List<Long> postIds);
 
     Post updatePost(Long userId, Long postId, PostRequestDTO.UpdatePostDTO request, MultipartFile imageFile);
 }

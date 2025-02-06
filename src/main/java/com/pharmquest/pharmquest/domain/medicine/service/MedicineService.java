@@ -3,6 +3,7 @@ package com.pharmquest.pharmquest.domain.medicine.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.pharmquest.pharmquest.domain.medicine.data.Medicine;
 import com.pharmquest.pharmquest.domain.medicine.web.dto.MedicineDetailResponseDTO;
+import com.pharmquest.pharmquest.domain.medicine.web.dto.MedicineListResponseDTO;
 import com.pharmquest.pharmquest.domain.medicine.web.dto.MedicineResponseDTO;
 
 import java.util.List;
@@ -18,5 +19,5 @@ public interface MedicineService {
 
     MedicineDetailResponseDTO getMedicineBySplSetIdFromDB(String splSetId);
     List<MedicineResponseDTO> getMedicinesFromDBByCategory(String category, int page, int size);
-    List<MedicineResponseDTO> searchMedicinesByCategoryAndKeyword(String category, String keyword, int page, int size);
+    MedicineListResponseDTO searchMedicinesByCategoryAndKeyword(String category, String keyword, int page, int size);
 }

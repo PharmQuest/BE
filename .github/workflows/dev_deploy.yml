@@ -25,27 +25,19 @@ jobs:
           echo "${{ secrets.APPLICATION_YML }}" > ./src/main/resources/application.yml
         shell: bash
 
-      #  Gradle 캐시 삭제 (캐시 강제 무효화)
-      - name: Delete Gradle Cache
-        run: rm -rf ~/.gradle/caches ~/.gradle/wrapper
-
-      #  Gradle 캐시 설정 (불필요한 restore-keys 제거)
-      - name: Cache Gradle dependencies
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+      #  기존 Gradle 캐시 강제 삭제 (캐시 문제 해결)
+      - name: Remove Gradle Cache
+        run: |
+          echo "Removing old Gradle cache..."
+          rm -rf ~/.gradle/caches ~/.gradle/wrapper
+          ./gradlew --stop
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      #  Gradle 의존성 강제 새로고침 + 빌드 실행
-      - name: Build with Gradle
-        uses: gradle/gradle-build-action@v2
-        with:
-          arguments: clean build --refresh-dependencies --stacktrace
+      #  Gradle 빌드 (캐시 사용 안 함)
+      - name: Build with Gradle (No Cache)
+        run: ./gradlew clean build --no-build-cache --refresh-dependencies --stacktrace
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4

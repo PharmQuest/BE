@@ -7,6 +7,7 @@ import com.pharmquest.pharmquest.domain.medicine.data.MedicineCategoryMapper;
 import com.pharmquest.pharmquest.domain.medicine.repository.MedicineRepository;
 import com.pharmquest.pharmquest.domain.medicine.service.TranslationService;
 import com.pharmquest.pharmquest.domain.medicine.web.dto.MedicineDetailResponseDTO;
+import com.pharmquest.pharmquest.domain.medicine.web.dto.MedicineOpenapiResponseDTO;
 import com.pharmquest.pharmquest.domain.medicine.web.dto.MedicineResponseDTO;
 import org.springframework.stereotype.Component;
 
@@ -22,7 +23,7 @@ public class MedicineConverter {
     }
 
     // 번역 포함 변환
-    public MedicineResponseDTO convertWithTranslation(JsonNode result) {
+    public MedicineOpenapiResponseDTO convertWithTranslation(JsonNode result) {
         String brandName = translate(getFirstValue(result, "openfda.brand_name"));
         String genericName = translate(getFirstValue(result, "openfda.generic_name"));
         String category = MedicineCategoryMapper.getCategory(
@@ -36,7 +37,7 @@ public class MedicineConverter {
         String imgUrl = fetchImageUrl(splSetId);
         String country = "미국";
 
-        return new MedicineResponseDTO(
+        return new MedicineOpenapiResponseDTO(
                 brandName,
                 genericName,
                 splSetId,
@@ -82,7 +83,7 @@ public class MedicineConverter {
 
 
     // 번역 없이 변환
-    public MedicineResponseDTO convertWithoutTranslation(JsonNode result) {
+    public MedicineOpenapiResponseDTO  convertWithoutTranslation(JsonNode result) {
         String brandName = getFirstValue(result, "openfda.brand_name");
         String genericName = getFirstValue(result, "openfda.generic_name");
         String activeIngredient = getFirstValue(result, "active_ingredient");
@@ -92,8 +93,7 @@ public class MedicineConverter {
         String splSetId = getFirstValue(result, "openfda.spl_set_id");
         String imgUrl = fetchImageUrl(splSetId);
         String country = "미국";
-
-        return new MedicineResponseDTO(
+        return new MedicineOpenapiResponseDTO (
                 brandName,
                 genericName,
                 splSetId,
@@ -140,6 +140,7 @@ public class MedicineConverter {
         }
 
         return new MedicineResponseDTO(
+                medicine.getId(),
                 medicine.getBrandName(),
                 medicine.getGenericName(),
                 medicine.getSplSetId(),

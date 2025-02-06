@@ -8,6 +8,8 @@ import com.pharmquest.pharmquest.domain.medicine.data.MedicineCategoryMapper;
 import com.pharmquest.pharmquest.domain.medicine.repository.MedRepository;
 import com.pharmquest.pharmquest.domain.medicine.repository.MedicineRepository;
 import com.pharmquest.pharmquest.domain.medicine.web.dto.MedicineDetailResponseDTO;
+import com.pharmquest.pharmquest.domain.medicine.web.dto.MedicineListResponseDTO;
+import com.pharmquest.pharmquest.domain.medicine.web.dto.MedicineOpenapiResponseDTO;
 import com.pharmquest.pharmquest.domain.medicine.web.dto.MedicineResponseDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -41,13 +43,13 @@ public class MedicineServiceImpl implements MedicineService {
 
     // FDA API 데이터를 DTO로 변환 (번역 포함)
     @Override
-    public List<MedicineResponseDTO> getMedicines(String query, int limit) {
+    public List<MedicineOpenapiResponseDTO> getMedicines(String query, int limit) {
         try {
             String response = medicineRepository.fetchMedicineData(query, limit);
             ObjectMapper mapper = new ObjectMapper();
             JsonNode results = mapper.readTree(response).path("results");
 
-            List<MedicineResponseDTO> medicines = new ArrayList<>();
+            List<MedicineOpenapiResponseDTO> medicines = new ArrayList<>();
             if (results.isArray()) {
                 for (JsonNode result : results) {
                     medicines.add(medicineConverter.convertWithTranslation(result));
@@ -60,7 +62,7 @@ public class MedicineServiceImpl implements MedicineService {
     }
 
     @Override
-    public List<MedicineResponseDTO> getMedicinesbyCategory(String query, int limit) {
+    public List<MedicineOpenapiResponseDTO> getMedicinesbyCategory(String query, int limit) {
         try {
             // 카테고리 이름을 쿼리로 변환 (해당되는 경우)
             String apiQuery = MedicineCategoryMapper.getQueryForCategory(query);
@@ -75,10 +77,10 @@ public class MedicineServiceImpl implements MedicineService {
             ObjectMapper mapper = new ObjectMapper();
             JsonNode results = mapper.readTree(response).path("results");
 
-            List<MedicineResponseDTO> medicines = new ArrayList<>();
+            List<MedicineOpenapiResponseDTO > medicines = new ArrayList<>();
             if (results.isArray()) {
                 for (JsonNode result : results) {
-                    MedicineResponseDTO dto = medicineConverter.convertWithTranslation(result);
+                    MedicineOpenapiResponseDTO  dto = medicineConverter.convertWithTranslation(result);
                     if (isValidMedicine(dto)) {
                         medicines.add(dto);
                     }
@@ -94,13 +96,13 @@ public class MedicineServiceImpl implements MedicineService {
 
     // FDA API 데이터를 DTO로 변환 (번역 없이 원본 반환) 백엔드 작업용
     @Override
-    public List<MedicineResponseDTO> getEnMedicines(String query, int limit) {
+    public List<MedicineOpenapiResponseDTO> getEnMedicines(String query, int limit) {
         try {
             String response = medicineRepository.fetchMedicineData(query, limit);
             ObjectMapper mapper = new ObjectMapper();
             JsonNode results = mapper.readTree(response).path("results");
 
-            List<MedicineResponseDTO> medicines = new ArrayList<>();
+            List<MedicineOpenapiResponseDTO> medicines = new ArrayList<>();
             if (results.isArray()) {
                 for (JsonNode result : results) {
                     medicines.add(medicineConverter.convertWithoutTranslation(result));
@@ -189,7 +191,7 @@ public class MedicineServiceImpl implements MedicineService {
 
 
 
-    private boolean isValidMedicine(MedicineResponseDTO dto) {
+    private boolean isValidMedicine(MedicineOpenapiResponseDTO  dto) {
         return dto.getBrandName() != null && !dto.getBrandName().isEmpty()
                 && dto.getGenericName() != null && !dto.getGenericName().isEmpty()
                 && dto.getImgUrl() != null && !dto.getImgUrl().isEmpty()
@@ -337,21 +339,18 @@ public class MedicineServiceImpl implements MedicineService {
     }
     @Override
     @Transactional(readOnly = true)
-    public List<MedicineResponseDTO> searchMedicinesByCategoryAndKeyword(String category, String keyword, int page, int size) {
+    public MedicineListResponseDTO searchMedicinesByCategoryAndKeyword(String category, String keyword, int page, int size) {
         try {
-            Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending()); // 페이지네이션 설정
-
+            Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending());
             Page<Medicine> medicinesPage;
 
             if (category.equalsIgnoreCase("전체")) {
-                // ✅ 검색어가 있을 경우 `brandName`, `indicationsAndUsage`, `category`에서 검색
                 if (keyword != null && !keyword.isEmpty()) {
                     medicinesPage = medRepository.findByKeyword(keyword, pageable);
                 } else {
                     medicinesPage = medRepository.findAll(pageable);
                 }
             } else {
-                // ✅ 특정 카테고리에서 검색어 필터링
                 if (keyword != null && !keyword.isEmpty()) {
                     medicinesPage = medRepository.findByCategoryAndKeyword(category, keyword, pageable);
                 } else {
@@ -359,18 +358,17 @@ public class MedicineServiceImpl implements MedicineService {
                 }
             }
 
-            // 결과가 없을 경우 로그 출력
-            if (medicinesPage.isEmpty()) {
-                System.out.println("카테고리 '" + category + "' 및 키워드 '" + keyword + "'에 해당하는 데이터가 없습니다.");
-            }
+            long totalCount = medicinesPage.getTotalElements();  // 전체 개수 가져오기
 
-            // 결과를 DTO로 변환 후 반환
-            return medicinesPage.getContent().stream()
+            List<MedicineResponseDTO> medicines = medicinesPage.getContent().stream()
                     .map(medicineConverter::convertFromEntity)
                     .collect(Collectors.toList());
+
+            return new MedicineListResponseDTO(totalCount, medicines);
         } catch (Exception e) {
             throw new RuntimeException("DB에서 약물 데이터를 검색하는 중 오류 발생", e);
         }
     }
+
 
 }

@@ -25,7 +25,11 @@ jobs:
           echo "${{ secrets.APPLICATION_YML }}" > ./src/main/resources/application.yml
         shell: bash
 
-      #  Gradle 캐시 강제 갱신
+      #  Gradle 캐시 삭제 (캐시 강제 무효화)
+      - name: Delete Gradle Cache
+        run: rm -rf ~/.gradle/caches ~/.gradle/wrapper
+
+      #  Gradle 캐시 설정 (불필요한 restore-keys 제거)
       - name: Cache Gradle dependencies
         uses: actions/cache@v3
         with:
@@ -33,17 +37,15 @@ jobs:
             ~/.gradle/caches
             ~/.gradle/wrapper
           key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            gradle-${{ runner.os }}-
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      # Gradle 빌드 시 캐시를 강제 업데이트하여 문제 해결
+      #  Gradle 의존성 강제 새로고침 + 빌드 실행
       - name: Build with Gradle
         uses: gradle/gradle-build-action@v2
         with:
-          arguments: build --no-daemon --stacktrace --info
+          arguments: clean build --refresh-dependencies --stacktrace
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
@@ -83,10 +85,10 @@ jobs:
             fi
           EOF
 
-          # 새 JAR 파일 업로드
+          #  새 JAR 파일 업로드
           scp -i private_key.pem -o StrictHostKeyChecking=no "$jar_file" $EC2_USERNAME@$EC2_HOST:/home/$EC2_USERNAME/umc7thServer.jar
 
-          # 새로운 프로세스 실행
+          #  새로운 프로세스 실행
           ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_HOST << 'EOF'
             echo "Starting new application..."
             nohup java -jar /home/$EC2_USERNAME/umc7thServer.jar > app.log 2>&1 &

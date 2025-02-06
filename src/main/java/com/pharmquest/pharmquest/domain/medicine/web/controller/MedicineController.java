@@ -5,6 +5,8 @@ import com.pharmquest.pharmquest.domain.medicine.data.Medicine;
 import com.pharmquest.pharmquest.domain.medicine.repository.MedRepository;
 import com.pharmquest.pharmquest.domain.medicine.service.MedicineService;
 import com.pharmquest.pharmquest.domain.medicine.web.dto.MedicineDetailResponseDTO;
+import com.pharmquest.pharmquest.domain.medicine.web.dto.MedicineListResponseDTO;
+import com.pharmquest.pharmquest.domain.medicine.web.dto.MedicineOpenapiResponseDTO;
 import com.pharmquest.pharmquest.domain.medicine.web.dto.MedicineResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.http.ResponseEntity;
@@ -27,14 +29,14 @@ public class MedicineController {
 
     // 번역된 약물 정보 검색
     @GetMapping("test/searchOpenAPI/ko")
-    public List<MedicineResponseDTO> searchMedicines(
+    public List<MedicineOpenapiResponseDTO> searchMedicines(
             @RequestParam(defaultValue = "openfda.product_type:OTC") String query,
             @RequestParam(defaultValue = "10") int limit) {
         return medicineService.getMedicines(query, limit);
     }
 
     @GetMapping("test/lists")
-    public List<MedicineResponseDTO> searchMedicinesByCategory(
+    public List<MedicineOpenapiResponseDTO> searchMedicinesByCategory(
             @RequestParam(defaultValue = "진통/해열") String category,
             @RequestParam(defaultValue = "10") int limit) {
         return medicineService.getMedicinesbyCategory(category, limit);
@@ -43,14 +45,14 @@ public class MedicineController {
     @GetMapping("/lists")
     public List<MedicineResponseDTO> searchMedicinesByCategory(
             @RequestParam(defaultValue = "전체") String category,
-            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size) {
-        return medicineService.getMedicinesFromDBByCategory(category, page, size);
+        return medicineService.getMedicinesFromDBByCategory(category, page - 1, size);
     }
 
     // 번역되지 않은 약물 정보 검색
     @GetMapping("test/searchOpenAPI/english")
-    public List<MedicineResponseDTO> searchEnMedicines(
+    public List<MedicineOpenapiResponseDTO> searchEnMedicines(
             @RequestParam(defaultValue = "openfda.product_type:OTC") String query,
             @RequestParam(defaultValue = "10") int limit) {
         return medicineService.getEnMedicines(query, limit);
@@ -109,13 +111,13 @@ public class MedicineController {
 
     @GetMapping("/search")
     @Operation(summary = "약물 검색 API", description = "카테고리 및 키워드를 이용해 약물을 검색합니다.")
-    public List<MedicineResponseDTO> searchMedicinesByCategoryAndKeyword(
+    public MedicineListResponseDTO  searchMedicinesByCategoryAndKeyword(
             @RequestParam(defaultValue = "전체") String category,
             @RequestParam(defaultValue = "") String keyword,
-            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size) {
 
-        return medicineService.searchMedicinesByCategoryAndKeyword(category, keyword, page, size);
+        return medicineService.searchMedicinesByCategoryAndKeyword(category, keyword, page - 1, size);
     }
 
 }

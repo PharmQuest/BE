@@ -12,6 +12,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -42,16 +43,18 @@ public class PostScrapServiceImpl implements PostScrapService {
     }
 
     @Override
-    public void deletePostScrap(Long userId, Long postId) {
-        Optional<PostScrap> postScrap =
-                postScrapRepository.findByPostIdAndUserId(postId, userId);
+    public void deletePostScrap(Long userId, List<Long> postIds) {
 
-        if (postScrap.isEmpty()) {
-            throw new IllegalStateException("좋아요를 누르지 않은 게시물 입니다.");
+        for (Long postId : postIds) {
+            Optional<PostScrap> postScrap =
+                    postScrapRepository.findByPostIdAndUserId(postId, userId);
+
+            if (postScrap.isEmpty()) {
+                throw new IllegalStateException("스크랩하지 않은 게시물 입니다. id : " + postIds);
+            }
+
+            postScrapRepository.delete(postScrap.get());
         }
-
-        postScrapRepository.delete(postScrap.get());
-
     }
-
 }
+

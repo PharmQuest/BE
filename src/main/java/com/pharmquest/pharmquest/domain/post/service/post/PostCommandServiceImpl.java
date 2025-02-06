@@ -6,6 +6,7 @@ import com.pharmquest.pharmquest.domain.post.data.Post;
 import com.pharmquest.pharmquest.domain.post.data.enums.Country;
 import com.pharmquest.pharmquest.domain.post.data.enums.PostCategory;
 import com.pharmquest.pharmquest.domain.post.data.mapping.Comment;
+import com.pharmquest.pharmquest.domain.post.repository.comment.CommentLikeRepository;
 import com.pharmquest.pharmquest.domain.post.repository.comment.PostCommentRepository;
 import com.pharmquest.pharmquest.domain.post.repository.like.PostLikeRepository;
 import com.pharmquest.pharmquest.domain.post.repository.post.PostRepository;
@@ -38,6 +39,7 @@ public class PostCommandServiceImpl implements PostCommandService {
     private final PostLikeRepository likeRepository;
     private final PostScrapRepository scrapRepository;
     private final PostCommentRepository commentRepository;
+    private final CommentLikeRepository commentLikeRepository;
     private final S3Service s3Service;
 
     private final UserRepository userRepository;
@@ -101,19 +103,39 @@ public class PostCommandServiceImpl implements PostCommandService {
 
         boolean isLiked = likeRepository.existsByPostIdAndUserId(postId, userId);
         boolean isScrapped = scrapRepository.existsByPostIdAndUserId(postId, userId);
-        boolean isOwnPost =userId.equals(post.getUser().getId());
+        boolean isOwnPost = userId.equals(post.getUser().getId());
 
+        // 최상위 댓글 페이지네이션
         Page<Comment> parentCommentsPage = commentRepository.findByPostAndParentIsNull(
                 post,
                 PageRequest.of(page - 1, 5)
         );
 
+        // 최상위 댓글 처리
         List<CommentResponseDTO.CommentDTO> topLevelComments = parentCommentsPage.getContent().stream()
-                .map(PostCommentConverter::toComment)
+                .map(comment -> {
+
+                    boolean isCommentLiked = commentLikeRepository.existsByCommentIdAndUserId(comment.getId(), userId);
+                    boolean isOwnComment = userId.equals(comment.getUser().getId());
+                    boolean isPostAuthor = post.getUser().getId().equals(comment.getUser().getId());
+
+                    List<CommentResponseDTO.CommentDTO> replies = comment.getChildren().stream()
+                            .map(child -> {
+                                boolean isChildLiked = commentLikeRepository.existsByCommentIdAndUserId(child.getId(), userId);
+                                boolean isChildOwnComment = userId.equals(child.getUser().getId());
+                                boolean isChildPostAuthor = post.getUser().getId().equals(child.getUser().getId());
+                                return PostCommentConverter.toComment(child, isChildLiked, isChildPostAuthor, isChildOwnComment);
+                            })
+                            .collect(Collectors.toList());
+
+                    return PostCommentConverter.toComment(comment, isCommentLiked, isPostAuthor, isOwnComment)
+                            .toBuilder()
+                            .replies(replies)
+                            .build();
+                })
                 .collect(Collectors.toList());
 
-
-        return PostConverter.postDetailDTO(post, isLiked, isScrapped, isOwnPost , topLevelComments,parentCommentsPage);
+        return PostConverter.postDetailDTO(post, isLiked, isScrapped, isOwnPost, topLevelComments, parentCommentsPage);
     }
 
     //게시글 제목, 내용으로 검색(카테고리, 나라 별 필터링, 20개씩 페이징)
@@ -134,18 +156,18 @@ public class PostCommandServiceImpl implements PostCommandService {
     }
 
     @Override
-    public void deletePost(Long userId, Long postId) {
+    public void deletePost(Long userId, List<Long> postIds) {
 
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new PostHandler(ErrorStatus.POST_NOT_EXIST));
+        for(Long postId : postIds) {
+            Post post = postRepository.findById(postId)
+                    .orElseThrow(() -> new PostHandler(ErrorStatus.POST_NOT_EXIST));
 
-        if (!userId.equals(post.getUser().getId())) {
-            throw new PostHandler(ErrorStatus.NOT_POST_AUTHOR);
+            if (!userId.equals(post.getUser().getId())) {
+                throw new PostHandler(ErrorStatus.NOT_POST_AUTHOR);
+            }
+            // 게시글 삭제
+            postRepository.deleteById(postId);
         }
-
-        // 게시글 삭제
-        postRepository.deleteById(postId);
-
     }
 
     @Override

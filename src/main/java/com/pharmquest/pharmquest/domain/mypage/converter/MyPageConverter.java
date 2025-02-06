@@ -1,5 +1,6 @@
 package com.pharmquest.pharmquest.domain.mypage.converter;
 
+import com.pharmquest.pharmquest.domain.medicine.data.Medicine;
 import com.pharmquest.pharmquest.domain.mypage.web.dto.MyPageResponseDTO;
 import com.pharmquest.pharmquest.domain.post.data.Post;
 import com.pharmquest.pharmquest.domain.post.data.mapping.Comment;
@@ -47,7 +48,7 @@ public class MyPageConverter {
     public MyPageResponseDTO.ScrapPostResponseDTO toScrapedPostDto(Post post) {
         return MyPageResponseDTO.ScrapPostResponseDTO.builder()
                 .postId(post.getId())
-                .writerName(post.getUser().getName())
+                .writerName(post.getUser().getEmail().substring(0, post.getUser().getEmail().indexOf("@")))
                 .title(post.getTitle())
                 .category(post.getCategory())
                 .content(post.getContent().length() <= 40 ? post.getContent() : post.getContent().substring(0, 40))
@@ -71,13 +72,27 @@ public class MyPageConverter {
                 .build();
     }
 
-    public static MyPageResponseDTO.PharmacyResponse toPharmaciesResponse(Page<MyPageResponseDTO.PharmacyDto> pharmacies) {
+    public MyPageResponseDTO.MedicineResponseDto toMedicineDto(Medicine medicine) {
+        return MyPageResponseDTO.MedicineResponseDto.builder()
+                .id(medicine.getId())
+                .productName(medicine.getBrandName())
+                .generalName(medicine.getSubstanceName())
+                .productImage(medicine.getImgUrl())
+                .country(medicine.getCountry())
+                .categories(medicine.getCategory())
+                .build();
+    }
+
+    public static MyPageResponseDTO.PharmacyResponse toPharmaciesResponse(Page<MyPageResponseDTO.PharmacyDto> pharmacies, int page, int size) {
 
         List<MyPageResponseDTO.PharmacyDto> list = pharmacies.stream().toList();
 
         return MyPageResponseDTO.PharmacyResponse.builder()
                 .pharmacies(list)
-                .count((int) pharmacies.getTotalElements())
+                .totalElements((int) pharmacies.getTotalElements())
+                .totalPages(pharmacies.getTotalPages())
+                .currentPage(page)
+                .elementsPerPage(size)
                 .build();
     }
 
@@ -87,6 +102,16 @@ public class MyPageConverter {
                 .title(comment.getPost().getTitle())
                 .postId(comment.getPost().getId())
                 .content(comment.getContent())
+                .createdAt(comment.getCreatedAt().toLocalDate())
+                .build();
+    }
+
+    public MyPageResponseDTO.notificationResponseDTO toNotificationCommentDTO(Comment comment) {
+        return MyPageResponseDTO.notificationResponseDTO.builder()
+                .postId(comment.getPost().getId())
+                .commentContent(comment.getContent())
+                .commentWriter(comment.getUser().getEmail().substring(0, comment.getUser().getEmail().indexOf("@")))
+                .postTitle(comment.getPost().getTitle())
                 .createdAt(comment.getCreatedAt().toLocalDate())
                 .build();
     }

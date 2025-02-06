@@ -2,6 +2,8 @@ package com.pharmquest.pharmquest.domain.post.service.scrap;
 
 import com.pharmquest.pharmquest.domain.mypage.data.PostScrap;
 
+import java.util.List;
+
 
 public interface PostScrapService {
 
@@ -9,5 +11,5 @@ public interface PostScrapService {
             Long userId, Long postId);
 
     void deletePostScrap(
-            Long userId, Long postId);
+            Long userId, List<Long> postIds);
 }

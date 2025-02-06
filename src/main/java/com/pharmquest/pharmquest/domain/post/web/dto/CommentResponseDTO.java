@@ -19,7 +19,7 @@ public class CommentResponseDTO {
         LocalDateTime createdAt;
     }
 
-    @Builder
+    @Builder(toBuilder = true)  // toBuilder 속성 추가
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
@@ -31,7 +31,9 @@ public class CommentResponseDTO {
         private LocalDateTime createdAt;
         private Long parentId;
         private String parentName;
-        private Boolean isOwnPost;
+        private Boolean isPostAuthor;
+        private Boolean isOwnComment;
+        private Boolean isDeleted;
         private Integer likeCount;
         private Boolean isLiked;
         private List<CommentDTO> replies;

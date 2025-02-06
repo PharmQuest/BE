@@ -98,6 +98,7 @@ public class SupplementsResponseDTO {
         private String image;
         private String brand;
         private String maker;
+        private List<String> categories;
         private boolean isScrapped;
         private int scrapCount;
     }
@@ -116,13 +117,10 @@ public class SupplementsResponseDTO {
         private String maker;
         private boolean isScrapped;
         private int scrapCount;
-        private String category1;
-        private String category2;
-        private String category3;
-        private String category4;
-        private String dosage;
-        private String purpose;
-        private String warning;
+        private List<String> productCategory;
+        private List<String> dosage;
+        private List<String> purpose;
+        private List<String> warning;
         private List<String> categories;
         private List<RelatedSupplementDto> relatedSupplements;
     }

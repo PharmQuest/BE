@@ -9,6 +9,7 @@ import com.pharmquest.pharmquest.domain.medicine.repository.MedRepository;
 import com.pharmquest.pharmquest.domain.medicine.repository.MedicineRepository;
 import com.pharmquest.pharmquest.domain.medicine.web.dto.MedicineDetailResponseDTO;
 import com.pharmquest.pharmquest.domain.medicine.web.dto.MedicineListResponseDTO;
+import com.pharmquest.pharmquest.domain.medicine.web.dto.MedicineOpenapiResponseDTO;
 import com.pharmquest.pharmquest.domain.medicine.web.dto.MedicineResponseDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -42,13 +43,13 @@ public class MedicineServiceImpl implements MedicineService {
 
     // FDA API 데이터를 DTO로 변환 (번역 포함)
     @Override
-    public List<MedicineResponseDTO> getMedicines(String query, int limit) {
+    public List<MedicineOpenapiResponseDTO> getMedicines(String query, int limit) {
         try {
             String response = medicineRepository.fetchMedicineData(query, limit);
             ObjectMapper mapper = new ObjectMapper();
             JsonNode results = mapper.readTree(response).path("results");
 
-            List<MedicineResponseDTO> medicines = new ArrayList<>();
+            List<MedicineOpenapiResponseDTO> medicines = new ArrayList<>();
             if (results.isArray()) {
                 for (JsonNode result : results) {
                     medicines.add(medicineConverter.convertWithTranslation(result));
@@ -61,7 +62,7 @@ public class MedicineServiceImpl implements MedicineService {
     }
 
     @Override
-    public List<MedicineResponseDTO> getMedicinesbyCategory(String query, int limit) {
+    public List<MedicineOpenapiResponseDTO> getMedicinesbyCategory(String query, int limit) {
         try {
             // 카테고리 이름을 쿼리로 변환 (해당되는 경우)
             String apiQuery = MedicineCategoryMapper.getQueryForCategory(query);
@@ -76,10 +77,10 @@ public class MedicineServiceImpl implements MedicineService {
             ObjectMapper mapper = new ObjectMapper();
             JsonNode results = mapper.readTree(response).path("results");
 
-            List<MedicineResponseDTO> medicines = new ArrayList<>();
+            List<MedicineOpenapiResponseDTO > medicines = new ArrayList<>();
             if (results.isArray()) {
                 for (JsonNode result : results) {
-                    MedicineResponseDTO dto = medicineConverter.convertWithTranslation(result);
+                    MedicineOpenapiResponseDTO  dto = medicineConverter.convertWithTranslation(result);
                     if (isValidMedicine(dto)) {
                         medicines.add(dto);
                     }
@@ -95,13 +96,13 @@ public class MedicineServiceImpl implements MedicineService {
 
     // FDA API 데이터를 DTO로 변환 (번역 없이 원본 반환) 백엔드 작업용
     @Override
-    public List<MedicineResponseDTO> getEnMedicines(String query, int limit) {
+    public List<MedicineOpenapiResponseDTO> getEnMedicines(String query, int limit) {
         try {
             String response = medicineRepository.fetchMedicineData(query, limit);
             ObjectMapper mapper = new ObjectMapper();
             JsonNode results = mapper.readTree(response).path("results");
 
-            List<MedicineResponseDTO> medicines = new ArrayList<>();
+            List<MedicineOpenapiResponseDTO> medicines = new ArrayList<>();
             if (results.isArray()) {
                 for (JsonNode result : results) {
                     medicines.add(medicineConverter.convertWithoutTranslation(result));
@@ -190,7 +191,7 @@ public class MedicineServiceImpl implements MedicineService {
 
 
 
-    private boolean isValidMedicine(MedicineResponseDTO dto) {
+    private boolean isValidMedicine(MedicineOpenapiResponseDTO  dto) {
         return dto.getBrandName() != null && !dto.getBrandName().isEmpty()
                 && dto.getGenericName() != null && !dto.getGenericName().isEmpty()
                 && dto.getImgUrl() != null && !dto.getImgUrl().isEmpty()

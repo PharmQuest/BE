@@ -25,13 +25,25 @@ jobs:
           echo "${{ secrets.APPLICATION_YML }}" > ./src/main/resources/application.yml
         shell: bash
 
+      #  Gradle 캐시 강제 갱신
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            gradle-${{ runner.os }}-
+
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
+      # Gradle 빌드 시 캐시를 강제 업데이트하여 문제 해결
       - name: Build with Gradle
         uses: gradle/gradle-build-action@v2
         with:
-          arguments: build --stacktrace
+          arguments: build --no-daemon --stacktrace --info
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
@@ -59,10 +71,27 @@ jobs:
           echo "$EC2_SSH_KEY" > private_key.pem
           chmod 600 private_key.pem
           jar_file=$(find build/libs -name '*.jar' ! -name '*plain.jar' | head -n 1)
+          
+          echo " Deploying to EC2..."
+          
+          #  기존 프로세스를 안전하게 종료
+          ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_HOST << 'EOF'
+            echo "Stopping existing application..."
+            if pgrep -f umc7thServer.jar; then
+              pgrep -f umc7thServer.jar | xargs -r kill -15
+              sleep 10
+            fi
+          EOF
+
+          # 새 JAR 파일 업로드
           scp -i private_key.pem -o StrictHostKeyChecking=no "$jar_file" $EC2_USERNAME@$EC2_HOST:/home/$EC2_USERNAME/umc7thServer.jar
-          ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_HOST "
-            pgrep java | xargs -r kill -15
-            sleep 10
+
+          # 새로운 프로세스 실행
+          ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_HOST << 'EOF'
+            echo "Starting new application..."
             nohup java -jar /home/$EC2_USERNAME/umc7thServer.jar > app.log 2>&1 &
-          "
+            sleep 5
+            echo "Deployment completed!"
+          EOF
+
           rm -f private_key.pem

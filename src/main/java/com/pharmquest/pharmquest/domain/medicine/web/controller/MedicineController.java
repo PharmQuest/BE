@@ -43,9 +43,9 @@ public class MedicineController {
     @GetMapping("/lists")
     public List<MedicineResponseDTO> searchMedicinesByCategory(
             @RequestParam(defaultValue = "전체") String category,
-            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size) {
-        return medicineService.getMedicinesFromDBByCategory(category, page, size);
+        return medicineService.getMedicinesFromDBByCategory(category, page-1, size);
     }
 
     // 번역되지 않은 약물 정보 검색
@@ -112,10 +112,10 @@ public class MedicineController {
     public List<MedicineResponseDTO> searchMedicinesByCategoryAndKeyword(
             @RequestParam(defaultValue = "전체") String category,
             @RequestParam(defaultValue = "") String keyword,
-            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size) {
 
-        return medicineService.searchMedicinesByCategoryAndKeyword(category, keyword, page, size);
+        return medicineService.searchMedicinesByCategoryAndKeyword(category, keyword, page-1, size);
     }
 
 }

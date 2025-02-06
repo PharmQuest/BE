@@ -44,29 +44,40 @@ public class PostLikeServiceImpl implements PostLikeService {
         PostLike postLike = PostLikeConverter.toPostLike(user, post);
         postLikeRepository.save(postLike);
 
-        // 좋아요 개수 확인 및 BestPost 등록 (트랜잭션 내에서 실행)
+        // 좋아요 개수 확인 및 BestPost 등록
         int likeCount = postLikeRepository.countByPostId(postId);
         if (likeCount >= 10 && !bestPostRepository.existsByPostId(postId)) {
             BestPost newBestPost = new BestPost();
             newBestPost.setPost(post);
             newBestPost.setBestPostAt(LocalDateTime.now());
+            post.setBestPost(true);
             bestPostRepository.save(newBestPost);
         }
 
         return postLike;
     }
 
+    @Transactional
     @Override
     public void deletePostLike(Long userId, Long postId) {
 
         Optional<PostLike> postLike =
                 postLikeRepository.findByPostIdAndUserId(postId, userId);
 
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new EntityNotFoundException("Post not found"));
+
         if (postLike.isEmpty()) {
             throw new PostHandler(ErrorStatus.POST_LIKE_NOT_EXIST);
         }
 
         postLikeRepository.delete(postLike.get());
+
+        int likeCount = postLikeRepository.countByPostId(postId);
+
+        if (likeCount < 10 && bestPostRepository.existsByPostId(postId)) {
+            post.setBestPost(false);
+        }
 
     }
 }

@@ -2,11 +2,13 @@ package com.pharmquest.pharmquest.domain.post.web.controller;
 
 import com.pharmquest.pharmquest.domain.post.converter.*;
 import com.pharmquest.pharmquest.domain.mypage.data.PostScrap;
+import com.pharmquest.pharmquest.domain.post.data.BestPost;
 import com.pharmquest.pharmquest.domain.post.data.Post;
 import com.pharmquest.pharmquest.domain.post.data.enums.Country;
 import com.pharmquest.pharmquest.domain.post.data.enums.PostCategory;
 import com.pharmquest.pharmquest.domain.post.data.enums.ReportType;
 import com.pharmquest.pharmquest.domain.post.data.mapping.*;
+import com.pharmquest.pharmquest.domain.post.service.bestPost.BestPostService;
 import com.pharmquest.pharmquest.domain.post.service.comment.CommentLikeService;
 import com.pharmquest.pharmquest.domain.post.service.comment.CommentReportService;
 import com.pharmquest.pharmquest.domain.post.service.post.PostCommandService;
@@ -45,6 +47,7 @@ public class PostController {
     private final PostReportService postReportService;
     private final CommentLikeService commentLikeService;
     private final CommentReportService commentReportService;
+    private final BestPostService bestPostService;
 
     @PostMapping(value = "/posts", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "게시글 작성 API")
@@ -259,5 +262,17 @@ public class PostController {
 
         CommentReport commentReport = commentReportService.createReport(user.getId(), commentId, reportType);
         return ApiResponse.onSuccess(PostCommentConverter.toCommentReportDTO(commentReport));
+    }
+
+    @GetMapping("/best-posts/lists")
+    @Operation(summary = "베스트 인기글 리스트 조회 API")
+    public ApiResponse<PostResponseDTO.PostPreViewListDTO> getBestPostList(@Parameter (hidden = true) @RequestHeader(value = "Authorization",required = false) String authorizationHeader, @RequestParam(name="page")Integer page){
+
+        User user = jwtUtil.getUserFromHeader(authorizationHeader);
+
+        Page<Post> bestPostList = bestPostService.getBestPosts(user.getId(),  page);
+
+        return ApiResponse.onSuccess(PostConverter.postPreViewListDTO(bestPostList));
+
     }
 }

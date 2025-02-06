@@ -38,7 +38,7 @@ jobs:
           cache-disabled: true  #  Gradle 캐시 비활성화
 
       - name: Upload build artifact  # 빌드된 JAR 파일 업로드
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: umc7thServer
           path: build/libs/*.jar
@@ -49,7 +49,7 @@ jobs:
 
     steps:
       - name: Download build artifact  # JAR 다운로드
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: umc7thServer
           path: build/libs/

@@ -25,15 +25,19 @@ jobs:
           echo "${{ secrets.APPLICATION_YML }}" > ./src/main/resources/application.yml
         shell: bash
 
-      #  기존 Gradle 캐시 강제 삭제 (캐시 문제 해결)
+      #  기존 Gradle 캐시 강제 삭제
       - name: Remove Gradle Cache
         run: |
           echo "Removing old Gradle cache..."
           rm -rf ~/.gradle/caches ~/.gradle/wrapper
-          ./gradlew --stop
 
+      # Gradle Wrapper 실행 권한 부여 (여기로 이동!)
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
+
+      #  Gradle 실행 중인 Daemon 종료
+      - name: Stop Gradle Daemon
+        run: ./gradlew --stop || true
 
       #  Gradle 빌드 (캐시 사용 안 함)
       - name: Build with Gradle (No Cache)
@@ -44,48 +48,3 @@ jobs:
         with:
           name: umc7thServer
           path: build/libs/*.jar
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Download build artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: umc7thServer
-          path: build/libs/
-
-      - name: Deploy to EC2
-        env:
-          EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
-          EC2_USERNAME: ${{ secrets.EC2_USERNAME }}
-          EC2_HOST: ${{ secrets.EC2_HOST }}
-        run: |
-          echo "$EC2_SSH_KEY" > private_key.pem
-          chmod 600 private_key.pem
-          jar_file=$(find build/libs -name '*.jar' ! -name '*plain.jar' | head -n 1)
-          
-          echo " Deploying to EC2..."
-          
-          #  기존 프로세스를 안전하게 종료
-          ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_HOST << 'EOF'
-            echo "Stopping existing application..."
-            if pgrep -f umc7thServer.jar; then
-              pgrep -f umc7thServer.jar | xargs -r kill -15
-              sleep 10
-            fi
-          EOF
-
-          #  새 JAR 파일 업로드
-          scp -i private_key.pem -o StrictHostKeyChecking=no "$jar_file" $EC2_USERNAME@$EC2_HOST:/home/$EC2_USERNAME/umc7thServer.jar
-
-          #  새로운 프로세스 실행
-          ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_HOST << 'EOF'
-            echo "Starting new application..."
-            nohup java -jar /home/$EC2_USERNAME/umc7thServer.jar > app.log 2>&1 &
-            sleep 5
-            echo "Deployment completed!"
-          EOF
-
-          rm -f private_key.pem

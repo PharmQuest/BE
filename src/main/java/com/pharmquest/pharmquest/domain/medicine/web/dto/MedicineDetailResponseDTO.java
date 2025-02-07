@@ -17,4 +17,5 @@ public class MedicineDetailResponseDTO {
     private String imgUrl; //
     private String category;
     private String country;
+    private String warnings;
 }

@@ -26,4 +26,6 @@ public class Medicine {
     private String imgUrl;
     private String category;
     private String country;
+    @Column(columnDefinition = "TEXT")
+    private String warnings;
 }

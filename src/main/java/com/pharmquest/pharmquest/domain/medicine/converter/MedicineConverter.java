@@ -65,6 +65,7 @@ public class MedicineConverter {
         String splSetId = getFirstValue(result, "openfda.spl_set_id");
         String imgUrl = fetchImageUrl(splSetId);
         String country = "미국";
+        String warnings = translate(getFirstValue(result, "warnings"));
 
         return new MedicineDetailResponseDTO(
                 brandName,
@@ -77,7 +78,8 @@ public class MedicineConverter {
                 splSetId,
                 imgUrl,
                 category,
-                country
+                country,
+                warnings
         );
     }
 

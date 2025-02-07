@@ -182,7 +182,8 @@ public class MedicineServiceImpl implements MedicineService {
                     medicine.getSplSetId(),
                     medicine.getImgUrl(),
                     medicine.getCategory(),
-                    medicine.getCountry()
+                    medicine.getCountry(),
+                    medicine.getWarnings()
             );
         } catch (Exception e) {
             throw new RuntimeException("DB에서 약물 세부 정보를 가져오는 중 오류 발생", e);
@@ -199,16 +200,23 @@ public class MedicineServiceImpl implements MedicineService {
     }
 
     private boolean isValidMedicineDetail(MedicineDetailResponseDTO dto) {
-        return dto.getBrandName() != null && !dto.getBrandName().isEmpty()
-                && dto.getGenericName() != null && !dto.getGenericName().isEmpty()
-                && dto.getSubstanceName() != null && !dto.getSubstanceName().isEmpty()
-                && dto.getActiveIngredient() != null && !dto.getActiveIngredient().isEmpty()
-                && dto.getPurpose() != null && !dto.getPurpose().isEmpty()
-                && dto.getIndicationsAndUsage() != null && !dto.getIndicationsAndUsage().isEmpty()
-                && dto.getDosageAndAdministration() != null && !dto.getDosageAndAdministration().isEmpty()
-                && dto.getImgUrl() != null && !dto.getImgUrl().isEmpty()
-                && dto.getCategory() != null && !dto.getCategory().isEmpty();
+        return isValid(dto.getBrandName()) &&
+                isValid(dto.getGenericName()) &&
+                isValid(dto.getSubstanceName()) &&
+                isValid(dto.getActiveIngredient()) &&
+                isValid(dto.getPurpose()) &&
+                isValid(dto.getIndicationsAndUsage()) &&
+                isValid(dto.getDosageAndAdministration()) &&
+                isValid(dto.getImgUrl()) &&
+                isValid(dto.getCategory()) &&
+                isValid(dto.getWarnings());
     }
+
+    // 공통된 유효성 검사 로직
+    private boolean isValid(String value) {
+        return value != null && !value.isEmpty() && !value.equalsIgnoreCase("Unknown") && !value.equals("알려지지 않은");
+    }
+
 
     //카테고리 별 db 저장 로직
     @Transactional
@@ -252,7 +260,7 @@ public class MedicineServiceImpl implements MedicineService {
                             medicine.setImgUrl(dto.getImgUrl());
                             medicine.setCategory(dto.getCategory());
                             medicine.setCountry(dto.getCountry());
-
+                            medicine.setWarnings(dto.getWarnings());
                             savedMedicines.add(medRepository.save(medicine));
                         }
 
@@ -314,7 +322,7 @@ public class MedicineServiceImpl implements MedicineService {
                             medicine.setImgUrl(dto.getImgUrl());
                             medicine.setCategory("기타");
                             medicine.setCountry(dto.getCountry());
-
+                            medicine.setWarnings(dto.getWarnings());
                             savedMedicines.add(medRepository.save(medicine));
                         }
 

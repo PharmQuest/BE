@@ -79,7 +79,7 @@ public class MyPageConverter {
                 .generalName(medicine.getSubstanceName())
                 .productImage(medicine.getImgUrl())
                 .country(medicine.getCountry())
-                .categories(medicine.getCategory())
+                .categories(medicine.getCategory().name())
                 .build();
     }
 

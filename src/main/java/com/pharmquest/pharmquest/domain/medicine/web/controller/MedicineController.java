@@ -2,6 +2,7 @@ package com.pharmquest.pharmquest.domain.medicine.web.controller;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.pharmquest.pharmquest.domain.medicine.data.Medicine;
+import com.pharmquest.pharmquest.domain.medicine.data.enums.MedicineCategory;
 import com.pharmquest.pharmquest.domain.medicine.repository.MedRepository;
 import com.pharmquest.pharmquest.domain.medicine.service.MedicineService;
 import com.pharmquest.pharmquest.domain.medicine.web.dto.MedicineDetailResponseDTO;
@@ -12,6 +13,8 @@ import com.pharmquest.pharmquest.global.apiPayload.ApiResponse;
 import com.pharmquest.pharmquest.global.apiPayload.code.status.ErrorStatus;
 import com.pharmquest.pharmquest.global.apiPayload.code.status.SuccessStatus;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,17 +41,18 @@ public class MedicineController {
         return medicineService.getMedicines(query, limit);
     }
 
-    @GetMapping("test/lists")
+    @Operation(summary = "카테고리별 약물 검색", description = "FDA API에서 특정 카테고리의 약물 정보를 가져옵니다.")
+    @GetMapping("/test/lists")
     public List<MedicineOpenapiResponseDTO> searchMedicinesByCategory(
-            @RequestParam(defaultValue = "진통/해열") String category,
+            @RequestParam MedicineCategory category,  // ✅ String 대신 Enum 사용
             @RequestParam(defaultValue = "10") int limit) {
         return medicineService.getMedicinesbyCategory(category, limit);
     }
-
     @Operation(summary = "카테고리별 약물 검색", description = "DB에서 특정 카테고리별로 약물을 검색합니다.")
     @GetMapping("/lists")
     public ResponseEntity<ApiResponse<List<MedicineResponseDTO>>> searchMedicinesByCategory(
-            @RequestParam(defaultValue = "전체") String category,
+            @Parameter(description = "카테고리 선택", required = true)
+            @RequestParam(defaultValue = "ALL") MedicineCategory category,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size) {
         try {
@@ -58,6 +62,7 @@ public class MedicineController {
             return ApiResponse.onFailure(ErrorStatus.MEDICINE_NOT_FOUND);
         }
     }
+
 
     // 번역되지 않은 약물 정보 검색
     @GetMapping("test/searchOpenAPI/english")
@@ -96,7 +101,11 @@ public class MedicineController {
     @Operation(summary = "FDA API 데이터를 DB에 저장", description = "FDA API에서 특정 카테고리의 약물 정보를 받아와 DB에 저장합니다.")
     @PostMapping("/save")
     public ResponseEntity<ApiResponse<List<Medicine>>> saveMedicineByCategory(
-            @RequestParam(defaultValue = "진통/해열") String category,
+            @Parameter(
+                    description = "저장할 카테고리 선택 (진통/해열 -> PAIN_RELIEF, 소화/위장 -> DIGESTIVE)",
+                    in = ParameterIn.QUERY
+            )
+            @RequestParam MedicineCategory category,  // ✅ Enum 직접 사용 (Swagger에서 토글 지원)
             @RequestParam(defaultValue = "10") int limit) {
         try {
             List<Medicine> savedMedicines = medicineService.saveMedicinesByCategory(category, limit);
@@ -105,6 +114,7 @@ public class MedicineController {
             return ApiResponse.onFailure(ErrorStatus.MEDICINE_SAVE_FAILED);
         }
     }
+
 
     @Operation(summary = "기타 카테고리 약물 DB 저장", description = "FDA API에서 기타 카테고리 약물 정보를 받아와 DB에 저장합니다.")
     @PostMapping("/save/other")
@@ -129,7 +139,7 @@ public class MedicineController {
     @Operation(summary = "약물 검색 API", description = "카테고리 및 키워드를 이용해 DB에서 약물을 검색합니다.")
     @GetMapping("/search")
     public ResponseEntity<ApiResponse<MedicineListResponseDTO>> searchMedicinesByCategoryAndKeyword(
-            @RequestParam(defaultValue = "전체") String category,
+            @RequestParam(defaultValue = "ALL") MedicineCategory category,
             @RequestParam(defaultValue = "") String keyword,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size) {

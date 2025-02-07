@@ -50,6 +50,12 @@ public enum ErrorStatus implements BaseErrorCode {
     INVALID_PAGE_NUMBER(HttpStatus.BAD_REQUEST, "MYPAGE4001", "페이지 번호가 1보다 작을 수 없습니다."),
     PAGE_NUMBER_EXCEEDS_TOTAL(HttpStatus.BAD_REQUEST, "MYAPGE4002", "페이지 번호 전체 페이지 수를 초과하였습니다."),
     INVALID_SIZE_NUMBER(HttpStatus.BAD_REQUEST, "MYAPGE4003", "사이즈 번호가 1보다 작을 수 없습니다."),
+
+    // Medicine
+    MEDICINE_NOT_FOUND(HttpStatus.NOT_FOUND, "MED4001", "해당하는 약물을 찾을 수 없습니다."),
+    MEDICINE_API_REQUEST_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "MED4002", "FDA API 요청이 실패했습니다."),
+    MEDICINE_TRANSLATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "MED4003", "약물 정보 번역에 실패했습니다."),
+    MEDICINE_SAVE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "MED4004", "약물 데이터 저장 중 오류가 발생했습니다."),
     ;
 
     private final HttpStatus httpStatus;

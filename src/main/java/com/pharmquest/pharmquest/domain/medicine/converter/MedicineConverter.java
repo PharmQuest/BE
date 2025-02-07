@@ -3,6 +3,7 @@ package com.pharmquest.pharmquest.domain.medicine.converter;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pharmquest.pharmquest.domain.medicine.data.Medicine;
+import com.pharmquest.pharmquest.domain.medicine.data.enums.MedicineCategory;
 import com.pharmquest.pharmquest.domain.medicine.data.MedicineCategoryMapper;
 import com.pharmquest.pharmquest.domain.medicine.repository.MedicineRepository;
 import com.pharmquest.pharmquest.domain.medicine.service.TranslationService;
@@ -26,7 +27,7 @@ public class MedicineConverter {
     public MedicineOpenapiResponseDTO convertWithTranslation(JsonNode result) {
         String brandName = translate(getFirstValue(result, "openfda.brand_name"));
         String genericName = translate(getFirstValue(result, "openfda.generic_name"));
-        String category = MedicineCategoryMapper.getCategory(
+        MedicineCategory category = MedicineCategoryMapper.getCategory(
                 getFirstValue(result, "purpose"),
                 getFirstValue(result, "active_ingredient"),
                 "",
@@ -50,7 +51,7 @@ public class MedicineConverter {
     public MedicineDetailResponseDTO convertToDetail(JsonNode result) {
         String brandName = translate(getFirstValue(result, "openfda.brand_name"));
         String genericName = translate(getFirstValue(result, "openfda.generic_name"));
-        String category = MedicineCategoryMapper.getCategory(
+        MedicineCategory category = MedicineCategoryMapper.getCategory(
                 getFirstValue(result, "purpose"),
                 getFirstValue(result, "active_ingredient"),
                 "",
@@ -65,6 +66,7 @@ public class MedicineConverter {
         String splSetId = getFirstValue(result, "openfda.spl_set_id");
         String imgUrl = fetchImageUrl(splSetId);
         String country = "미국";
+        String warnings = translate(getFirstValue(result, "warnings"));
 
         return new MedicineDetailResponseDTO(
                 brandName,
@@ -77,7 +79,8 @@ public class MedicineConverter {
                 splSetId,
                 imgUrl,
                 category,
-                country
+                country,
+                warnings
         );
     }
 
@@ -89,7 +92,7 @@ public class MedicineConverter {
         String activeIngredient = getFirstValue(result, "active_ingredient");
         String route = getFirstValue(result, "openfda.route");
         String purpose = getFirstValue(result, "purpose");
-        String category = MedicineCategoryMapper.getCategory(purpose, activeIngredient, "", route);
+        MedicineCategory category = MedicineCategoryMapper.getCategory(purpose, activeIngredient, "", route);
         String splSetId = getFirstValue(result, "openfda.spl_set_id");
         String imgUrl = fetchImageUrl(splSetId);
         String country = "미국";

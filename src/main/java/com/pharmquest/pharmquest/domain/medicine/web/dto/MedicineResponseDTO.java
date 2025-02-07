@@ -12,6 +12,6 @@ public class MedicineResponseDTO {
     private String genericName; // openfda.generic_name
     private String splSetId; //이미지 찾는 기준이 되는 약 코드
     private String imgUrl; //
-    private MedicineCategory category;
+    private String category;
     private String country;
 }

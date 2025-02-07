@@ -1,6 +1,40 @@
 package com.pharmquest.pharmquest.domain.medicine.data;
 import com.pharmquest.pharmquest.domain.medicine.data.enums.MedicineCategory;
+
+import java.util.HashMap;
+import java.util.Map;
+
 public class MedicineCategoryMapper {
+
+    private static final Map<MedicineCategory, String> categoryToKorean = new HashMap<>();
+    private static final Map<String, MedicineCategory> koreanToCategory = new HashMap<>();
+
+    static {
+        categoryToKorean.put(MedicineCategory.PAIN_RELIEF, "진통/해열");
+        categoryToKorean.put(MedicineCategory.DIGESTIVE, "소화/위장");
+        categoryToKorean.put(MedicineCategory.COLD, "감기/기침");
+        categoryToKorean.put(MedicineCategory.ALLERGY, "알레르기");
+        categoryToKorean.put(MedicineCategory.ANTISEPTIC, "상처/소독");
+        categoryToKorean.put(MedicineCategory.MOTION_SICKNESS, "멀미");
+        categoryToKorean.put(MedicineCategory.EYE_DROPS, "안약");
+        categoryToKorean.put(MedicineCategory.OTHER, "기타");
+        categoryToKorean.put(MedicineCategory.ALL, "전체");
+
+        // 역변환을 위한 매핑
+        for (Map.Entry<MedicineCategory, String> entry : categoryToKorean.entrySet()) {
+            koreanToCategory.put(entry.getValue(), entry.getKey());
+        }
+    }
+
+    // ✅ 영어 -> 한글 변환
+    public static String toKoreanCategory(MedicineCategory category) {
+        return categoryToKorean.getOrDefault(category, "기타");
+    }
+
+    // ✅ 한글 -> 영어 변환
+    public static MedicineCategory toEnglishCategory(String koreanCategory) {
+        return koreanToCategory.getOrDefault(koreanCategory, MedicineCategory.OTHER);
+    }
 
     public static MedicineCategory getCategory(String purpose, String activeIngredient, String pharmClassEpc, String route) {
         // Null-safe 초기화

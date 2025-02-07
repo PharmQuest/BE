@@ -34,6 +34,7 @@ public class MedicineController {
     }
 
     // 번역된 약물 정보 검색
+    @Operation(summary = "번역 버전 약물 검색", description = "백엔드 확인용 프론트 사용x")
     @GetMapping("test/searchOpenAPI/ko")
     public List<MedicineOpenapiResponseDTO> searchMedicines(
             @RequestParam(defaultValue = "openfda.product_type:OTC") String query,
@@ -41,7 +42,7 @@ public class MedicineController {
         return medicineService.getMedicines(query, limit);
     }
 
-    @Operation(summary = "카테고리별 약물 검색", description = "FDA API에서 특정 카테고리의 약물 정보를 가져옵니다.")
+    @Operation(summary = "카테고리별 약물 검색", description = "백엔드 확인용 프론트 사용x FDA API에서 특정 카테고리의 약물 정보를 가져옵니다.")
     @GetMapping("/test/lists")
     public List<MedicineOpenapiResponseDTO> searchMedicinesByCategory(
             @RequestParam MedicineCategory category,  // ✅ String 대신 Enum 사용
@@ -65,6 +66,7 @@ public class MedicineController {
 
 
     // 번역되지 않은 약물 정보 검색
+    @Operation(summary = "번역적용x 약물 검색", description = "백엔드 확인용 프론트 사용x")
     @GetMapping("test/searchOpenAPI/english")
     public List<MedicineOpenapiResponseDTO> searchEnMedicines(
             @RequestParam(defaultValue = "openfda.product_type:OTC") String query,
@@ -73,6 +75,7 @@ public class MedicineController {
     }
 
     // FDA API에서 전체 데이터 원본 반환
+    @Operation(summary = "원본 칼럼 전체 확인", description = "백엔드 확인용 프론트 사용x")
     @GetMapping("test/total")
     public String viewTotal(
             @RequestParam(defaultValue = "openfda.product_type:OTC") String query,
@@ -81,6 +84,7 @@ public class MedicineController {
     }
 
     // SPL Set ID로 약물 세부 정보 검색
+    @Operation(summary = "세부 내용 확인", description = "백엔드 확인용 프론트 사용x")
     @GetMapping("test/detail")
     public MedicineDetailResponseDTO searchBySplSetId(@RequestParam String splSetId) {
         return medicineService.getMedicineBySplSetId(splSetId);
@@ -98,7 +102,7 @@ public class MedicineController {
     }
 
 
-    @Operation(summary = "FDA API 데이터를 DB에 저장", description = "FDA API에서 특정 카테고리의 약물 정보를 받아와 DB에 저장합니다.")
+    @Operation(summary = "FDA API 데이터를 DB에 저장", description = "백엔드 db 저장용 프론트 사용 x FDA API에서 특정 카테고리의 약물 정보를 받아와 DB에 저장합니다.")
     @PostMapping("/save")
     public ResponseEntity<ApiResponse<List<Medicine>>> saveMedicineByCategory(
             @Parameter(
@@ -116,10 +120,16 @@ public class MedicineController {
     }
 
 
-    @Operation(summary = "기타 카테고리 약물 DB 저장", description = "FDA API에서 기타 카테고리 약물 정보를 받아와 DB에 저장합니다.")
+    @Operation(summary = "기타 카테고리 약물 DB 저장", description = "백엔드 db 저장용 프론트 사용 x FDA API에서 기타 카테고리 약물 정보를 받아와 DB에 저장합니다.")
     @PostMapping("/save/other")
     public ResponseEntity<ApiResponse<List<Medicine>>> saveOtherMedicines(
-            @RequestParam String query,
+            @RequestParam(defaultValue = "NOT (purpose:(\"Pain reliever\" OR \"Fever reducer\" OR \"Antacid\" OR \n" +
+                    "\"Acid reducer\" OR \"Cough suppressant\" OR \"Expectorant\" OR \"Antihistamine\" OR \n" +
+                    "\"Antiseptic\" OR \"Antiemetic\") OR \n" +
+                    "active_ingredient:(\"Acetaminophen\" OR \"Naproxen\" OR \"Ibuprofen\") OR \n" +
+                    "pharm_class_epc:(\"Analgesic\" OR \"Antipyretic\" OR \"Antacid\" OR \"Proton pump inhibitor\" OR \n" +
+                    "\"Decongestant\" OR \"Antihistamine\" OR \"Antiseptic\" OR \"Antiemetic\") OR \n" +
+                    "openfda.route:(\"OPHTHALMIC\"))\n") String query,
             @RequestParam(defaultValue = "10") int limit) {
         try {
             List<Medicine> savedMedicines = medicineService.saveOtherMedicines(query, limit);

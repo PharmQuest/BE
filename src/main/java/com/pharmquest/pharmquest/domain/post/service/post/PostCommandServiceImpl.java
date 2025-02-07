@@ -2,10 +2,12 @@ package com.pharmquest.pharmquest.domain.post.service.post;
 
 import com.pharmquest.pharmquest.domain.post.converter.PostCommentConverter;
 import com.pharmquest.pharmquest.domain.post.converter.PostConverter;
+import com.pharmquest.pharmquest.domain.post.data.BestPost;
 import com.pharmquest.pharmquest.domain.post.data.Post;
 import com.pharmquest.pharmquest.domain.post.data.enums.Country;
 import com.pharmquest.pharmquest.domain.post.data.enums.PostCategory;
 import com.pharmquest.pharmquest.domain.post.data.mapping.Comment;
+import com.pharmquest.pharmquest.domain.post.repository.bestPost.BestPostRepository;
 import com.pharmquest.pharmquest.domain.post.repository.comment.CommentLikeRepository;
 import com.pharmquest.pharmquest.domain.post.repository.comment.PostCommentRepository;
 import com.pharmquest.pharmquest.domain.post.repository.like.PostLikeRepository;
@@ -29,6 +31,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -40,7 +43,9 @@ public class PostCommandServiceImpl implements PostCommandService {
     private final PostScrapRepository scrapRepository;
     private final PostCommentRepository commentRepository;
     private final CommentLikeRepository commentLikeRepository;
+    private final BestPostRepository bestPostRepository;
     private final S3Service s3Service;
+    private final PostConverter postConverter;
 
     private final UserRepository userRepository;
 
@@ -95,15 +100,19 @@ public class PostCommandServiceImpl implements PostCommandService {
         }
     }
 
+
+
     //게시글 상세보기
     @Override
     public PostResponseDTO.PostDetailDTO getPost(Long userId, Long postId, Integer page) {
+
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new PostHandler(ErrorStatus.POST_NOT_EXIST));
 
         boolean isLiked = likeRepository.existsByPostIdAndUserId(postId, userId);
         boolean isScrapped = scrapRepository.existsByPostIdAndUserId(postId, userId);
         boolean isOwnPost = userId.equals(post.getUser().getId());
+        boolean isBestPost = bestPostRepository.existsByPostId(postId);
 
         // 최상위 댓글 페이지네이션
         Page<Comment> parentCommentsPage = commentRepository.findByPostAndParentIsNull(
@@ -135,7 +144,7 @@ public class PostCommandServiceImpl implements PostCommandService {
                 })
                 .collect(Collectors.toList());
 
-        return PostConverter.postDetailDTO(post, isLiked, isScrapped, isOwnPost, topLevelComments, parentCommentsPage);
+        return PostConverter.postDetailDTO(post, isLiked, isScrapped, isOwnPost, isBestPost, topLevelComments, parentCommentsPage);
     }
 
     //게시글 제목, 내용으로 검색(카테고리, 나라 별 필터링, 20개씩 페이징)
@@ -165,6 +174,13 @@ public class PostCommandServiceImpl implements PostCommandService {
             if (!userId.equals(post.getUser().getId())) {
                 throw new PostHandler(ErrorStatus.NOT_POST_AUTHOR);
             }
+            //베스트 게시글이라면 베스트 게시글부터 삭제
+            BestPost bestPost = bestPostRepository.findByPostId(postId);
+
+            if (bestPost !=null){
+                bestPostRepository.delete(bestPost);
+            }
+
             // 게시글 삭제
             postRepository.deleteById(postId);
         }
@@ -204,5 +220,7 @@ public class PostCommandServiceImpl implements PostCommandService {
 
         return post;
     }
+
+
 
 }

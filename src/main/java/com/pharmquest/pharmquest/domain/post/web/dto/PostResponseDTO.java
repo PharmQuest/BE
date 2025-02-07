@@ -111,5 +111,16 @@ public class PostResponseDTO {
         LocalDateTime createdAt;
     }
 
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class BestPostListDTO {
+
+        List<PostPreViewDTO> postList;
+        Integer listSize;
+
+    }
+
 }
 

@@ -6,10 +6,13 @@ import com.pharmquest.pharmquest.domain.post.web.dto.CommentResponseDTO;
 import com.pharmquest.pharmquest.domain.post.web.dto.PostRequestDTO;
 import com.pharmquest.pharmquest.domain.post.web.dto.PostResponseDTO;
 import org.springframework.data.domain.Page;
+import org.springframework.stereotype.Component;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Component
 public class PostConverter {
 
     public static PostResponseDTO.postResultDTO toPostResultDTO(Post post) {
@@ -29,7 +32,6 @@ public class PostConverter {
                 .build();
     }
 
-
     public static PostResponseDTO.PostPreViewDTO postPreViewDTO(Post post) {
         return PostResponseDTO.PostPreViewDTO.builder()
                 .postId(post.getId())
@@ -40,6 +42,7 @@ public class PostConverter {
                 .category(post.getCategory().getKoreanName())
                 .scrapeCount(post.getScraps().size())
                 .likeCount(post.getLikes().size())
+                .isBestPost(post.isBestPost())
                 .commentCount(post.getComments().size())
                 .createdAt(post.getCreatedAt())
                 .build();
@@ -63,6 +66,7 @@ public class PostConverter {
             Boolean isLiked,
             Boolean isScraped,
             Boolean isOwnPost,
+            Boolean isBestPost,
             List<CommentResponseDTO.CommentDTO> topLevelComment,
             Page<Comment> parentCommentsPage
     ) {
@@ -80,6 +84,7 @@ public class PostConverter {
                 .isLiked(isLiked)
                 .isScraped(isScraped)
                 .isOwnPost(isOwnPost)
+                .isBestPost(isBestPost)
                 .imageUrl(post.getPostImgURL())
                 .comments(topLevelComment)
                 .isFirst(parentCommentsPage.isFirst())
@@ -88,6 +93,18 @@ public class PostConverter {
                 .totalElements(parentCommentsPage.getTotalElements())
                 .listSize(parentCommentsPage.getSize())
                 .createdAt(post.getCreatedAt())
+                .build();
+    }
+
+
+    public static PostResponseDTO.BestPostListDTO postRandomDTO(List<Post> postList) {
+        List<PostResponseDTO.PostPreViewDTO> postPreViewDTOList = postList.stream()
+                .map(PostConverter::postPreViewDTO)
+                .collect(Collectors.toList());
+
+        return PostResponseDTO.BestPostListDTO.builder()
+                .listSize(postPreViewDTOList.size())
+                .postList(postPreViewDTOList)
                 .build();
     }
 

@@ -9,41 +9,30 @@ import com.pharmquest.pharmquest.domain.supplements.data.Supplements;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import com.pharmquest.pharmquest.domain.supplements.repository.SupplementsCategoryRepository;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
 public class MyPageConverter {
-    private final SupplementsCategoryRepository supplementsCategoryRepository;
 
-    public MyPageResponseDTO.SupplementsResponseDto toSupplementsDto(Supplements supplements, CategoryKeyword category) {
-        List<String> categories = supplementsCategoryRepository.findCategoryNamesBySupplementId(supplements.getId());
-
-        if (category == null || category == CategoryKeyword.전체) {
-            return MyPageResponseDTO.SupplementsResponseDto.builder()
-                    .id(supplements.getId())
-                    .name(supplements.getName())
-                    .image(supplements.getImage())
-                    .categories(categories)
-                    .build();
-        } else {
-            boolean isCategoryMatched = categories.stream()
-                    .anyMatch(c -> c.equals(category.toString()));
-
-            if (isCategoryMatched) {
-                return MyPageResponseDTO.SupplementsResponseDto.builder()
-                        .id(supplements.getId())
-                        .name(supplements.getName())
-                        .image(supplements.getImage())
-                        .categories(categories)
-                        .build();
-            } else {
-                return null;
-            }
+    public MyPageResponseDTO.SupplementsResponseDto toSupplementsDto(Supplements supplements) {
+        if (supplements == null) {
+            return null;
         }
+        return MyPageResponseDTO.SupplementsResponseDto.from(supplements);
     }
+
+    public List<MyPageResponseDTO.SupplementsResponseDto> toSupplementsDtoList(List<Supplements> supplements) {
+        return supplements.stream()
+                .map(this::toSupplementsDto)
+                .collect(Collectors.toList());
+    }
+
 
     public MyPageResponseDTO.ScrapPostResponseDTO toScrapedPostDto(Post post) {
         return MyPageResponseDTO.ScrapPostResponseDTO.builder()

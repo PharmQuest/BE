@@ -17,6 +17,7 @@ import org.xml.sax.InputSource;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +27,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class DailyMedServiceImpl implements DailyMedService {
-    private static final String DAILY_MED_URL = "https://dailymed.nlm.nih.gov/dailymed/services/v2/spls.json?search=supplement?labeltype=human";
+    private static final String DAILY_MED_URL = "https://dailymed.nlm.nih.gov/dailymed/services/v2/spls.json?doctype=58476-3";
     private static final String DETAIL_URL = "https://dailymed.nlm.nih.gov/dailymed/services/v2/spls/{setId}.xml";
     private static final String IMAGE_URL = "https://dailymed.nlm.nih.gov/dailymed/services/v2/spls/{setId}/media.json";
 
@@ -35,22 +36,43 @@ public class DailyMedServiceImpl implements DailyMedService {
     @Override
     public List<DailyMedResponseDTO.ExtractedInfo> extractSupplementInfo() {
         RestTemplate restTemplate = new RestTemplate();
+        List<DailyMedResponseDTO.ExtractedInfo> allData = new ArrayList<>();
+        int page = 1;
+        int totalCollected = 0;
+        int limit = 100; // DailyMed API의 페이지당 기본 제한
 
         try {
-            ResponseEntity<DailyMedResponseDTO.SearchResponse> response =
-                    restTemplate.getForEntity(DAILY_MED_URL, DailyMedResponseDTO.SearchResponse.class);
+            while (totalCollected < 465) {
+                String paginatedUrl = DAILY_MED_URL + "&page=" + page + "&pagesize=" + limit;
+                ResponseEntity<DailyMedResponseDTO.SearchResponse> response =
+                        restTemplate.getForEntity(paginatedUrl, DailyMedResponseDTO.SearchResponse.class);
 
-            if (response.getBody() != null && response.getBody().getData() != null) {
-                return response.getBody().getData().stream()
-                        .limit(100)
+                if (response.getBody() == null || response.getBody().getData() == null || response.getBody().getData().isEmpty()) {
+                    break;
+                }
+
+                List<DailyMedResponseDTO.ExtractedInfo> pageData = response.getBody().getData().stream()
                         .map(item -> DailyMedResponseDTO.ExtractedInfo.builder()
                                 .setid(item.getSetid())
                                 .title(item.getTitle())
                                 .build())
                         .collect(Collectors.toList());
+
+                allData.addAll(pageData);
+                totalCollected = allData.size();
+                log.info("현재까지 수집된 데이터 수: {}, 현재 페이지: {}", totalCollected, page);
+
+                if (pageData.size() < limit) {
+                    break;
+                }
+
+                page++;
             }
 
-            return Collections.emptyList();
+            return allData.stream()
+                    .limit(465)
+                    .collect(Collectors.toList());
+
         } catch (RestClientException e) {
             log.error("Failed to fetch data from DailyMed API: {}", e.getMessage());
             throw new RuntimeException("Failed to fetch data from DailyMed API", e);
@@ -77,7 +99,7 @@ public class DailyMedServiceImpl implements DailyMedService {
             String fullTitle = processedTitle.replaceAll("\\(.*?\\)", "").trim() + " / " + translate(processedTitle.replaceAll("\\(.*?\\)", "").trim());
             String imageUrl = fetchImageUrl(setId);
             String dosage = translate(extractSectionText(document, "34068-7"));
-            String purpose = translate(extractSectionText(document, "34067-9"));
+            String purpose = translate(extractPurposeOrIndication(document)); // Changed this line
             String warning = translate(extractSectionText(document, "34071-1"));
 
             if (dosage == null || purpose == null || warning == null) {
@@ -97,6 +119,52 @@ public class DailyMedServiceImpl implements DailyMedService {
             log.error("Error processing XML for setId {}: {}", setId, e.getMessage());
             throw new RuntimeException("Failed to process XML data", e);
         }
+    }
+
+    private String extractPurposeOrIndication(Document document) {
+        try {
+            // 1. First try to get purpose (34067-9)
+            String purpose = extractSectionText(document, "34067-9");
+            if (purpose != null && !purpose.trim().isEmpty()) {
+                return purpose;
+            }
+
+            // 2. If purpose not found, look for indications
+            NodeList sections = document.getElementsByTagName("section");
+            for (int i = 0; i < sections.getLength(); i++) {
+                Element section = (Element) sections.item(i);
+
+                // Check section title
+                NodeList titleNodes = section.getElementsByTagName("title");
+                if (titleNodes.getLength() > 0) {
+                    String title = titleNodes.item(0).getTextContent().toLowerCase();
+                    if (title.contains("indication") && !title.contains("contraindication")) {
+                        NodeList textNodes = section.getElementsByTagName("text");
+                        if (textNodes.getLength() > 0) {
+                            return cleanText(textNodes.item(0).getTextContent());
+                        }
+                    }
+                }
+
+                // Check for "INDICATIONS AND USAGE" in content
+                NodeList contentNodes = section.getElementsByTagName("content");
+                for (int j = 0; j < contentNodes.getLength(); j++) {
+                    Node content = contentNodes.item(j);
+                    String contentText = content.getTextContent();
+                    if (contentText.toLowerCase().contains("indication") &&
+                            !contentText.toLowerCase().contains("contraindication")) {
+                        // Get the parent paragraph's full text
+                        Node paragraph = content.getParentNode();
+                        if (paragraph != null) {
+                            return cleanText(paragraph.getTextContent());
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Failed to extract purpose or indication: {}", e.getMessage());
+        }
+        return null;
     }
 
     private String extractSectionText(Document document, String code) {

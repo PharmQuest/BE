@@ -50,6 +50,7 @@ public class SupplementsScrapServiceImpl implements SupplementsScrapService{
         return SupplementsScrapResponseDTO.builder()
                 .supplementId(supplement.getId())
                 .scrapCount(supplement.getScrapCount())
+                .isScrapped(isScrapped)
                 .message(isScrapped ? "스크랩 되었습니다." : "스크랩이 취소되었습니다.")
                 .build();
     }

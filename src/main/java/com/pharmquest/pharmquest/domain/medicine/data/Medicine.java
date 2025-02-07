@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
+import com.pharmquest.pharmquest.domain.medicine.data.enums.MedicineCategory;
 @Entity
 @Getter
 @Setter
@@ -24,6 +24,9 @@ public class Medicine {
     private String dosageAndAdministration;
     private String splSetId;
     private String imgUrl;
-    private String category;
+    @Enumerated(EnumType.STRING)
+    private MedicineCategory category;
     private String country;
+    @Column(columnDefinition = "TEXT")
+    private String warnings;
 }

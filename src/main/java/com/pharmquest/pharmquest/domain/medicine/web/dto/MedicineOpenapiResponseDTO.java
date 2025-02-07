@@ -1,5 +1,6 @@
 package com.pharmquest.pharmquest.domain.medicine.web.dto;
 
+import com.pharmquest.pharmquest.domain.medicine.data.enums.MedicineCategory;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 @Data

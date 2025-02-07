@@ -133,7 +133,6 @@ public class SupplementsConverter {
                 .country(processCountryName(supplement.getCountry()))
                 .isScrapped(isSupplementScrappedByUser(supplement, userId))
                 .scrapCount(supplement.getScrapCount())
-                .isScrapped(isSupplementScrappedByUser(supplement, userId))
                 .productCategory(productCategory)
                 .dosage(dosageList)
                 .purpose(purposeList)

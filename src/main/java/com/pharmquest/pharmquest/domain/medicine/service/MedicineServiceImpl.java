@@ -152,6 +152,8 @@ public class MedicineServiceImpl implements MedicineService {
             Medicine medicine = medRepository.findBySplSetId(splSetId)
                     .orElseThrow(() -> new IllegalArgumentException("해당 SPL Set ID를 가진 약물이 없습니다: " + splSetId));
 
+            String category = MedicineCategoryMapper.toKoreanCategory(medicine.getCategory());
+
             // 엔티티를 DTO로 변환하여 반환
             return new MedicineDetailResponseDTO(
                     medicine.getBrandName(),
@@ -163,7 +165,7 @@ public class MedicineServiceImpl implements MedicineService {
                     medicine.getDosageAndAdministration(),
                     medicine.getSplSetId(),
                     medicine.getImgUrl(),
-                    medicine.getCategory(),
+                    category,
                     medicine.getCountry(),
                     medicine.getWarnings()
             );

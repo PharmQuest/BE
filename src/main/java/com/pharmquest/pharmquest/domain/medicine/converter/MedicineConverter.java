@@ -27,12 +27,14 @@ public class MedicineConverter {
     public MedicineOpenapiResponseDTO convertWithTranslation(JsonNode result) {
         String brandName = translate(getFirstValue(result, "openfda.brand_name"));
         String genericName = translate(getFirstValue(result, "openfda.generic_name"));
-        MedicineCategory category = MedicineCategoryMapper.getCategory(
+        MedicineCategory categoryEnum = MedicineCategoryMapper.getCategory(
                 getFirstValue(result, "purpose"),
                 getFirstValue(result, "active_ingredient"),
                 "",
                 getFirstValue(result, "openfda.route")
         );
+        String category = MedicineCategoryMapper.toKoreanCategory(categoryEnum);
+
 
         String splSetId = getFirstValue(result, "openfda.spl_set_id");
         String imgUrl = fetchImageUrl(splSetId);
@@ -51,12 +53,13 @@ public class MedicineConverter {
     public MedicineDetailResponseDTO convertToDetail(JsonNode result) {
         String brandName = translate(getFirstValue(result, "openfda.brand_name"));
         String genericName = translate(getFirstValue(result, "openfda.generic_name"));
-        MedicineCategory category = MedicineCategoryMapper.getCategory(
+        MedicineCategory categoryEnum = MedicineCategoryMapper.getCategory(
                 getFirstValue(result, "purpose"),
                 getFirstValue(result, "active_ingredient"),
                 "",
                 getFirstValue(result, "openfda.route")
         );
+        String category = MedicineCategoryMapper.toKoreanCategory(categoryEnum);
         String substanceName = translate(getFirstValue(result, "openfda.substance_name"));
         String activeIngredient = translate(getFirstValue(result, "active_ingredient"));
         String purpose = translate(getFirstValue(result, "purpose"));
@@ -92,10 +95,11 @@ public class MedicineConverter {
         String activeIngredient = getFirstValue(result, "active_ingredient");
         String route = getFirstValue(result, "openfda.route");
         String purpose = getFirstValue(result, "purpose");
-        MedicineCategory category = MedicineCategoryMapper.getCategory(purpose, activeIngredient, "", route);
+        MedicineCategory categoryEnum = MedicineCategoryMapper.getCategory(purpose, activeIngredient, "", route);
         String splSetId = getFirstValue(result, "openfda.spl_set_id");
         String imgUrl = fetchImageUrl(splSetId);
         String country = "미국";
+        String category = MedicineCategoryMapper.toKoreanCategory(categoryEnum);
         return new MedicineOpenapiResponseDTO (
                 brandName,
                 genericName,
@@ -141,14 +145,14 @@ public class MedicineConverter {
         if (medicine == null) {
             return null;
         }
-
+        String category = MedicineCategoryMapper.toKoreanCategory(medicine.getCategory());
         return new MedicineResponseDTO(
                 medicine.getId(),
                 medicine.getBrandName(),
                 medicine.getGenericName(),
                 medicine.getSplSetId(),
                 medicine.getImgUrl(),
-                medicine.getCategory(),
+                category,
                 medicine.getCountry()
         );
     }

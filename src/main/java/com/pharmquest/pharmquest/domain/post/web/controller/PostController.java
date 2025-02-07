@@ -279,7 +279,7 @@ public class PostController {
 
     @GetMapping("/best-posts/random")
     @Operation(summary = "베스트 인기글 랜덤 조회API")
-    public ApiResponse<PostResponseDTO.PostPreViewListDTO> getRandomBestPosts() {
+    public ApiResponse<PostResponseDTO.BestPostListDTO> getRandomBestPosts() {
 
         List<Post> bestPostRandList = bestPostService.getRandomBestPosts(3);
 

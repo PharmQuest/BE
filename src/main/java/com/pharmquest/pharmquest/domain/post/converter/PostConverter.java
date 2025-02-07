@@ -96,5 +96,17 @@ public class PostConverter {
                 .build();
     }
 
+
+    public static PostResponseDTO.PostPreViewListDTO postRandomDTO(List<Post> postList) {
+        List<PostResponseDTO.PostPreViewDTO> postPreViewDTOList = postList.stream()
+                .map(PostConverter::postPreViewDTO)
+                .collect(Collectors.toList());
+
+        return PostResponseDTO.PostPreViewListDTO.builder()
+                .listSize(postPreViewDTOList.size())
+                .postList(postPreViewDTOList)
+                .build();
+    }
+
 }
 

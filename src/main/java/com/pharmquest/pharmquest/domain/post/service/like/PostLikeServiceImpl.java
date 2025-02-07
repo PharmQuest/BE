@@ -46,7 +46,7 @@ public class PostLikeServiceImpl implements PostLikeService {
 
         // 좋아요 개수 확인 및 BestPost 등록
         int likeCount = postLikeRepository.countByPostId(postId);
-        if (likeCount >= 10 && !bestPostRepository.existsByPostId(postId)) {
+        if (likeCount >=2 && !bestPostRepository.existsByPostId(postId)) {
             BestPost newBestPost = new BestPost();
             newBestPost.setPost(post);
             newBestPost.setBestPostAt(LocalDateTime.now());
@@ -75,7 +75,11 @@ public class PostLikeServiceImpl implements PostLikeService {
 
         int likeCount = postLikeRepository.countByPostId(postId);
 
-        if (likeCount < 10 && bestPostRepository.existsByPostId(postId)) {
+        if (likeCount < 2 && bestPostRepository.existsByPostId(postId)) {
+
+            BestPost bestPost
+                    = bestPostRepository.findByPostId(postId);
+            bestPostRepository.delete(bestPost);
             post.setBestPost(false);
         }
 

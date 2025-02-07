@@ -2,6 +2,7 @@ package com.pharmquest.pharmquest.domain.post.service.post;
 
 import com.pharmquest.pharmquest.domain.post.converter.PostCommentConverter;
 import com.pharmquest.pharmquest.domain.post.converter.PostConverter;
+import com.pharmquest.pharmquest.domain.post.data.BestPost;
 import com.pharmquest.pharmquest.domain.post.data.Post;
 import com.pharmquest.pharmquest.domain.post.data.enums.Country;
 import com.pharmquest.pharmquest.domain.post.data.enums.PostCategory;
@@ -30,6 +31,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -172,6 +174,13 @@ public class PostCommandServiceImpl implements PostCommandService {
             if (!userId.equals(post.getUser().getId())) {
                 throw new PostHandler(ErrorStatus.NOT_POST_AUTHOR);
             }
+            //베스트 게시글이라면 베스트 게시글부터 삭제
+            BestPost bestPost = bestPostRepository.findByPostId(postId);
+
+            if (bestPost !=null){
+                bestPostRepository.delete(bestPost);
+            }
+
             // 게시글 삭제
             postRepository.deleteById(postId);
         }

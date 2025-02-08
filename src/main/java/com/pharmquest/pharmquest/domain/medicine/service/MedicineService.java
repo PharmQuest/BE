@@ -20,6 +20,6 @@ public interface MedicineService {
 
     MedicineDetailResponseDTO getMedicineBySplSetIdFromDB(String splSetId);
     MedicineListPageResponseDTO getMedicinesFromDBByCategory(MedicineCategory category, int page, int size);
-    MedicineListResponseDTO searchMedicinesByCategoryAndKeyword(MedicineCategory category, String keyword, int page, int size);
+    MedicineListPageResponseDTO searchMedicinesByCategoryAndKeyword(MedicineCategory category, String keyword, int page, int size);
 
 }

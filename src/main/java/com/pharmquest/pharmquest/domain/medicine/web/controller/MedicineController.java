@@ -145,13 +145,13 @@ public class MedicineController {
 
     @Operation(summary = "약물 검색 API", description = "카테고리 및 키워드를 이용해 DB에서 약물을 검색합니다.")
     @GetMapping("/search")
-    public ResponseEntity<ApiResponse<MedicineListResponseDTO>> searchMedicinesByCategoryAndKeyword(
+    public ResponseEntity<ApiResponse<MedicineListPageResponseDTO>> searchMedicinesByCategoryAndKeyword(
             @RequestParam(defaultValue = "ALL") MedicineCategory category,
             @RequestParam(defaultValue = "") String keyword,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size) {
         try {
-            MedicineListResponseDTO medicines = medicineService.searchMedicinesByCategoryAndKeyword(category, keyword, page - 1, size);
+            MedicineListPageResponseDTO medicines = medicineService.searchMedicinesByCategoryAndKeyword(category, keyword, page - 1, size);
             return ApiResponse.onSuccess(SuccessStatus.MEDICINE_FETCH_SUCCESS, medicines);
         } catch (Exception e) {
             return ApiResponse.onFailure(ErrorStatus.MEDICINE_NOT_FOUND);

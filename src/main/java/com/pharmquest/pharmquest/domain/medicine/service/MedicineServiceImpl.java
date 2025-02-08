@@ -337,12 +337,12 @@ public class MedicineServiceImpl implements MedicineService {
 
     @Override
     @Transactional(readOnly = true)
-    public MedicineListResponseDTO searchMedicinesByCategoryAndKeyword(MedicineCategory category, String keyword, int page, int size) {
+    public MedicineListPageResponseDTO searchMedicinesByCategoryAndKeyword(MedicineCategory category, String keyword, int page, int size) {
         try {
-            Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending());
+            Pageable pageable = PageRequest.of(page , size, Sort.by("id").ascending());
             Page<Medicine> medicinesPage;
 
-            if (category == MedicineCategory.ALL) {  // ✅ Enum 비교 방식 변경
+            if (category == MedicineCategory.ALL) {
                 if (keyword != null && !keyword.isEmpty()) {
                     medicinesPage = medRepository.findByKeyword(keyword, pageable);
                 } else {
@@ -352,21 +352,25 @@ public class MedicineServiceImpl implements MedicineService {
                 if (keyword != null && !keyword.isEmpty()) {
                     medicinesPage = medRepository.findByCategoryAndKeyword(category, keyword, pageable);
                 } else {
-                    medicinesPage = medRepository.findByCategory(category, pageable); // ✅ IgnoreCase 제거
+                    medicinesPage = medRepository.findByCategory(category, pageable);
                 }
             }
 
-            long totalCount = medicinesPage.getTotalElements(); // 전체 개수 가져오기
+            long amountCount = medicinesPage.getTotalElements(); // 전체 개수
+            int amountPage = medicinesPage.getTotalPages();      // 전체 페이지 수
+            int currentCount = medicinesPage.getNumberOfElements(); // 현재 페이지의 개수
+            int currentPage = medicinesPage.getNumber() + 1;         // ✅ 1부터 시작하도록 변경
 
             List<MedicineResponseDTO> medicines = medicinesPage.getContent().stream()
                     .map(medicineConverter::convertFromEntity)
                     .collect(Collectors.toList());
 
-            return new MedicineListResponseDTO(totalCount, medicines);
+            return new MedicineListPageResponseDTO(amountCount, amountPage, currentCount, currentPage, medicines);
         } catch (Exception e) {
             throw new RuntimeException("DB에서 약물 데이터를 검색하는 중 오류 발생", e);
         }
     }
+
 
 
 

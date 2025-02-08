@@ -2,14 +2,17 @@ package com.pharmquest.pharmquest.domain.supplements.repository;
 
 import com.pharmquest.pharmquest.domain.post.data.enums.Country;
 import com.pharmquest.pharmquest.domain.supplements.data.Supplements;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface SupplementsRepository extends JpaRepository<Supplements, Long> {
@@ -46,6 +49,10 @@ public interface SupplementsRepository extends JpaRepository<Supplements, Long> 
 
     Page<Supplements> findByNameContainingAndCountry(String name, Country country, Pageable pageable);
     Page<Supplements> findByNameContaining(String name, Pageable pageable);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT s FROM Supplements s where s.id = :id")
+    Optional<Supplements> findByIdWithPessimisticLock(@Param("id") Long id);
 
     boolean existsByName(String name);
 }

@@ -15,6 +15,12 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 
 @Entity
+@Table(uniqueConstraints = {
+        @UniqueConstraint(
+                name = "uk_user_supplement",
+                columnNames = {"user_id", "sup_id"}
+        )
+})
 public class SupplementsScrap extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,9 +33,6 @@ public class SupplementsScrap extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "sup_id", nullable = false)
     private Supplements supplements;
-
-    @Column(nullable = false)
-    private LocalDateTime createdAt;
 
     @Column(nullable = false)
     private Boolean isSuccess;

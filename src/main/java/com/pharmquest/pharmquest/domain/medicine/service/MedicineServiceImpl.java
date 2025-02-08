@@ -8,10 +8,7 @@ import com.pharmquest.pharmquest.domain.medicine.data.MedicineCategoryMapper;
 import com.pharmquest.pharmquest.domain.medicine.data.enums.MedicineCategory;
 import com.pharmquest.pharmquest.domain.medicine.repository.MedRepository;
 import com.pharmquest.pharmquest.domain.medicine.repository.MedicineRepository;
-import com.pharmquest.pharmquest.domain.medicine.web.dto.MedicineDetailResponseDTO;
-import com.pharmquest.pharmquest.domain.medicine.web.dto.MedicineListResponseDTO;
-import com.pharmquest.pharmquest.domain.medicine.web.dto.MedicineOpenapiResponseDTO;
-import com.pharmquest.pharmquest.domain.medicine.web.dto.MedicineResponseDTO;
+import com.pharmquest.pharmquest.domain.medicine.web.dto.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -135,26 +132,37 @@ public class MedicineServiceImpl implements MedicineService {
     }
 
     @Override
-    public List<MedicineResponseDTO> getMedicinesFromDBByCategory(MedicineCategory category, int page, int size) {
+    public MedicineListPageResponseDTO getMedicinesFromDBByCategory(MedicineCategory category, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Medicine> medicinesPage = (category == MedicineCategory.ALL)
                 ? medRepository.findAll(pageable)
                 : medRepository.findByCategory(category, pageable);
 
-        return medicinesPage.getContent().stream()
+        long amountCount = medicinesPage.getTotalElements(); // 전체 개수
+        int amountPage = medicinesPage.getTotalPages();      // 전체 페이지 수
+        int currentCount = medicinesPage.getNumberOfElements(); // 현재 페이지의 개수
+        int currentPage = medicinesPage.getNumber()+1;         // 현재 페이지 번호
+
+        List<MedicineResponseDTO> medicines = medicinesPage.getContent().stream()
                 .map(medicineConverter::convertFromEntity)
                 .collect(Collectors.toList());
+
+        return new MedicineListPageResponseDTO(amountCount, amountPage, currentCount, currentPage, medicines);
     }
+
     @Override
-    public MedicineDetailResponseDTO getMedicineBySplSetIdFromDB(String splSetId) {
+    public MedicineDetailResponseDTO getMedicineByIdFromDB(Long medicineTableId) {
         try {
-            // DB에서 SPL Set ID를 기준으로 약물 조회
-            Medicine medicine = medRepository.findBySplSetId(splSetId)
-                    .orElseThrow(() -> new IllegalArgumentException("해당 SPL Set ID를 가진 약물이 없습니다: " + splSetId));
+            // DB에서 medicineTableId를 기준으로 약물 조회
+            Medicine medicine = medRepository.findById(medicineTableId)
+                    .orElseThrow(() -> new IllegalArgumentException("해당 ID를 가진 약물이 없습니다: " + medicineTableId));
+
+            // 저장된 값 확인용 로그 출력
+            System.out.println("조회된 약물의 ID: " + medicine.getId());
+            System.out.println("조회된 약물의 카테고리: " + medicine.getCategory());
 
             String category = MedicineCategoryMapper.toKoreanCategory(medicine.getCategory());
 
-            // 엔티티를 DTO로 변환하여 반환
             return new MedicineDetailResponseDTO(
                     medicine.getBrandName(),
                     medicine.getGenericName(),
@@ -220,7 +228,7 @@ public class MedicineServiceImpl implements MedicineService {
                     for (JsonNode result : results) {
                         String splSetId = result.at("/openfda/spl_set_id").asText("Unknown");
 
-                        // ✅ 이미 존재하는 데이터는 건너뛰기
+                        //  이미 존재하는 데이터는 건너뛰기
                         if (medRepository.existsBySplSetId(splSetId)) {
                             continue;
                         }
@@ -238,7 +246,7 @@ public class MedicineServiceImpl implements MedicineService {
                             medicine.setDosageAndAdministration(dto.getDosageAndAdministration());
                             medicine.setSplSetId(dto.getSplSetId());
                             medicine.setImgUrl(dto.getImgUrl());
-                            medicine.setCategory(category); // ✅ Enum 그대로 적용
+                            medicine.setCategory(category); //  Enum 그대로 적용
                             medicine.setCountry(dto.getCountry());
                             medicine.setWarnings(dto.getWarnings());
 
@@ -252,7 +260,7 @@ public class MedicineServiceImpl implements MedicineService {
                 retryCount++;
             }
 
-            // ✅ 최소 개수 미달 시 예외 처리
+            //  최소 개수 미달 시 예외 처리
             if (savedMedicines.size() < limit) {
                 throw new RuntimeException("충분한 데이터를 저장하지 못했습니다. (현재 개수: " + savedMedicines.size() + ")");
             }
@@ -303,7 +311,7 @@ public class MedicineServiceImpl implements MedicineService {
                             medicine.setDosageAndAdministration(dto.getDosageAndAdministration());
                             medicine.setSplSetId(dto.getSplSetId());
                             medicine.setImgUrl(dto.getImgUrl());
-                            medicine.setCategory(MedicineCategory.OTHER); // ✅ Enum 적용
+                            medicine.setCategory(MedicineCategory.OTHER); //  Enum 적용
                             medicine.setCountry(dto.getCountry());
                             medicine.setWarnings(dto.getWarnings());
 
@@ -332,12 +340,12 @@ public class MedicineServiceImpl implements MedicineService {
 
     @Override
     @Transactional(readOnly = true)
-    public MedicineListResponseDTO searchMedicinesByCategoryAndKeyword(MedicineCategory category, String keyword, int page, int size) {
+    public MedicineListPageResponseDTO searchMedicinesByCategoryAndKeyword(MedicineCategory category, String keyword, int page, int size) {
         try {
-            Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending());
+            Pageable pageable = PageRequest.of(page , size, Sort.by("id").ascending());
             Page<Medicine> medicinesPage;
 
-            if (category == MedicineCategory.ALL) {  // ✅ Enum 비교 방식 변경
+            if (category == MedicineCategory.ALL) {
                 if (keyword != null && !keyword.isEmpty()) {
                     medicinesPage = medRepository.findByKeyword(keyword, pageable);
                 } else {
@@ -347,21 +355,25 @@ public class MedicineServiceImpl implements MedicineService {
                 if (keyword != null && !keyword.isEmpty()) {
                     medicinesPage = medRepository.findByCategoryAndKeyword(category, keyword, pageable);
                 } else {
-                    medicinesPage = medRepository.findByCategory(category, pageable); // ✅ IgnoreCase 제거
+                    medicinesPage = medRepository.findByCategory(category, pageable);
                 }
             }
 
-            long totalCount = medicinesPage.getTotalElements(); // 전체 개수 가져오기
+            long amountCount = medicinesPage.getTotalElements(); // 전체 개수
+            int amountPage = medicinesPage.getTotalPages();      // 전체 페이지 수
+            int currentCount = medicinesPage.getNumberOfElements(); // 현재 페이지의 개수
+            int currentPage = medicinesPage.getNumber() + 1;         //  1부터 시작하도록 변경
 
             List<MedicineResponseDTO> medicines = medicinesPage.getContent().stream()
                     .map(medicineConverter::convertFromEntity)
                     .collect(Collectors.toList());
 
-            return new MedicineListResponseDTO(totalCount, medicines);
+            return new MedicineListPageResponseDTO(amountCount, amountPage, currentCount, currentPage, medicines);
         } catch (Exception e) {
             throw new RuntimeException("DB에서 약물 데이터를 검색하는 중 오류 발생", e);
         }
     }
+
 
 
 

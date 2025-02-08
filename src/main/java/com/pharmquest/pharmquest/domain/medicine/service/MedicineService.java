@@ -3,10 +3,7 @@ package com.pharmquest.pharmquest.domain.medicine.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.pharmquest.pharmquest.domain.medicine.data.Medicine;
 import com.pharmquest.pharmquest.domain.medicine.data.enums.MedicineCategory;
-import com.pharmquest.pharmquest.domain.medicine.web.dto.MedicineDetailResponseDTO;
-import com.pharmquest.pharmquest.domain.medicine.web.dto.MedicineListResponseDTO;
-import com.pharmquest.pharmquest.domain.medicine.web.dto.MedicineOpenapiResponseDTO;
-import com.pharmquest.pharmquest.domain.medicine.web.dto.MedicineResponseDTO;
+import com.pharmquest.pharmquest.domain.medicine.web.dto.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -21,8 +18,8 @@ public interface MedicineService {
     List<Medicine> saveMedicinesByCategory(MedicineCategory category, int limit);
     List<Medicine> saveOtherMedicines(String query, int limit);
 
-    MedicineDetailResponseDTO getMedicineBySplSetIdFromDB(String splSetId);
-    List<MedicineResponseDTO> getMedicinesFromDBByCategory(MedicineCategory category, int page, int size);
-    MedicineListResponseDTO searchMedicinesByCategoryAndKeyword(MedicineCategory category, String keyword, int page, int size);
+    MedicineDetailResponseDTO getMedicineByIdFromDB(Long medicineTableId) ;
+    MedicineListPageResponseDTO getMedicinesFromDBByCategory(MedicineCategory category, int page, int size);
+    MedicineListPageResponseDTO searchMedicinesByCategoryAndKeyword(MedicineCategory category, String keyword, int page, int size);
 
 }

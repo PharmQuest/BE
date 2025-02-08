@@ -5,10 +5,7 @@ import com.pharmquest.pharmquest.domain.medicine.data.Medicine;
 import com.pharmquest.pharmquest.domain.medicine.data.enums.MedicineCategory;
 import com.pharmquest.pharmquest.domain.medicine.repository.MedRepository;
 import com.pharmquest.pharmquest.domain.medicine.service.MedicineService;
-import com.pharmquest.pharmquest.domain.medicine.web.dto.MedicineDetailResponseDTO;
-import com.pharmquest.pharmquest.domain.medicine.web.dto.MedicineListResponseDTO;
-import com.pharmquest.pharmquest.domain.medicine.web.dto.MedicineOpenapiResponseDTO;
-import com.pharmquest.pharmquest.domain.medicine.web.dto.MedicineResponseDTO;
+import com.pharmquest.pharmquest.domain.medicine.web.dto.*;
 import com.pharmquest.pharmquest.global.apiPayload.ApiResponse;
 import com.pharmquest.pharmquest.global.apiPayload.code.status.ErrorStatus;
 import com.pharmquest.pharmquest.global.apiPayload.code.status.SuccessStatus;
@@ -51,13 +48,13 @@ public class MedicineController {
     }
     @Operation(summary = "카테고리별 약물 검색", description = "DB에서 특정 카테고리별로 약물을 검색합니다.")
     @GetMapping("/lists")
-    public ResponseEntity<ApiResponse<List<MedicineResponseDTO>>> searchMedicinesByCategory(
+    public ResponseEntity<ApiResponse<MedicineListPageResponseDTO>>searchMedicinesByCategory(
             @Parameter(description = "카테고리 선택", required = true)
             @RequestParam(defaultValue = "ALL") MedicineCategory category,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size) {
         try {
-            List<MedicineResponseDTO> medicines = medicineService.getMedicinesFromDBByCategory(category, page - 1, size);
+            MedicineListPageResponseDTO medicines = medicineService.getMedicinesFromDBByCategory(category, page - 1, size);
             return ApiResponse.onSuccess(SuccessStatus.MEDICINE_FETCH_SUCCESS, medicines);
         } catch (Exception e) {
             return ApiResponse.onFailure(ErrorStatus.MEDICINE_NOT_FOUND);
@@ -90,17 +87,16 @@ public class MedicineController {
         return medicineService.getMedicineBySplSetId(splSetId);
     }
 
-    @Operation(summary = "SPL Set ID를 이용한 약물 상세 검색", description = "DB에서 SPL Set ID를 기반으로 약물 정보를 조회합니다.")
+    @Operation(summary = "약물 ID를 이용한 상세 검색", description = "DB에서 약물 ID를 기반으로 약물 정보를 조회합니다.")
     @GetMapping("/detail")
-    public ResponseEntity<ApiResponse<MedicineDetailResponseDTO>> searchBySplSetIdFromDB(@RequestParam String splSetId) {
+    public ResponseEntity<ApiResponse<MedicineDetailResponseDTO>> searchByIdFromDB(@RequestParam Long medicineTableId) {
         try {
-            MedicineDetailResponseDTO medicine = medicineService.getMedicineBySplSetIdFromDB(splSetId);
+            MedicineDetailResponseDTO medicine = medicineService.getMedicineByIdFromDB(medicineTableId);
             return ApiResponse.onSuccess(SuccessStatus.MEDICINE_FETCH_SUCCESS, medicine);
         } catch (Exception e) {
             return ApiResponse.onFailure(ErrorStatus.MEDICINE_NOT_FOUND);
         }
     }
-
 
     @Operation(summary = "FDA API 데이터를 DB에 저장", description = "백엔드 db 저장용 프론트 사용 x FDA API에서 특정 카테고리의 약물 정보를 받아와 DB에 저장합니다.")
     @PostMapping("/save")
@@ -148,13 +144,13 @@ public class MedicineController {
 
     @Operation(summary = "약물 검색 API", description = "카테고리 및 키워드를 이용해 DB에서 약물을 검색합니다.")
     @GetMapping("/search")
-    public ResponseEntity<ApiResponse<MedicineListResponseDTO>> searchMedicinesByCategoryAndKeyword(
+    public ResponseEntity<ApiResponse<MedicineListPageResponseDTO>> searchMedicinesByCategoryAndKeyword(
             @RequestParam(defaultValue = "ALL") MedicineCategory category,
             @RequestParam(defaultValue = "") String keyword,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size) {
         try {
-            MedicineListResponseDTO medicines = medicineService.searchMedicinesByCategoryAndKeyword(category, keyword, page - 1, size);
+            MedicineListPageResponseDTO medicines = medicineService.searchMedicinesByCategoryAndKeyword(category, keyword, page - 1, size);
             return ApiResponse.onSuccess(SuccessStatus.MEDICINE_FETCH_SUCCESS, medicines);
         } catch (Exception e) {
             return ApiResponse.onFailure(ErrorStatus.MEDICINE_NOT_FOUND);

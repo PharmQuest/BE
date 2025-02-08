@@ -89,9 +89,9 @@ public class MedicineController {
 
     @Operation(summary = "약물 ID를 이용한 상세 검색", description = "DB에서 약물 ID를 기반으로 약물 정보를 조회합니다.")
     @GetMapping("/detail")
-    public ResponseEntity<ApiResponse<MedicineDetailResponseDTO>> searchByIdFromDB(@RequestParam Long medicineTableId) {
+    public ResponseEntity<ApiResponse<MedicineDetailResponseDTO>> searchByIdFromDB(@RequestParam Long medicineId) {
         try {
-            MedicineDetailResponseDTO medicine = medicineService.getMedicineByIdFromDB(medicineTableId);
+            MedicineDetailResponseDTO medicine = medicineService.getMedicineByIdFromDB(medicineId);
             return ApiResponse.onSuccess(SuccessStatus.MEDICINE_FETCH_SUCCESS, medicine);
         } catch (Exception e) {
             return ApiResponse.onFailure(ErrorStatus.MEDICINE_NOT_FOUND);

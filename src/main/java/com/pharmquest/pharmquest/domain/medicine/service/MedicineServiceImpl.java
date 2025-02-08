@@ -151,11 +151,11 @@ public class MedicineServiceImpl implements MedicineService {
     }
 
     @Override
-    public MedicineDetailResponseDTO getMedicineByIdFromDB(Long medicineTableId) {
+    public MedicineDetailResponseDTO getMedicineByIdFromDB(Long medicineId) {
         try {
             // DB에서 medicineTableId를 기준으로 약물 조회
-            Medicine medicine = medRepository.findById(medicineTableId)
-                    .orElseThrow(() -> new IllegalArgumentException("해당 ID를 가진 약물이 없습니다: " + medicineTableId));
+            Medicine medicine = medRepository.findById(medicineId)
+                    .orElseThrow(() -> new IllegalArgumentException("해당 ID를 가진 약물이 없습니다: " + medicineId));
 
             // 저장된 값 확인용 로그 출력
             System.out.println("조회된 약물의 ID: " + medicine.getId());

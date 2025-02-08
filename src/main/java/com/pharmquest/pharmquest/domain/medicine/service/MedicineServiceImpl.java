@@ -8,10 +8,7 @@ import com.pharmquest.pharmquest.domain.medicine.data.MedicineCategoryMapper;
 import com.pharmquest.pharmquest.domain.medicine.data.enums.MedicineCategory;
 import com.pharmquest.pharmquest.domain.medicine.repository.MedRepository;
 import com.pharmquest.pharmquest.domain.medicine.repository.MedicineRepository;
-import com.pharmquest.pharmquest.domain.medicine.web.dto.MedicineDetailResponseDTO;
-import com.pharmquest.pharmquest.domain.medicine.web.dto.MedicineListResponseDTO;
-import com.pharmquest.pharmquest.domain.medicine.web.dto.MedicineOpenapiResponseDTO;
-import com.pharmquest.pharmquest.domain.medicine.web.dto.MedicineResponseDTO;
+import com.pharmquest.pharmquest.domain.medicine.web.dto.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -135,16 +132,24 @@ public class MedicineServiceImpl implements MedicineService {
     }
 
     @Override
-    public List<MedicineResponseDTO> getMedicinesFromDBByCategory(MedicineCategory category, int page, int size) {
+    public MedicineListPageResponseDTO getMedicinesFromDBByCategory(MedicineCategory category, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Medicine> medicinesPage = (category == MedicineCategory.ALL)
                 ? medRepository.findAll(pageable)
                 : medRepository.findByCategory(category, pageable);
 
-        return medicinesPage.getContent().stream()
+        long amountCount = medicinesPage.getTotalElements(); // 전체 개수
+        int amountPage = medicinesPage.getTotalPages();      // 전체 페이지 수
+        int currentCount = medicinesPage.getNumberOfElements(); // 현재 페이지의 개수
+        int currentPage = medicinesPage.getNumber()+1;         // 현재 페이지 번호
+
+        List<MedicineResponseDTO> medicines = medicinesPage.getContent().stream()
                 .map(medicineConverter::convertFromEntity)
                 .collect(Collectors.toList());
+
+        return new MedicineListPageResponseDTO(amountCount, amountPage, currentCount, currentPage, medicines);
     }
+
     @Override
     public MedicineDetailResponseDTO getMedicineBySplSetIdFromDB(String splSetId) {
         try {

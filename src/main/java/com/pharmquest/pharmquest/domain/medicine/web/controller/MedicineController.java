@@ -5,10 +5,7 @@ import com.pharmquest.pharmquest.domain.medicine.data.Medicine;
 import com.pharmquest.pharmquest.domain.medicine.data.enums.MedicineCategory;
 import com.pharmquest.pharmquest.domain.medicine.repository.MedRepository;
 import com.pharmquest.pharmquest.domain.medicine.service.MedicineService;
-import com.pharmquest.pharmquest.domain.medicine.web.dto.MedicineDetailResponseDTO;
-import com.pharmquest.pharmquest.domain.medicine.web.dto.MedicineListResponseDTO;
-import com.pharmquest.pharmquest.domain.medicine.web.dto.MedicineOpenapiResponseDTO;
-import com.pharmquest.pharmquest.domain.medicine.web.dto.MedicineResponseDTO;
+import com.pharmquest.pharmquest.domain.medicine.web.dto.*;
 import com.pharmquest.pharmquest.global.apiPayload.ApiResponse;
 import com.pharmquest.pharmquest.global.apiPayload.code.status.ErrorStatus;
 import com.pharmquest.pharmquest.global.apiPayload.code.status.SuccessStatus;
@@ -51,13 +48,13 @@ public class MedicineController {
     }
     @Operation(summary = "카테고리별 약물 검색", description = "DB에서 특정 카테고리별로 약물을 검색합니다.")
     @GetMapping("/lists")
-    public ResponseEntity<ApiResponse<List<MedicineResponseDTO>>> searchMedicinesByCategory(
+    public ResponseEntity<ApiResponse<MedicineListPageResponseDTO>>searchMedicinesByCategory(
             @Parameter(description = "카테고리 선택", required = true)
             @RequestParam(defaultValue = "ALL") MedicineCategory category,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size) {
         try {
-            List<MedicineResponseDTO> medicines = medicineService.getMedicinesFromDBByCategory(category, page - 1, size);
+            MedicineListPageResponseDTO medicines = medicineService.getMedicinesFromDBByCategory(category, page - 1, size);
             return ApiResponse.onSuccess(SuccessStatus.MEDICINE_FETCH_SUCCESS, medicines);
         } catch (Exception e) {
             return ApiResponse.onFailure(ErrorStatus.MEDICINE_NOT_FOUND);

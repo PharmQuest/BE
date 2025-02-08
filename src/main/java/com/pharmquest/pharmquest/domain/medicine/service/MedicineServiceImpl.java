@@ -151,15 +151,18 @@ public class MedicineServiceImpl implements MedicineService {
     }
 
     @Override
-    public MedicineDetailResponseDTO getMedicineBySplSetIdFromDB(String splSetId) {
+    public MedicineDetailResponseDTO getMedicineByIdFromDB(Long medicineTableId) {
         try {
-            // DB에서 SPL Set ID를 기준으로 약물 조회
-            Medicine medicine = medRepository.findBySplSetId(splSetId)
-                    .orElseThrow(() -> new IllegalArgumentException("해당 SPL Set ID를 가진 약물이 없습니다: " + splSetId));
+            // DB에서 medicineTableId를 기준으로 약물 조회
+            Medicine medicine = medRepository.findById(medicineTableId)
+                    .orElseThrow(() -> new IllegalArgumentException("해당 ID를 가진 약물이 없습니다: " + medicineTableId));
+
+            // 저장된 값 확인용 로그 출력
+            System.out.println("조회된 약물의 ID: " + medicine.getId());
+            System.out.println("조회된 약물의 카테고리: " + medicine.getCategory());
 
             String category = MedicineCategoryMapper.toKoreanCategory(medicine.getCategory());
 
-            // 엔티티를 DTO로 변환하여 반환
             return new MedicineDetailResponseDTO(
                     medicine.getBrandName(),
                     medicine.getGenericName(),
@@ -225,7 +228,7 @@ public class MedicineServiceImpl implements MedicineService {
                     for (JsonNode result : results) {
                         String splSetId = result.at("/openfda/spl_set_id").asText("Unknown");
 
-                        // ✅ 이미 존재하는 데이터는 건너뛰기
+                        //  이미 존재하는 데이터는 건너뛰기
                         if (medRepository.existsBySplSetId(splSetId)) {
                             continue;
                         }
@@ -243,7 +246,7 @@ public class MedicineServiceImpl implements MedicineService {
                             medicine.setDosageAndAdministration(dto.getDosageAndAdministration());
                             medicine.setSplSetId(dto.getSplSetId());
                             medicine.setImgUrl(dto.getImgUrl());
-                            medicine.setCategory(category); // ✅ Enum 그대로 적용
+                            medicine.setCategory(category); //  Enum 그대로 적용
                             medicine.setCountry(dto.getCountry());
                             medicine.setWarnings(dto.getWarnings());
 
@@ -257,7 +260,7 @@ public class MedicineServiceImpl implements MedicineService {
                 retryCount++;
             }
 
-            // ✅ 최소 개수 미달 시 예외 처리
+            //  최소 개수 미달 시 예외 처리
             if (savedMedicines.size() < limit) {
                 throw new RuntimeException("충분한 데이터를 저장하지 못했습니다. (현재 개수: " + savedMedicines.size() + ")");
             }
@@ -308,7 +311,7 @@ public class MedicineServiceImpl implements MedicineService {
                             medicine.setDosageAndAdministration(dto.getDosageAndAdministration());
                             medicine.setSplSetId(dto.getSplSetId());
                             medicine.setImgUrl(dto.getImgUrl());
-                            medicine.setCategory(MedicineCategory.OTHER); // ✅ Enum 적용
+                            medicine.setCategory(MedicineCategory.OTHER); //  Enum 적용
                             medicine.setCountry(dto.getCountry());
                             medicine.setWarnings(dto.getWarnings());
 
@@ -359,7 +362,7 @@ public class MedicineServiceImpl implements MedicineService {
             long amountCount = medicinesPage.getTotalElements(); // 전체 개수
             int amountPage = medicinesPage.getTotalPages();      // 전체 페이지 수
             int currentCount = medicinesPage.getNumberOfElements(); // 현재 페이지의 개수
-            int currentPage = medicinesPage.getNumber() + 1;         // ✅ 1부터 시작하도록 변경
+            int currentPage = medicinesPage.getNumber() + 1;         //  1부터 시작하도록 변경
 
             List<MedicineResponseDTO> medicines = medicinesPage.getContent().stream()
                     .map(medicineConverter::convertFromEntity)

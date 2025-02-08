@@ -87,17 +87,16 @@ public class MedicineController {
         return medicineService.getMedicineBySplSetId(splSetId);
     }
 
-    @Operation(summary = "SPL Set ID를 이용한 약물 상세 검색", description = "DB에서 SPL Set ID를 기반으로 약물 정보를 조회합니다.")
+    @Operation(summary = "약물 ID를 이용한 상세 검색", description = "DB에서 약물 ID를 기반으로 약물 정보를 조회합니다.")
     @GetMapping("/detail")
-    public ResponseEntity<ApiResponse<MedicineDetailResponseDTO>> searchBySplSetIdFromDB(@RequestParam String splSetId) {
+    public ResponseEntity<ApiResponse<MedicineDetailResponseDTO>> searchByIdFromDB(@RequestParam Long medicineTableId) {
         try {
-            MedicineDetailResponseDTO medicine = medicineService.getMedicineBySplSetIdFromDB(splSetId);
+            MedicineDetailResponseDTO medicine = medicineService.getMedicineByIdFromDB(medicineTableId);
             return ApiResponse.onSuccess(SuccessStatus.MEDICINE_FETCH_SUCCESS, medicine);
         } catch (Exception e) {
             return ApiResponse.onFailure(ErrorStatus.MEDICINE_NOT_FOUND);
         }
     }
-
 
     @Operation(summary = "FDA API 데이터를 DB에 저장", description = "백엔드 db 저장용 프론트 사용 x FDA API에서 특정 카테고리의 약물 정보를 받아와 DB에 저장합니다.")
     @PostMapping("/save")

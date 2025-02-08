@@ -18,7 +18,7 @@ public interface MedicineService {
     List<Medicine> saveMedicinesByCategory(MedicineCategory category, int limit);
     List<Medicine> saveOtherMedicines(String query, int limit);
 
-    MedicineDetailResponseDTO getMedicineBySplSetIdFromDB(String splSetId);
+    MedicineDetailResponseDTO getMedicineByIdFromDB(Long medicineTableId) ;
     MedicineListPageResponseDTO getMedicinesFromDBByCategory(MedicineCategory category, int page, int size);
     MedicineListPageResponseDTO searchMedicinesByCategoryAndKeyword(MedicineCategory category, String keyword, int page, int size);
 

@@ -247,14 +247,4 @@ public class SupplementsServiceImpl implements SupplementsService {
 
         return prefix + " " + cleaned;
     }
-
-    private Country getCountryFromSearchKeyword(String keyword) {
-        if (keyword.contains("미국")) {
-            return Country.USA;
-        } else if (keyword.contains("한국")) {
-            return Country.KOREA;
-        } else {
-            return Country.NONE;
-        }
-    }
 }

@@ -44,11 +44,14 @@ public class SupplementsConverter {
         else if (country == Country.USA) {
             return "미국";
         }
+        else if (country == Country.JAPAN) {
+            return "일본";
+        }
         return "";
     }
 
     private String processProductName(String name) {
-        return name.replaceAll("^\\[(한국|미국)\\]\\s*", "");
+        return name.replaceAll("^\\[(한국|미국|일본)\\]\\s*", "");
     }
 
     public SupplementsResponseDTO.SupplementsDto toDto(Supplements supplement, Long userId) {

@@ -24,7 +24,7 @@ public class SupplementsScrapServiceImpl implements SupplementsScrapService{
     @Override
     @Transactional
     public SupplementsScrapResponseDTO changeScrap(Long supplementsId, Long userId) {
-        Supplements supplement = supplementsRepository.findById(supplementsId).orElse(null);
+        Supplements supplement = supplementsRepository.findByIdWithPessimisticLock(supplementsId).orElse(null);
 
         User user = userRepository.findById(userId).orElse(null);
 

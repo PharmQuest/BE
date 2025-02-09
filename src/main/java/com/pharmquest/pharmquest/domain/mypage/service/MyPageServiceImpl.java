@@ -13,7 +13,10 @@ import com.pharmquest.pharmquest.domain.post.data.mapping.Comment;
 import com.pharmquest.pharmquest.domain.post.repository.comment.PostCommentRepository;
 import com.pharmquest.pharmquest.domain.post.repository.post.PostRepository;
 import com.pharmquest.pharmquest.domain.post.repository.scrap.PostScrapRepository;
+import com.pharmquest.pharmquest.domain.supplements.data.Category;
 import com.pharmquest.pharmquest.domain.supplements.data.Enum.CategoryKeyword;
+import com.pharmquest.pharmquest.domain.supplements.data.Supplements;
+import com.pharmquest.pharmquest.domain.supplements.data.mapping.SupplementsCategory;
 import com.pharmquest.pharmquest.domain.supplements.data.mapping.SupplementsScrap;
 import com.pharmquest.pharmquest.domain.supplements.repository.SupplementsScrapRepository;
 import com.pharmquest.pharmquest.domain.user.data.User;
@@ -30,9 +33,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -50,20 +51,29 @@ public class MyPageServiceImpl implements MyPageService {
 
 
     @Override
-    public Page<MyPageResponseDTO.SupplementsResponseDto> getScrapSupplements(Long userId, Pageable pageable, CategoryKeyword category) {
+    public Page<MyPageResponseDTO.SupplementsResponseDto> getScrapSupplements(
+            Long userId,
+            Pageable pageable,
+            CategoryKeyword requestCategory) {
 
-        Page<SupplementsScrap> supplementsScrapPage = supplementsScrapRepository.findSupplementsByUserId(userId, pageable);
+        if (requestCategory == null || requestCategory == CategoryKeyword.전체) {
+            Page<SupplementsScrap> supplementsScrapPage =
+                    supplementsScrapRepository.findByUserIdWithSupplementsAndCategories(userId, pageable);
 
-        if (supplementsScrapPage.isEmpty()) {
-            return new PageImpl<>(new ArrayList<>(), pageable, supplementsScrapPage.getTotalElements());
+            return supplementsScrapPage.map(scrap ->
+                    myPageConverter.toSupplementsDto(scrap.getSupplements()));
         }
 
-        List<MyPageResponseDTO.SupplementsResponseDto> supplementsDtos = supplementsScrapPage.stream()
-                .map(supplementsScrap -> myPageConverter.toSupplementsDto(supplementsScrap.getSupplements(), category))
-                .filter(Objects::nonNull)
-                .toList();
+        // 카테고리 필터링이 필요한 경우 - DB에서 필터링
+        Page<SupplementsScrap> filteredPage =
+                supplementsScrapRepository.findByUserIdAndCategoryWithSupplementsAndCategories(
+                        userId,
+                        requestCategory,
+                        pageable
+                );
 
-        return new PageImpl<>(supplementsDtos, pageable, supplementsScrapPage.getTotalElements());
+        return filteredPage.map(scrap ->
+                myPageConverter.toSupplementsDto(scrap.getSupplements()));
     }
 
     @Override

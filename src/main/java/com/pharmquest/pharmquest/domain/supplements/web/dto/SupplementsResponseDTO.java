@@ -68,8 +68,6 @@ public class SupplementsResponseDTO {
         private String brand;
         private boolean isScrapped;
         private int scrapCount;
-        private int amountPage;
-        private int amountCount;
         private String category4;
         private List<String> categories;
     }

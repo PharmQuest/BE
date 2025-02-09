@@ -57,7 +57,7 @@ public class SupplementListController {
     public ApiResponse<SupplementsResponseDTO.SupplementsSearchPageResponseDto> searchSupplements(
             @Parameter(description = "키워드", hidden = true) @RequestHeader(value = "authorization", required = false) String authorizationHeader,
             @RequestParam(required = false) String keyword,
-            @Parameter(description = "국가",schema = @Schema(allowableValues = {"USA", "KOREA"}))
+            @Parameter(description = "국가",schema = @Schema(allowableValues = {"USA", "KOREA", "JAPAN"}))
             @RequestParam(required = false) Country country,
             @Parameter(description = "페이지 번호") @RequestParam(defaultValue = "1") int page
     ) {

@@ -1,15 +1,12 @@
 package com.pharmquest.pharmquest.domain.supplements.web.controller;
 
 import com.pharmquest.pharmquest.domain.post.data.enums.Country;
-import com.pharmquest.pharmquest.domain.supplements.data.Enum.CategoryKeyword;
+import com.pharmquest.pharmquest.domain.supplements.data.Enum.CategoryGroup;
 import com.pharmquest.pharmquest.domain.supplements.repository.SupplementsRepository;
 import com.pharmquest.pharmquest.domain.supplements.service.Supplements.SupplementsService;
 import com.pharmquest.pharmquest.domain.supplements.web.dto.SupplementsResponseDTO;
 import com.pharmquest.pharmquest.domain.token.JwtUtil;
-import com.pharmquest.pharmquest.domain.user.data.User;
 import com.pharmquest.pharmquest.global.apiPayload.ApiResponse;
-import com.pharmquest.pharmquest.global.apiPayload.code.status.ErrorStatus;
-import com.pharmquest.pharmquest.global.apiPayload.exception.handler.CommonExceptionHandler;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -36,7 +33,7 @@ public class SupplementListController {
     @GetMapping("/lists")
     @Operation(summary = "영양제 조회 API", description = "영양제 목록 조회 및 카테고리 필터링")
     public ApiResponse<SupplementsResponseDTO.SupplementsPageResponseDto> getSupplements(
-            @Parameter(description = "카테고리") @RequestParam(required = false) CategoryKeyword category,
+            @Parameter(description = "카테고리") @RequestParam(required = false) CategoryGroup category,
             @Parameter(description = "페이지 번호", example = "1") @RequestParam(defaultValue = "1") int page,
             @Parameter(description = "사용자 ID", hidden = true) @RequestHeader(value = "authorization", required = false) String authorizationHeader
     ) {

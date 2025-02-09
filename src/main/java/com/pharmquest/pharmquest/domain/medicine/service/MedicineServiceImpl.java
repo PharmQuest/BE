@@ -5,17 +5,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pharmquest.pharmquest.domain.medicine.converter.MedicineConverter;
 import com.pharmquest.pharmquest.domain.medicine.data.Medicine;
 import com.pharmquest.pharmquest.domain.medicine.data.MedicineCategoryMapper;
+import com.pharmquest.pharmquest.domain.medicine.data.enums.MedicineCategory;
 import com.pharmquest.pharmquest.domain.medicine.repository.MedRepository;
 import com.pharmquest.pharmquest.domain.medicine.repository.MedicineRepository;
-import com.pharmquest.pharmquest.domain.medicine.web.dto.MedicineDetailResponseDTO;
-import com.pharmquest.pharmquest.domain.medicine.web.dto.MedicineResponseDTO;
+import com.pharmquest.pharmquest.domain.medicine.web.dto.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -41,13 +40,13 @@ public class MedicineServiceImpl implements MedicineService {
 
     // FDA API 데이터를 DTO로 변환 (번역 포함)
     @Override
-    public List<MedicineResponseDTO> getMedicines(String query, int limit) {
+    public List<MedicineOpenapiResponseDTO> getMedicines(String query, int limit) {
         try {
             String response = medicineRepository.fetchMedicineData(query, limit);
             ObjectMapper mapper = new ObjectMapper();
             JsonNode results = mapper.readTree(response).path("results");
 
-            List<MedicineResponseDTO> medicines = new ArrayList<>();
+            List<MedicineOpenapiResponseDTO> medicines = new ArrayList<>();
             if (results.isArray()) {
                 for (JsonNode result : results) {
                     medicines.add(medicineConverter.convertWithTranslation(result));
@@ -60,25 +59,22 @@ public class MedicineServiceImpl implements MedicineService {
     }
 
     @Override
-    public List<MedicineResponseDTO> getMedicinesbyCategory(String query, int limit) {
+    public List<MedicineOpenapiResponseDTO> getMedicinesbyCategory(MedicineCategory category, int limit) {
         try {
-            // 카테고리 이름을 쿼리로 변환 (해당되는 경우)
-            String apiQuery = MedicineCategoryMapper.getQueryForCategory(query);
-            if (apiQuery != null) {
-                query = apiQuery; // FDA 쿼리로 대체
-            }
+            // ✅ Enum을 기반으로 FDA API 검색 쿼리 가져오기
+            String query = MedicineCategoryMapper.getQueryForCategory(category);
 
-            // 더 많은 데이터를 요청 (limit * 2)
+            // 더 많은 데이터를 요청 (limit * 3)
             int requestLimit = limit * 3;
             String response = medicineRepository.fetchMedicineData(query, requestLimit);
 
             ObjectMapper mapper = new ObjectMapper();
             JsonNode results = mapper.readTree(response).path("results");
 
-            List<MedicineResponseDTO> medicines = new ArrayList<>();
+            List<MedicineOpenapiResponseDTO> medicines = new ArrayList<>();
             if (results.isArray()) {
                 for (JsonNode result : results) {
-                    MedicineResponseDTO dto = medicineConverter.convertWithTranslation(result);
+                    MedicineOpenapiResponseDTO dto = medicineConverter.convertWithTranslation(result);
                     if (isValidMedicine(dto)) {
                         medicines.add(dto);
                     }
@@ -92,15 +88,16 @@ public class MedicineServiceImpl implements MedicineService {
         }
     }
 
+
     // FDA API 데이터를 DTO로 변환 (번역 없이 원본 반환) 백엔드 작업용
     @Override
-    public List<MedicineResponseDTO> getEnMedicines(String query, int limit) {
+    public List<MedicineOpenapiResponseDTO> getEnMedicines(String query, int limit) {
         try {
             String response = medicineRepository.fetchMedicineData(query, limit);
             ObjectMapper mapper = new ObjectMapper();
             JsonNode results = mapper.readTree(response).path("results");
 
-            List<MedicineResponseDTO> medicines = new ArrayList<>();
+            List<MedicineOpenapiResponseDTO> medicines = new ArrayList<>();
             if (results.isArray()) {
                 for (JsonNode result : results) {
                     medicines.add(medicineConverter.convertWithoutTranslation(result));
@@ -135,40 +132,37 @@ public class MedicineServiceImpl implements MedicineService {
     }
 
     @Override
-    public List<MedicineResponseDTO> getMedicinesFromDBByCategory(String category, int page, int size) {
-        try {
-            Page<Medicine> medicinesPage;
-            Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending()); // 페이지네이션 설정 (ID 기준 정렬)
+    public MedicineListPageResponseDTO getMedicinesFromDBByCategory(MedicineCategory category, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Medicine> medicinesPage = (category == MedicineCategory.ALL)
+                ? medRepository.findAll(pageable)
+                : medRepository.findByCategory(category, pageable);
 
-            // "전체" 선택 시 모든 데이터 페이지네이션 처리
-            if (category.equalsIgnoreCase("전체")) {
-                medicinesPage = medRepository.findAll(pageable);
-            } else {
-                medicinesPage = medRepository.findByCategoryIgnoreCase(category, pageable);
-            }
+        long amountCount = medicinesPage.getTotalElements(); // 전체 개수
+        int amountPage = medicinesPage.getTotalPages();      // 전체 페이지 수
+        int currentCount = medicinesPage.getNumberOfElements(); // 현재 페이지의 개수
+        int currentPage = medicinesPage.getNumber()+1;         // 현재 페이지 번호
 
-            // 로그 추가 (검색 결과 없을 경우 디버깅)
-            if (medicinesPage.isEmpty()) {
-                System.out.println("카테고리 '" + category + "' 에 해당하는 데이터가 없습니다.");
-            }
+        List<MedicineResponseDTO> medicines = medicinesPage.getContent().stream()
+                .map(medicineConverter::convertFromEntity)
+                .collect(Collectors.toList());
 
-            // 결과 변환 후 반환
-            return medicinesPage.getContent().stream()
-                    .map(medicineConverter::convertFromEntity)
-                    .collect(Collectors.toList());
-        } catch (Exception e) {
-            throw new RuntimeException("DB에서 약물 데이터를 가져오는 중 오류 발생", e);
-        }
+        return new MedicineListPageResponseDTO(amountCount, amountPage, currentCount, currentPage, medicines);
     }
 
     @Override
-    public MedicineDetailResponseDTO getMedicineBySplSetIdFromDB(String splSetId) {
+    public MedicineDetailResponseDTO getMedicineByIdFromDB(Long medicineId) {
         try {
-            // DB에서 SPL Set ID를 기준으로 약물 조회
-            Medicine medicine = medRepository.findBySplSetId(splSetId)
-                    .orElseThrow(() -> new IllegalArgumentException("해당 SPL Set ID를 가진 약물이 없습니다: " + splSetId));
+            // DB에서 medicineTableId를 기준으로 약물 조회
+            Medicine medicine = medRepository.findById(medicineId)
+                    .orElseThrow(() -> new IllegalArgumentException("해당 ID를 가진 약물이 없습니다: " + medicineId));
 
-            // 엔티티를 DTO로 변환하여 반환
+            // 저장된 값 확인용 로그 출력
+            System.out.println("조회된 약물의 ID: " + medicine.getId());
+            System.out.println("조회된 약물의 카테고리: " + medicine.getCategory());
+
+            String category = MedicineCategoryMapper.toKoreanCategory(medicine.getCategory());
+
             return new MedicineDetailResponseDTO(
                     medicine.getBrandName(),
                     medicine.getGenericName(),
@@ -179,8 +173,9 @@ public class MedicineServiceImpl implements MedicineService {
                     medicine.getDosageAndAdministration(),
                     medicine.getSplSetId(),
                     medicine.getImgUrl(),
-                    medicine.getCategory(),
-                    medicine.getCountry()
+                    category,
+                    medicine.getCountry(),
+                    medicine.getWarnings()
             );
         } catch (Exception e) {
             throw new RuntimeException("DB에서 약물 세부 정보를 가져오는 중 오류 발생", e);
@@ -189,33 +184,36 @@ public class MedicineServiceImpl implements MedicineService {
 
 
 
-    private boolean isValidMedicine(MedicineResponseDTO dto) {
+    private boolean isValidMedicine(MedicineOpenapiResponseDTO  dto) {
         return dto.getBrandName() != null && !dto.getBrandName().isEmpty()
                 && dto.getGenericName() != null && !dto.getGenericName().isEmpty()
-                && dto.getImgUrl() != null && !dto.getImgUrl().isEmpty()
-                && dto.getCategory() != null && !dto.getCategory().isEmpty();
+                && dto.getImgUrl() != null && !dto.getImgUrl().isEmpty();
     }
 
     private boolean isValidMedicineDetail(MedicineDetailResponseDTO dto) {
-        return dto.getBrandName() != null && !dto.getBrandName().isEmpty()
-                && dto.getGenericName() != null && !dto.getGenericName().isEmpty()
-                && dto.getSubstanceName() != null && !dto.getSubstanceName().isEmpty()
-                && dto.getActiveIngredient() != null && !dto.getActiveIngredient().isEmpty()
-                && dto.getPurpose() != null && !dto.getPurpose().isEmpty()
-                && dto.getIndicationsAndUsage() != null && !dto.getIndicationsAndUsage().isEmpty()
-                && dto.getDosageAndAdministration() != null && !dto.getDosageAndAdministration().isEmpty()
-                && dto.getImgUrl() != null && !dto.getImgUrl().isEmpty()
-                && dto.getCategory() != null && !dto.getCategory().isEmpty();
+        return isValid(dto.getBrandName()) &&
+                isValid(dto.getGenericName()) &&
+                isValid(dto.getSubstanceName()) &&
+                isValid(dto.getActiveIngredient()) &&
+                isValid(dto.getPurpose()) &&
+                isValid(dto.getIndicationsAndUsage()) &&
+                isValid(dto.getDosageAndAdministration()) &&
+                isValid(dto.getImgUrl()) &&
+                isValid(dto.getWarnings());
     }
+
+    // 공통된 유효성 검사 로직
+    private boolean isValid(String value) {
+        return value != null && !value.isEmpty() && !value.equalsIgnoreCase("Unknown") && !value.equals("알려지지 않은");
+    }
+
 
     //카테고리 별 db 저장 로직
     @Transactional
-    public List<Medicine> saveMedicinesByCategory(String category, int limit) {
+    public List<Medicine> saveMedicinesByCategory(MedicineCategory category, int limit) {
         try {
+            // ✅ Enum 기반으로 검색 쿼리 가져오기 (한글 제거)
             String query = MedicineCategoryMapper.getQueryForCategory(category);
-            if (query == null) {
-                throw new IllegalArgumentException("해당하는 카테고리가 없습니다: " + category);
-            }
 
             List<Medicine> savedMedicines = new ArrayList<>();
             int requestLimit = limit * 3; // 더 많은 데이터 요청
@@ -230,7 +228,7 @@ public class MedicineServiceImpl implements MedicineService {
                     for (JsonNode result : results) {
                         String splSetId = result.at("/openfda/spl_set_id").asText("Unknown");
 
-                        // 이미 존재하는 데이터 건너뛰기
+                        //  이미 존재하는 데이터는 건너뛰기
                         if (medRepository.existsBySplSetId(splSetId)) {
                             continue;
                         }
@@ -248,8 +246,9 @@ public class MedicineServiceImpl implements MedicineService {
                             medicine.setDosageAndAdministration(dto.getDosageAndAdministration());
                             medicine.setSplSetId(dto.getSplSetId());
                             medicine.setImgUrl(dto.getImgUrl());
-                            medicine.setCategory(dto.getCategory());
+                            medicine.setCategory(category); //  Enum 그대로 적용
                             medicine.setCountry(dto.getCountry());
+                            medicine.setWarnings(dto.getWarnings());
 
                             savedMedicines.add(medRepository.save(medicine));
                         }
@@ -261,7 +260,7 @@ public class MedicineServiceImpl implements MedicineService {
                 retryCount++;
             }
 
-            // 최소 개수 미달 시 예외 처리
+            //  최소 개수 미달 시 예외 처리
             if (savedMedicines.size() < limit) {
                 throw new RuntimeException("충분한 데이터를 저장하지 못했습니다. (현재 개수: " + savedMedicines.size() + ")");
             }
@@ -271,6 +270,8 @@ public class MedicineServiceImpl implements MedicineService {
             throw new RuntimeException("FDA API 데이터를 저장하는 중 오류 발생", e);
         }
     }
+
+
     //기타항목 저장 카테고리 연산량이 너무 많아서 따로 로직 설정
     @Transactional
     public List<Medicine> saveOtherMedicines(String query, int limit) {
@@ -284,7 +285,7 @@ public class MedicineServiceImpl implements MedicineService {
             int retryCount = 0;
             int totalFetched = 0;  // 가져온 전체 개수
 
-            while (savedMedicines.size() < limit && retryCount < 3) { // 최대 5번 재시도
+            while (savedMedicines.size() < limit && retryCount < 3) { // 최대 3번 재시도
                 String response = medicineRepository.fetchMedicineData(query, requestLimit);
                 ObjectMapper mapper = new ObjectMapper();
                 JsonNode results = mapper.readTree(response).path("results");
@@ -310,8 +311,9 @@ public class MedicineServiceImpl implements MedicineService {
                             medicine.setDosageAndAdministration(dto.getDosageAndAdministration());
                             medicine.setSplSetId(dto.getSplSetId());
                             medicine.setImgUrl(dto.getImgUrl());
-                            medicine.setCategory("기타");
+                            medicine.setCategory(MedicineCategory.OTHER); //  Enum 적용
                             medicine.setCountry(dto.getCountry());
+                            medicine.setWarnings(dto.getWarnings());
 
                             savedMedicines.add(medRepository.save(medicine));
                         }
@@ -320,7 +322,7 @@ public class MedicineServiceImpl implements MedicineService {
                     }
                 }
 
-                totalFetched += requestLimit; // 가져온 데이터 개수 업데이트
+                totalFetched += requestLimit;
                 retryCount++;
 
                 if (totalFetched >= 500) break; // 500개 이상 조회되면 중단
@@ -335,42 +337,44 @@ public class MedicineServiceImpl implements MedicineService {
             throw new RuntimeException("FDA API 데이터를 저장하는 중 오류 발생", e);
         }
     }
+
     @Override
     @Transactional(readOnly = true)
-    public List<MedicineResponseDTO> searchMedicinesByCategoryAndKeyword(String category, String keyword, int page, int size) {
+    public MedicineListPageResponseDTO searchMedicinesByCategoryAndKeyword(MedicineCategory category, String keyword, int page, int size) {
         try {
-            Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending()); // 페이지네이션 설정
-
+            Pageable pageable = PageRequest.of(page , size, Sort.by("id").ascending());
             Page<Medicine> medicinesPage;
 
-            if (category.equalsIgnoreCase("전체")) {
-                // ✅ 검색어가 있을 경우 `brandName`, `indicationsAndUsage`, `category`에서 검색
+            if (category == MedicineCategory.ALL) {
                 if (keyword != null && !keyword.isEmpty()) {
                     medicinesPage = medRepository.findByKeyword(keyword, pageable);
                 } else {
                     medicinesPage = medRepository.findAll(pageable);
                 }
             } else {
-                // ✅ 특정 카테고리에서 검색어 필터링
                 if (keyword != null && !keyword.isEmpty()) {
                     medicinesPage = medRepository.findByCategoryAndKeyword(category, keyword, pageable);
                 } else {
-                    medicinesPage = medRepository.findByCategoryIgnoreCase(category, pageable);
+                    medicinesPage = medRepository.findByCategory(category, pageable);
                 }
             }
 
-            // 결과가 없을 경우 로그 출력
-            if (medicinesPage.isEmpty()) {
-                System.out.println("카테고리 '" + category + "' 및 키워드 '" + keyword + "'에 해당하는 데이터가 없습니다.");
-            }
+            long amountCount = medicinesPage.getTotalElements(); // 전체 개수
+            int amountPage = medicinesPage.getTotalPages();      // 전체 페이지 수
+            int currentCount = medicinesPage.getNumberOfElements(); // 현재 페이지의 개수
+            int currentPage = medicinesPage.getNumber() + 1;         //  1부터 시작하도록 변경
 
-            // 결과를 DTO로 변환 후 반환
-            return medicinesPage.getContent().stream()
+            List<MedicineResponseDTO> medicines = medicinesPage.getContent().stream()
                     .map(medicineConverter::convertFromEntity)
                     .collect(Collectors.toList());
+
+            return new MedicineListPageResponseDTO(amountCount, amountPage, currentCount, currentPage, medicines);
         } catch (Exception e) {
             throw new RuntimeException("DB에서 약물 데이터를 검색하는 중 오류 발생", e);
         }
     }
+
+
+
 
 }

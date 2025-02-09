@@ -24,7 +24,7 @@ public class SupplementsScrapServiceImpl implements SupplementsScrapService{
     @Override
     @Transactional
     public SupplementsScrapResponseDTO changeScrap(Long supplementsId, Long userId) {
-        Supplements supplement = supplementsRepository.findById(supplementsId).orElse(null);
+        Supplements supplement = supplementsRepository.findByIdWithPessimisticLock(supplementsId).orElse(null);
 
         User user = userRepository.findById(userId).orElse(null);
 
@@ -50,6 +50,7 @@ public class SupplementsScrapServiceImpl implements SupplementsScrapService{
         return SupplementsScrapResponseDTO.builder()
                 .supplementId(supplement.getId())
                 .scrapCount(supplement.getScrapCount())
+                .isScrapped(isScrapped)
                 .message(isScrapped ? "스크랩 되었습니다." : "스크랩이 취소되었습니다.")
                 .build();
     }

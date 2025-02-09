@@ -53,6 +53,8 @@ public class Post extends BaseEntity {
 
     private boolean isDeleted = false;
 
+    private boolean isBestPost = false;
+
     @Lob
     @Column(columnDefinition = "TEXT")
     @Setter

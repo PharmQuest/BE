@@ -11,8 +11,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Component
 @RequiredArgsConstructor
@@ -94,6 +97,32 @@ public class SupplementsConverter {
             relatedSupplements.addAll(randomSupplements);
         }
 
+        List<String> dosageList = supplement.getDosage() != null ?
+                Arrays.stream(supplement.getDosage().split("(?<=\\.)\\s+"))
+                        .filter(s -> !s.trim().isEmpty())
+                        .collect(Collectors.toList()) :
+                new ArrayList<>();
+
+        List<String> purposeList = supplement.getPurpose() != null ?
+                Arrays.stream(supplement.getPurpose().split("(?<=\\.)\\s+"))
+                        .filter(s -> !s.trim().isEmpty())
+                        .collect(Collectors.toList()) :
+                new ArrayList<>();
+
+        List<String> warningList = supplement.getWarning() != null ?
+                Arrays.stream(supplement.getWarning().split("(?<=\\.)\\s+"))
+                        .filter(s -> !s.trim().isEmpty())
+                        .collect(Collectors.toList()) :
+                new ArrayList<>();
+
+        List<String> productCategory = Stream.of(
+                        supplement.getCategory1(),
+                        supplement.getCategory2(),
+                        supplement.getCategory3(),
+                        supplement.getCategory4())
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
         return SupplementsResponseDTO.SupplementsDetailResponseDto.builder()
                 .id(supplement.getId())
                 .name(supplement.getName())
@@ -104,27 +133,27 @@ public class SupplementsConverter {
                 .country(processCountryName(supplement.getCountry()))
                 .isScrapped(isSupplementScrappedByUser(supplement, userId))
                 .scrapCount(supplement.getScrapCount())
-                .isScrapped(isSupplementScrappedByUser(supplement, userId))
-                .category1(supplement.getCategory1())
-                .category2(supplement.getCategory2())
-                .category3(supplement.getCategory3())
-                .category4(supplement.getCategory4())
-                .dosage(supplement.getDosage())
-                .purpose(supplement.getPurpose())
-                .warning(supplement.getWarning())
+                .productCategory(productCategory)
+                .dosage(dosageList)
+                .purpose(purposeList)
+                .warning(warningList)
                 .categories(categories)
                 .relatedSupplements(relatedSupplements.stream()
-                        .map(s -> SupplementsResponseDTO.RelatedSupplementDto.builder()
-                                .id(s.getId())
-                                .name(s.getName())
-                                .image(s.getImage())
-                                .brand(s.getBrand())
-                                .maker(s.getMaker())
-                                .productName(processProductName(supplement.getName()))
-                                .country(processCountryName(supplement.getCountry()))
-                                .isScrapped(isSupplementScrappedByUser(s, userId))
-                                .scrapCount(s.getScrapCount())
-                                .build())
+                        .map(s -> {
+                            List<String> relatedCategories = supplementsCategoryRepository.findCategoryNamesBySupplementId(s.getId());
+                            return SupplementsResponseDTO.RelatedSupplementDto.builder()
+                                    .id(s.getId())
+                                    .name(s.getName())
+                                    .image(s.getImage())
+                                    .brand(s.getBrand())
+                                    .maker(s.getMaker())
+                                    .productName(processProductName(supplement.getName()))
+                                    .country(processCountryName(supplement.getCountry()))
+                                    .categories(relatedCategories)
+                                    .isScrapped(isSupplementScrappedByUser(s, userId))
+                                    .scrapCount(s.getScrapCount())
+                                    .build();
+                        })
                         .collect(Collectors.toList()))
                 .build();
     }

@@ -26,6 +26,11 @@ public enum SuccessStatus implements BaseCode {
     // my page
     MY_PAGE_PHARMACY(HttpStatus.OK, "MYPAGE201", "마이페이지에서 스크랩된 약국 목록을 성공적으로 조회했습니다."),
 
+    // Medicine
+    MEDICINE_FETCH_SUCCESS(HttpStatus.OK, "MED2001", "약물 데이터를 성공적으로 불러왔습니다."),
+    MEDICINE_SAVE_SUCCESS(HttpStatus.CREATED, "MED2002", "약물 데이터를 성공적으로 저장했습니다."),
+    MEDICINE_TRANSLATE_SUCCESS(HttpStatus.OK, "MED2003", "약물 데이터를 성공적으로 번역했습니다."),
+
     ;
     private final HttpStatus httpStatus;
     private final String code;

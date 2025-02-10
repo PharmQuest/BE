@@ -32,14 +32,15 @@ public class MyPageController {
     @GetMapping("/supplements")
     @Operation(summary = "스크랩한 영양제 조회 API")
     public ApiResponse<Page<MyPageResponseDTO.SupplementsResponseDto>> getScrapedSupplements(
-            @Parameter (hidden = true) @RequestHeader("Authorization") String authorizationHeader,
+            @Parameter(hidden = true) @RequestHeader("Authorization") String authorizationHeader,
             @Parameter(description = "페이지 번호") @RequestParam(defaultValue = "1") int page,
-            @Parameter(description = "카테고리") @RequestParam(defaultValue = "전체") CategoryKeyword category) {
+            @Parameter(description = "카테고리") @RequestParam(required = false) CategoryKeyword category) {
 
         Pageable pageable = PageRequest.of(page-1, 20);
         User user = jwtUtil.getUserFromHeader(authorizationHeader);
 
-        Page<MyPageResponseDTO.SupplementsResponseDto> supplements = myPageService.getScrapSupplements(user.getId(),pageable, category);
+        Page<MyPageResponseDTO.SupplementsResponseDto> supplements =
+                myPageService.getScrapSupplements(user.getId(), pageable, category);
 
         return ApiResponse.onSuccess(supplements);
     }

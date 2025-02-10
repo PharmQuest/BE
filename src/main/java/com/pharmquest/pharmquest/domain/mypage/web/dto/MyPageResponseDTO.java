@@ -2,26 +2,46 @@ package com.pharmquest.pharmquest.domain.mypage.web.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.pharmquest.pharmquest.domain.post.data.enums.PostCategory;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import com.pharmquest.pharmquest.domain.supplements.data.Supplements;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class MyPageResponseDTO {
 
-    @Builder
     @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor
     public static class SupplementsResponseDto {
-        private Long id;
-        private String name;
-        private String image;
-        private List<String> categories;
+        private final Long id;
+        private final String name;
+        private final String image;
+        private final List<String> categories;
+
+        @Builder
+        private SupplementsResponseDto(Long id, String name, String image, List<String> categories) {
+            this.id = id;
+            this.name = name;
+            this.image = image;
+            this.categories = categories != null ? categories : new ArrayList<>();
+        }
+
+        public static SupplementsResponseDto from(Supplements supplement) {
+            if (supplement == null) {
+                return null;
+            }
+
+            return SupplementsResponseDto.builder()
+                    .id(supplement.getId())
+                    .name(supplement.getName())
+                    .image(supplement.getImage())
+                    .categories(supplement.getSupplementsCategoryList().stream()
+                            .map(sc -> sc.getCategory().getName())
+                            .collect(Collectors.toList()))
+                    .build();
+        }
     }
 
     @Builder

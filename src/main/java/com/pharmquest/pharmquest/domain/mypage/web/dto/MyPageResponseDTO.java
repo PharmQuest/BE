@@ -12,35 +12,19 @@ import java.util.stream.Collectors;
 
 public class MyPageResponseDTO {
 
+    @Builder
     @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class SupplementsResponseDto {
-        private final Long id;
-        private final String name;
-        private final String image;
-        private final List<String> categories;
-
-        @Builder
-        private SupplementsResponseDto(Long id, String name, String image, List<String> categories) {
-            this.id = id;
-            this.name = name;
-            this.image = image;
-            this.categories = categories != null ? categories : new ArrayList<>();
-        }
-
-        public static SupplementsResponseDto from(Supplements supplement) {
-            if (supplement == null) {
-                return null;
-            }
-
-            return SupplementsResponseDto.builder()
-                    .id(supplement.getId())
-                    .name(supplement.getName())
-                    .image(supplement.getImage())
-                    .categories(supplement.getSupplementsCategoryList().stream()
-                            .map(sc -> sc.getCategory().getName())
-                            .collect(Collectors.toList()))
-                    .build();
-        }
+        private Long id;
+        private String name;
+        private String country;
+        private String productName;
+        private String image;
+        private String brand;
+        private boolean isScrapped;
+        private List<String> categories;
     }
 
     @Builder

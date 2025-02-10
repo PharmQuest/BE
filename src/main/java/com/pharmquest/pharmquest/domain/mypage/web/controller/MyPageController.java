@@ -5,6 +5,7 @@ import com.pharmquest.pharmquest.domain.mypage.converter.MyPageConverter;
 import com.pharmquest.pharmquest.domain.mypage.service.MyPageService;
 import com.pharmquest.pharmquest.domain.mypage.web.dto.MyPageResponseDTO;
 import com.pharmquest.pharmquest.domain.pharmacy.data.enums.PharmacyCountry;
+import com.pharmquest.pharmquest.domain.supplements.data.Enum.CategoryGroup;
 import com.pharmquest.pharmquest.domain.supplements.data.Enum.CategoryKeyword;
 import com.pharmquest.pharmquest.domain.token.JwtUtil;
 import com.pharmquest.pharmquest.domain.user.data.User;
@@ -34,7 +35,7 @@ public class MyPageController {
     public ApiResponse<Page<MyPageResponseDTO.SupplementsResponseDto>> getScrapedSupplements(
             @Parameter(hidden = true) @RequestHeader("Authorization") String authorizationHeader,
             @Parameter(description = "페이지 번호") @RequestParam(defaultValue = "1") int page,
-            @Parameter(description = "카테고리") @RequestParam(required = false) CategoryKeyword category) {
+            @Parameter(description = "카테고리") @RequestParam(required = false) CategoryGroup category) {
 
         Pageable pageable = PageRequest.of(page-1, 20);
         User user = jwtUtil.getUserFromHeader(authorizationHeader);

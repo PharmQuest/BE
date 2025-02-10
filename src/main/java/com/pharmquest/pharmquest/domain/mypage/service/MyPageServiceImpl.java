@@ -1,6 +1,5 @@
 package com.pharmquest.pharmquest.domain.mypage.service;
 
-import com.pharmquest.pharmquest.domain.medicine.data.Medicine;
 import com.pharmquest.pharmquest.domain.medicine.repository.MedicineScrapRepository;
 import com.pharmquest.pharmquest.domain.mypage.converter.MyPageConverter;
 import com.pharmquest.pharmquest.domain.mypage.data.MedicineScrap;
@@ -15,14 +14,13 @@ import com.pharmquest.pharmquest.domain.post.data.mapping.Comment;
 import com.pharmquest.pharmquest.domain.post.repository.comment.PostCommentRepository;
 import com.pharmquest.pharmquest.domain.post.repository.post.PostRepository;
 import com.pharmquest.pharmquest.domain.post.repository.scrap.PostScrapRepository;
-import com.pharmquest.pharmquest.domain.supplements.data.Category;
-import com.pharmquest.pharmquest.domain.supplements.data.Enum.CategoryKeyword;
+import com.pharmquest.pharmquest.domain.supplements.data.Enum.CategoryGroup;
 import com.pharmquest.pharmquest.domain.supplements.data.Supplements;
-import com.pharmquest.pharmquest.domain.supplements.data.mapping.SupplementsCategory;
 import com.pharmquest.pharmquest.domain.supplements.data.mapping.SupplementsScrap;
+import com.pharmquest.pharmquest.domain.supplements.repository.SupplementsCategoryRepository;
+import com.pharmquest.pharmquest.domain.supplements.repository.SupplementsRepository;
 import com.pharmquest.pharmquest.domain.supplements.repository.SupplementsScrapRepository;
 import com.pharmquest.pharmquest.domain.user.data.User;
-import com.pharmquest.pharmquest.domain.user.repository.UserRepository;
 import com.pharmquest.pharmquest.global.apiPayload.code.status.ErrorStatus;
 import com.pharmquest.pharmquest.global.apiPayload.exception.handler.CommonExceptionHandler;
 import lombok.RequiredArgsConstructor;
@@ -51,32 +49,33 @@ public class MyPageServiceImpl implements MyPageService {
     private final PostCommentRepository postCommentRepository;
     private final MedicineScrapRepository medicineScrapRepository;
     private final PharmacyRepository pharmacyRepository;
-
+    private final SupplementsRepository supplementsRepository;
+    private final SupplementsCategoryRepository supplementsCategoryRepository;
 
     @Override
     public Page<MyPageResponseDTO.SupplementsResponseDto> getScrapSupplements(
             Long userId,
             Pageable pageable,
-            CategoryKeyword requestCategory) {
+            CategoryGroup categoryGroup) {
 
-        if (requestCategory == null || requestCategory == CategoryKeyword.전체) {
-            Page<SupplementsScrap> supplementsScrapPage =
-                    supplementsScrapRepository.findByUserIdWithSupplementsAndCategories(userId, pageable);
-
-            return supplementsScrapPage.map(scrap ->
-                    myPageConverter.toSupplementsDto(scrap.getSupplements()));
+        Page<Supplements> supplementsPage;
+        List<Long> scrapAllSupplementsIds = supplementsScrapRepository.findSupplementsIdByUserId(userId);
+        if (categoryGroup == null || categoryGroup == CategoryGroup.전체) {
+            supplementsPage = supplementsRepository.findByIdIn(scrapAllSupplementsIds, pageable);
+        } else {
+            List<Long> scrapFilteredSupplementsIds = supplementsCategoryRepository.findSupplementIdByCategoryNameAndIds(categoryGroup.getCategories(),scrapAllSupplementsIds);
+            supplementsPage = supplementsRepository.findByIdIn(scrapFilteredSupplementsIds, pageable);
         }
 
-        // 카테고리 필터링이 필요한 경우 - DB에서 필터링
-        Page<SupplementsScrap> filteredPage =
-                supplementsScrapRepository.findByUserIdAndCategoryWithSupplementsAndCategories(
-                        userId,
-                        requestCategory,
-                        pageable
-                );
+        if(supplementsPage.isEmpty()) {
+            return new PageImpl<>(new ArrayList<>(), pageable, supplementsPage.getTotalElements());
+        }
 
-        return filteredPage.map(scrap ->
-                myPageConverter.toSupplementsDto(scrap.getSupplements()));
+        List<MyPageResponseDTO.SupplementsResponseDto> supplementDTO = supplementsPage.stream()
+                .map(myPageConverter::toSupplementsDto)
+                .toList();
+
+        return new PageImpl<>(supplementDTO, pageable, supplementsPage.getTotalElements());
     }
 
     @Override

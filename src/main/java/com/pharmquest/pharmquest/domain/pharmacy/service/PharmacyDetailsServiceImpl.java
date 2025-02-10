@@ -1,7 +1,6 @@
 package com.pharmquest.pharmquest.domain.pharmacy.service;
 
 import com.pharmquest.pharmquest.domain.medicine.service.TranslationService;
-import com.pharmquest.pharmquest.domain.mypage.web.dto.MyPageResponseDTO;
 import com.pharmquest.pharmquest.domain.pharmacy.ImageUtil;
 import com.pharmquest.pharmquest.domain.pharmacy.data.Pharmacy;
 import com.pharmquest.pharmquest.domain.pharmacy.data.enums.PharmacyCountry;
@@ -62,7 +61,7 @@ public class PharmacyDetailsServiceImpl implements PharmacyDetailsService {
     @Override
     public String getImgURLByPlaceId(String placeId) {
         GooglePlaceDetailsResponse response = getDetailsByPlaceId(placeId);
-        return imageUtil.getImageURL(response);
+        return imageUtil.getPharmacyImageURL(response);
     }
 
     // 장소 번역

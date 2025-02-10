@@ -1,5 +1,7 @@
 package com.pharmquest.pharmquest.domain.pharmacy.service;
 
+import com.pharmquest.pharmquest.domain.pharmacy.data.Pharmacy;
+import com.pharmquest.pharmquest.domain.pharmacy.repository.PharmacyRepository;
 import com.pharmquest.pharmquest.domain.user.data.User;
 import com.pharmquest.pharmquest.domain.user.repository.UserRepository;
 import com.pharmquest.pharmquest.global.apiPayload.code.status.ErrorStatus;
@@ -19,6 +21,7 @@ import java.util.List;
 public class PharmacyCommandServiceImpl implements PharmacyCommandService {
 
     private final PharmacyDetailsService pharmacyDetailsService;
+    private final PharmacyRepository pharmacyRepository;
     private final UserRepository userRepository;
 
     @Override
@@ -27,6 +30,13 @@ public class PharmacyCommandServiceImpl implements PharmacyCommandService {
         List<String> pharmacyScraps = user.getPharmacyScraps();
         List<String> updatedPharmacyScraps = new ArrayList<>(pharmacyScraps);
         boolean isScraped = true;
+
+        // 테이블에 약국 정보 이미 있는지 체크 후, 없다면 저장
+        Boolean isExist = pharmacyRepository.existsByPlaceId(placeId);
+        if (!isExist) {
+            Pharmacy pharmacy = pharmacyDetailsService.getPharmacyByPlaceId(placeId);
+            pharmacyRepository.save(pharmacy);
+        }
 
         // 해당 약국이 이미 스크랩되어있는지 체크.
         if(!pharmacyScraps.contains(placeId)) { // 스크랩 되어있지 않았다면 저장

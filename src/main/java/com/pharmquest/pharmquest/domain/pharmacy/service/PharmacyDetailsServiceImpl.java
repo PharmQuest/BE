@@ -1,8 +1,8 @@
 package com.pharmquest.pharmquest.domain.pharmacy.service;
 
 import com.pharmquest.pharmquest.domain.medicine.service.TranslationService;
-import com.pharmquest.pharmquest.domain.mypage.web.dto.MyPageResponseDTO;
 import com.pharmquest.pharmquest.domain.pharmacy.ImageUtil;
+import com.pharmquest.pharmquest.domain.pharmacy.data.Pharmacy;
 import com.pharmquest.pharmquest.domain.pharmacy.data.enums.PharmacyCountry;
 import com.pharmquest.pharmquest.domain.pharmacy.web.dto.GooglePlaceDetailsResponse;
 import com.pharmquest.pharmquest.global.apiPayload.code.status.ErrorStatus;
@@ -43,23 +43,25 @@ public class PharmacyDetailsServiceImpl implements PharmacyDetailsService {
         return false;
     }
 
-    // placeId로 상세정보를 불러와 Dto로 변환
+    // placeId로 Pharmacy 객체 반환
     @Override
-    public MyPageResponseDTO.PharmacyDto getPharmacyDtoByPlaceId(String placeId) {
-
+    public Pharmacy getPharmacyByPlaceId(String placeId) {
         GooglePlaceDetailsResponse response = getDetailsByPlaceId(placeId);
         GooglePlaceDetailsResponse.Result detailsResult = response.getResult();
-        return MyPageResponseDTO.PharmacyDto.builder()
+        return Pharmacy.builder()
                 .name(detailsResult.getName())
                 .placeId(placeId)
-//                .openNow(detailsResult.getOpeningHours().getOpenNow()) // 혹시나 나중에 추가할 수도 있어서 남겨둠
                 .region(getTranslatedLocation(response, detailsResult.getLocationList()))
                 .latitude(detailsResult.getGeometry().getLocation().getLat())
                 .longitude(detailsResult.getGeometry().getLocation().getLng())
-                .country(getCountryName(response))
-//                .periods(detailsResult.getOpeningHours().getPeriods()) // 혹시나 나중에 추가할 수도 있어서 남겨둠
-                .imgUrl(imageUtil.getImageURL(response))
+                .country(PharmacyCountry.getCountryByGoogleName(getCountryName(response)))
                 .build();
+    }
+
+    @Override
+    public String getImgURLByPlaceId(String placeId) {
+        GooglePlaceDetailsResponse response = getDetailsByPlaceId(placeId);
+        return imageUtil.getPharmacyImageURL(response);
     }
 
     // 장소 번역

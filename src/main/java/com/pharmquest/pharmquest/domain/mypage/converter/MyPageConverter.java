@@ -2,6 +2,9 @@ package com.pharmquest.pharmquest.domain.mypage.converter;
 
 import com.pharmquest.pharmquest.domain.medicine.data.Medicine;
 import com.pharmquest.pharmquest.domain.mypage.web.dto.MyPageResponseDTO;
+import com.pharmquest.pharmquest.domain.pharmacy.data.Pharmacy;
+import com.pharmquest.pharmquest.domain.pharmacy.service.PharmacyDetailsService;
+import com.pharmquest.pharmquest.domain.pharmacy.web.dto.GooglePlaceDetailsResponse;
 import com.pharmquest.pharmquest.domain.post.data.Post;
 import com.pharmquest.pharmquest.domain.post.data.enums.Country;
 import com.pharmquest.pharmquest.domain.post.data.mapping.Comment;
@@ -23,6 +26,7 @@ import java.util.stream.Collectors;
 public class MyPageConverter {
     private final SupplementsCategoryRepository supplementsCategoryRepository;
     private final SupplementsScrapRepository supplementsScrapRepository;
+    private final PharmacyDetailsService pharmacyDetailsService;
 
     private String processProductName(String name) {
         return name.replaceAll("^\\[(한국|미국|일본)\\]\\s*", "");
@@ -124,6 +128,18 @@ public class MyPageConverter {
                 .commentWriter(comment.getUser().getEmail().substring(0, comment.getUser().getEmail().indexOf("@")))
                 .postTitle(comment.getPost().getTitle())
                 .createdAt(comment.getCreatedAt().toLocalDate())
+                .build();
+    }
+
+    public MyPageResponseDTO.PharmacyDto toPharmacyDto(Pharmacy pharmacy) {
+
+        return MyPageResponseDTO.PharmacyDto.builder()
+                .name(pharmacy.getName())
+                .placeId(pharmacy.getPlaceId())
+                .region(pharmacy.getRegion())
+                .latitude(pharmacy.getLatitude())
+                .longitude(pharmacy.getLongitude())
+                .imgUrl(pharmacyDetailsService.getImgURLByPlaceId(pharmacy.getPlaceId()))
                 .build();
     }
 }

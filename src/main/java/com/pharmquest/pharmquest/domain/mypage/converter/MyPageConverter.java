@@ -3,9 +3,11 @@ package com.pharmquest.pharmquest.domain.mypage.converter;
 import com.pharmquest.pharmquest.domain.medicine.data.Medicine;
 import com.pharmquest.pharmquest.domain.mypage.web.dto.MyPageResponseDTO;
 import com.pharmquest.pharmquest.domain.post.data.Post;
+import com.pharmquest.pharmquest.domain.post.data.enums.Country;
 import com.pharmquest.pharmquest.domain.post.data.mapping.Comment;
 import com.pharmquest.pharmquest.domain.supplements.data.Enum.CategoryKeyword;
 import com.pharmquest.pharmquest.domain.supplements.data.Supplements;
+import com.pharmquest.pharmquest.domain.supplements.repository.SupplementsScrapRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import com.pharmquest.pharmquest.domain.supplements.repository.SupplementsCategoryRepository;
@@ -19,18 +21,38 @@ import java.util.stream.Collectors;
 @Component
 @RequiredArgsConstructor
 public class MyPageConverter {
+    private final SupplementsCategoryRepository supplementsCategoryRepository;
+    private final SupplementsScrapRepository supplementsScrapRepository;
 
-    public MyPageResponseDTO.SupplementsResponseDto toSupplementsDto(Supplements supplements) {
-        if (supplements == null) {
-            return null;
-        }
-        return MyPageResponseDTO.SupplementsResponseDto.from(supplements);
+    private String processProductName(String name) {
+        return name.replaceAll("^\\[(한국|미국|일본)\\]\\s*", "");
     }
 
-    public List<MyPageResponseDTO.SupplementsResponseDto> toSupplementsDtoList(List<Supplements> supplements) {
-        return supplements.stream()
-                .map(this::toSupplementsDto)
-                .collect(Collectors.toList());
+    private String processCountryName(Country country) {
+        if (country == Country.KOREA) {
+            return "한국";
+        }
+        else if (country == Country.USA) {
+            return "미국";
+        }
+        else if (country == Country.JAPAN) {
+            return "일본";
+        }
+        return "";
+    }
+
+    public MyPageResponseDTO.SupplementsResponseDto toSupplementsDto(Supplements supplements) {
+        List<String> categories = supplementsCategoryRepository.findCategoryNamesBySupplementId(supplements.getId());
+        return MyPageResponseDTO.SupplementsResponseDto.builder()
+                .id(supplements.getId())
+                .name(supplements.getName())
+                .image(supplements.getImage())
+                .brand(supplements.getBrand())
+                .productName(processProductName(supplements.getName()))
+                .country(processCountryName(supplements.getCountry()))
+                .isScrapped(true)
+                .categories(categories)
+                .build();
     }
 
 

@@ -158,9 +158,6 @@ public class PostCommandServiceImpl implements PostCommandService {
                 pageRequest
         );
 
-        if (posts.isEmpty()) {
-            throw new PostHandler(ErrorStatus.POST_NOT_EXIST);
-        }
         return posts;
     }
 

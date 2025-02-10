@@ -19,8 +19,8 @@ public enum SuccessStatus implements BaseCode {
     _CREATED_ACCESS_TOKEN(HttpStatus.CREATED, "201", "액세스 토큰 재발행에 성공했습니다."),
 
     // pharmacy
-    PHARMACY_SCRAP(HttpStatus.OK, "PHARMACY201", "약국을 마이페이지에 스크랩했습니다."),
-    PHARMACY_UNSCRAP(HttpStatus.OK, "PHARMACY202", "약국을 스크랩을 해제했습니다."),
+    PHARMACY_SCRAP(HttpStatus.OK, "PHARMACY201", "약국을 스크랩했습니다."),
+    PHARMACY_UNSCRAP(HttpStatus.OK, "PHARMACY202", "약국 스크랩을 해제했습니다."),
     PHARMACY_IF_SCRAP(HttpStatus.OK, "PHARMACY203", "약국 스크랩 여부를 성공적으로 조회했습니다."),
 
     // my page

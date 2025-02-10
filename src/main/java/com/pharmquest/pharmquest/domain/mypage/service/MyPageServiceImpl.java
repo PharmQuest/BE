@@ -161,8 +161,6 @@ public class MyPageServiceImpl implements MyPageService {
 
     @Override
     public Page<MyPageResponseDTO.PharmacyDto> getScrapPharmacies(User user, PharmacyCountry country, Integer page, Integer size) {
-
-
         // 스크랩된 전체 약국 placeId List
         List<String> pharmacyPlaceIdList = user.getPharmacyScraps();
 
@@ -193,7 +191,6 @@ public class MyPageServiceImpl implements MyPageService {
         Pageable pageable = PageRequest.of(page-1, size);
         int start = (page - 1) * size;
         int end = Math.min(start + size, totalElements);
-
         return new PageImpl<>(pharmacyDtoList.subList(start, end), pageable, totalElements);
     }
 

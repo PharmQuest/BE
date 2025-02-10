@@ -32,10 +32,8 @@ public class PharmacyCommandServiceImpl implements PharmacyCommandService {
         boolean isScraped = true;
 
         // 테이블에 약국 정보 이미 있는지 체크 후, 없다면 저장
-        Boolean isExist = pharmacyRepository.existsByPlaceId(placeId);
-        if (!isExist) {
-            Pharmacy pharmacy = pharmacyDetailsService.getPharmacyByPlaceId(placeId);
-            pharmacyRepository.save(pharmacy);
+        if (!pharmacyRepository.existsByPlaceId(placeId)){
+            savePharmacy(placeId);
         }
 
         // 해당 약국이 이미 스크랩되어있는지 체크.
@@ -66,5 +64,11 @@ public class PharmacyCommandServiceImpl implements PharmacyCommandService {
         userRepository.save(user);
         return isScraped ? SuccessStatus.PHARMACY_SCRAP : SuccessStatus.PHARMACY_UNSCRAP;
 
+    }
+
+    @Override
+    public Pharmacy savePharmacy(String placeId) {
+        Pharmacy pharmacy = pharmacyDetailsService.getPharmacyByPlaceId(placeId);
+        return pharmacyRepository.save(pharmacy);
     }
 }

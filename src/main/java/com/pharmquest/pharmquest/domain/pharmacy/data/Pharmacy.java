@@ -34,8 +34,5 @@ public class Pharmacy extends BaseEntity {
     @Column(nullable = false)
     private Double longitude;
 
-    @Column(nullable = false)
-    private String imgUrl;
-
 }
 

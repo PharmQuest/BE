@@ -6,7 +6,9 @@ import com.pharmquest.pharmquest.domain.mypage.converter.MyPageConverter;
 import com.pharmquest.pharmquest.domain.mypage.data.MedicineScrap;
 import com.pharmquest.pharmquest.domain.mypage.data.PostScrap;
 import com.pharmquest.pharmquest.domain.mypage.web.dto.MyPageResponseDTO;
+import com.pharmquest.pharmquest.domain.pharmacy.data.Pharmacy;
 import com.pharmquest.pharmquest.domain.pharmacy.data.enums.PharmacyCountry;
+import com.pharmquest.pharmquest.domain.pharmacy.repository.PharmacyRepository;
 import com.pharmquest.pharmquest.domain.pharmacy.service.PharmacyDetailsService;
 import com.pharmquest.pharmquest.domain.post.data.Post;
 import com.pharmquest.pharmquest.domain.post.data.mapping.Comment;
@@ -48,6 +50,7 @@ public class MyPageServiceImpl implements MyPageService {
     private final PostRepository postRepository;
     private final PostCommentRepository postCommentRepository;
     private final MedicineScrapRepository medicineScrapRepository;
+    private final PharmacyRepository pharmacyRepository;
 
 
     @Override
@@ -161,16 +164,15 @@ public class MyPageServiceImpl implements MyPageService {
 
     @Override
     public Page<MyPageResponseDTO.PharmacyDto> getScrapPharmacies(User user, PharmacyCountry country, Integer page, Integer size) {
+
         // 스크랩된 전체 약국 placeId List
         List<String> pharmacyPlaceIdList = user.getPharmacyScraps();
+        List<Pharmacy> pharmacies = pharmacyRepository.findAllByPlaceIds(pharmacyPlaceIdList);
 
-        // 찾는 국가의 약국만 필터링
-        List<MyPageResponseDTO.PharmacyDto> pharmacyDtoList = pharmacyPlaceIdList.stream()
-                .map(pharmacyDetailsService::getPharmacyDtoByPlaceId)
-                .filter(
-                        pharmacyDto -> country.equals(PharmacyCountry.getCountryByGoogleName(pharmacyDto.getCountry()))
-                                    || country.equals(PharmacyCountry.ALL)
-                )
+        // pharmacy list 기반으로 dto 추출
+        List<MyPageResponseDTO.PharmacyDto> pharmacyDtoList = pharmacies.stream()
+                .filter(pharmacy -> country.equals(pharmacy.getCountry()) || country.equals(PharmacyCountry.ALL))
+                .map(myPageConverter::toPharmacyDto)
                 .toList();
 
         int totalElements = pharmacyDtoList.size();

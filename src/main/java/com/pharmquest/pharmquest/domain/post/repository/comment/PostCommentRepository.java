@@ -12,8 +12,8 @@ public interface PostCommentRepository extends JpaRepository<Comment, Long> {
 
     Page<Comment> findByPostAndParentIsNull(Post post, Pageable pageable);
 
-    @Query("SELECT c FROM Comment c WHERE c.user.id = :userId AND c.isDeleted = false")
-    Page<Comment> findActiveCommentsByUser(@Param("userId") Long userId, Pageable pageable);
+    @Query("SELECT c FROM Comment c WHERE c.user.id = :userId AND c.isDeleted = false ORDER BY c.createdAt DESC")
+    Page<Comment> findActiveCommentsByUserOrderByCreatedAtDesc(@Param("userId") Long userId, Pageable pageable);
 
 
 
@@ -22,7 +22,7 @@ public interface PostCommentRepository extends JpaRepository<Comment, Long> {
             "(c.post.user.id = :userId AND c.user.id != :userId) " + // 내 게시글에 남이 단 댓글
             "OR " +
             "(c.parent.user.id = :userId AND c.user.id != :userId) " + // 내 댓글에 남이 단 대댓글 (어떤 게시글이든)
-            "ORDER BY c.createdAt ASC")
+            "ORDER BY c.createdAt DESC ")
     Page<Comment> findUserRelatedComments(
             @Param("userId") Long userId,
             Pageable pageable

@@ -11,7 +11,7 @@ public interface PostScrapRepository extends JpaRepository<PostScrap, Long> {
 
     boolean existsByPostIdAndUserId(Long postId, Long userId);
     Optional<PostScrap> findByPostIdAndUserId(Long postId, Long userId);
-    Page<PostScrap> findPostByUserId(Long userId, Pageable pageable);
+    Page<PostScrap> findPostByUserIdOrderByCreatedAtDesc(Long userId, Pageable pageable);
 
 
 }

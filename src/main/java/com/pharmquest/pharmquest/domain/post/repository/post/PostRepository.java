@@ -31,8 +31,8 @@ public interface PostRepository extends JpaRepository<Post, Long>, PostRepositor
             "(SELECT pr.post.id FROM PostReport pr WHERE pr.user.id = :userId)")
     Page<Post> findAllVisiblePostsExcludingReportedByUser(@Param("userId") Long userId, Pageable pageable);
 
-    Page<Post> findPostByUserId(Long userId, Pageable pageable);
-
     List<Post> findByIdIn(List<Long> ids);
+
+    Page<Post> findPostByUserIdOrderByCreatedAtDesc(Long userId, Pageable pageable);
 
 }

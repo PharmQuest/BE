@@ -80,7 +80,7 @@ public class MyPageServiceImpl implements MyPageService {
     @Override
     public Page<MyPageResponseDTO.ScrapPostResponseDTO> getScrapPosts(Long userId, Pageable pageable) {
 
-        Page<PostScrap> postScrapPage = postScrapRepository.findPostByUserId(userId, pageable);
+        Page<PostScrap> postScrapPage = postScrapRepository.findPostByUserIdOrderByCreatedAtDesc(userId, pageable);
 
         if (postScrapPage.isEmpty()) {
             return new PageImpl<>(new ArrayList<>(), pageable, postScrapPage.getTotalElements());
@@ -98,7 +98,7 @@ public class MyPageServiceImpl implements MyPageService {
     // 나의 활동 - 게시글
     @Override
     public Page<MyPageResponseDTO.PostResponseDTO> getMyPosts(Long userId, Pageable pageable) {
-        Page<Post> postPage = postRepository.findPostByUserId(userId, pageable);
+        Page<Post> postPage = postRepository.findPostByUserIdOrderByCreatedAtDesc(userId, pageable);
 
         if (postPage.isEmpty()) {
             return new PageImpl<>(new ArrayList<>(), pageable, postPage.getTotalElements());
@@ -116,7 +116,7 @@ public class MyPageServiceImpl implements MyPageService {
     // 나의 활동 - 댓글
     @Override
     public Page<MyPageResponseDTO.CommentResponseDTO> getMyComments(Long userId, Pageable pageable) {
-        Page<Comment> commentPage = postCommentRepository.findActiveCommentsByUser(userId, pageable);
+        Page<Comment> commentPage = postCommentRepository.findActiveCommentsByUserOrderByCreatedAtDesc(userId, pageable);
 
         if (commentPage.isEmpty()) {
             return new PageImpl<>(new ArrayList<>(), pageable, commentPage.getTotalElements());

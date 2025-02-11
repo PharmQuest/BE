@@ -8,7 +8,6 @@ import com.pharmquest.pharmquest.domain.mypage.web.dto.MyPageResponseDTO;
 import com.pharmquest.pharmquest.domain.pharmacy.data.Pharmacy;
 import com.pharmquest.pharmquest.domain.pharmacy.data.enums.PharmacyCountry;
 import com.pharmquest.pharmquest.domain.pharmacy.repository.PharmacyRepository;
-import com.pharmquest.pharmquest.domain.pharmacy.service.PharmacyDetailsService;
 import com.pharmquest.pharmquest.domain.post.data.Post;
 import com.pharmquest.pharmquest.domain.post.data.mapping.Comment;
 import com.pharmquest.pharmquest.domain.post.repository.comment.PostCommentRepository;
@@ -16,7 +15,6 @@ import com.pharmquest.pharmquest.domain.post.repository.post.PostRepository;
 import com.pharmquest.pharmquest.domain.post.repository.scrap.PostScrapRepository;
 import com.pharmquest.pharmquest.domain.supplements.data.Enum.CategoryGroup;
 import com.pharmquest.pharmquest.domain.supplements.data.Supplements;
-import com.pharmquest.pharmquest.domain.supplements.data.mapping.SupplementsScrap;
 import com.pharmquest.pharmquest.domain.supplements.repository.SupplementsCategoryRepository;
 import com.pharmquest.pharmquest.domain.supplements.repository.SupplementsRepository;
 import com.pharmquest.pharmquest.domain.supplements.repository.SupplementsScrapRepository;
@@ -34,7 +32,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -119,7 +116,7 @@ public class MyPageServiceImpl implements MyPageService {
     // 나의 활동 - 댓글
     @Override
     public Page<MyPageResponseDTO.CommentResponseDTO> getMyComments(Long userId, Pageable pageable) {
-        Page<Comment> commentPage = postCommentRepository.findCommentByUserId(userId, pageable);
+        Page<Comment> commentPage = postCommentRepository.findActiveCommentsByUser(userId, pageable);
 
         if (commentPage.isEmpty()) {
             return new PageImpl<>(new ArrayList<>(), pageable, commentPage.getTotalElements());

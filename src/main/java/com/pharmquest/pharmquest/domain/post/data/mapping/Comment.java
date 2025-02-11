@@ -23,6 +23,7 @@ public class Comment extends BaseEntity {
     @Column(nullable = false, length = 600)
     private String content;
 
+    @Column(name = "is_deleted")
     private boolean isDeleted = false;
 
     @ManyToOne(fetch = FetchType.LAZY)

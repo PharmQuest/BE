@@ -42,7 +42,6 @@ import java.util.stream.Collectors;
 @Slf4j
 public class MyPageServiceImpl implements MyPageService {
     private final MyPageConverter myPageConverter;
-    private final PharmacyDetailsService pharmacyDetailsService;
     private final SupplementsScrapRepository supplementsScrapRepository;
     private final PostScrapRepository postScrapRepository;
     private final PostRepository postRepository;
@@ -52,6 +51,8 @@ public class MyPageServiceImpl implements MyPageService {
     private final SupplementsRepository supplementsRepository;
     private final SupplementsCategoryRepository supplementsCategoryRepository;
 
+
+    // 스크랩한 영양제 조회
     @Override
     public Page<MyPageResponseDTO.SupplementsResponseDto> getScrapSupplements(
             Long userId,
@@ -78,6 +79,7 @@ public class MyPageServiceImpl implements MyPageService {
         return new PageImpl<>(supplementDTO, pageable, supplementsPage.getTotalElements());
     }
 
+    // 나의 활동 - 스크랩
     @Override
     public Page<MyPageResponseDTO.ScrapPostResponseDTO> getScrapPosts(Long userId, Pageable pageable) {
 
@@ -92,9 +94,11 @@ public class MyPageServiceImpl implements MyPageService {
                 .filter(Objects::nonNull)
                 .toList();
 
-        return new PageImpl<>(scrapedPostDTO, pageable, postScrapPage.getTotalPages());
+        return new PageImpl<>(scrapedPostDTO, pageable, postScrapPage.getTotalElements());
     }
 
+
+    // 나의 활동 - 게시글
     @Override
     public Page<MyPageResponseDTO.PostResponseDTO> getMyPosts(Long userId, Pageable pageable) {
         Page<Post> postPage = postRepository.findPostByUserId(userId, pageable);
@@ -108,10 +112,11 @@ public class MyPageServiceImpl implements MyPageService {
                     .filter(Objects::nonNull)
                     .toList();
 
-            return new PageImpl<>(PostDTO, pageable, postPage.getTotalPages());
+            return new PageImpl<>(PostDTO, pageable, postPage.getTotalElements());
         }
     }
 
+    // 나의 활동 - 댓글
     @Override
     public Page<MyPageResponseDTO.CommentResponseDTO> getMyComments(Long userId, Pageable pageable) {
         Page<Comment> commentPage = postCommentRepository.findCommentByUserId(userId, pageable);
@@ -124,10 +129,11 @@ public class MyPageServiceImpl implements MyPageService {
                     .filter(Objects::nonNull)
                     .toList();
 
-            return new PageImpl<>(CommentDTO, pageable, commentPage.getTotalPages());
+            return new PageImpl<>(CommentDTO, pageable, commentPage.getTotalElements());
         }
     }
 
+    // 스크랩한 상비약 조회
     @Override
     public Page<MyPageResponseDTO.MedicineResponseDto> getScrapMedicines(Long userId, Pageable pageable, String requestCountry) {
 
@@ -146,6 +152,7 @@ public class MyPageServiceImpl implements MyPageService {
         return new PageImpl<>(medicineDto, pageable, medicinePage.getTotalElements());
     }
 
+    //나의 활동 - 알림
     @Override
     public Page<MyPageResponseDTO.notificationResponseDTO> getNotification(Long userId, Pageable pageable) {
         Page<Comment> notificationCommentPage = postCommentRepository.findUserRelatedComments(userId, pageable);
@@ -157,10 +164,12 @@ public class MyPageServiceImpl implements MyPageService {
                     .map(myPageConverter::toNotificationCommentDTO)
                     .filter(Objects::nonNull)
                     .toList();
-            return new PageImpl<>(notificationCommentDTO, pageable, notificationCommentPage.getTotalPages());
+            return new PageImpl<>(notificationCommentDTO, pageable, notificationCommentPage.getTotalElements());
         }
     }
 
+
+    // 스크랩한 약국 조회
     @Override
     public Page<MyPageResponseDTO.PharmacyDto> getScrapPharmacies(User user, PharmacyCountry country, Integer page, Integer size) {
 

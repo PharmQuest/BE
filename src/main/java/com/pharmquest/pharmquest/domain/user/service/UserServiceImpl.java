@@ -23,6 +23,7 @@ public class UserServiceImpl implements UserService{
                 .userId(user.getId())
                 .userName(user.getEmail().substring(0, user.getEmail().indexOf("@")))
                 .provider(user.getProvider())
+                .email(user.getEmail())
                 .build();
     }
 }

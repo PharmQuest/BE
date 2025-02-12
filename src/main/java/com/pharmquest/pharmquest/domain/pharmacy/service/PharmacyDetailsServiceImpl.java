@@ -1,8 +1,8 @@
 package com.pharmquest.pharmquest.domain.pharmacy.service;
 
 import com.pharmquest.pharmquest.domain.medicine.service.TranslationService;
-import com.pharmquest.pharmquest.domain.mypage.web.dto.MyPageResponseDTO;
 import com.pharmquest.pharmquest.domain.pharmacy.ImageUtil;
+import com.pharmquest.pharmquest.domain.pharmacy.data.Pharmacy;
 import com.pharmquest.pharmquest.domain.pharmacy.data.enums.PharmacyCountry;
 import com.pharmquest.pharmquest.domain.pharmacy.web.dto.GooglePlaceDetailsResponse;
 import com.pharmquest.pharmquest.global.apiPayload.code.status.ErrorStatus;
@@ -36,32 +36,32 @@ public class PharmacyDetailsServiceImpl implements PharmacyDetailsService {
     public Boolean isPharmacyByPlaceId(String placeId) {
 
         GooglePlaceDetailsResponse response = getDetailsByPlaceId(placeId);
-        if (response != null && "OK".equals(response.getStatus())) {
+        if ("OK".equals(response.getStatus())) {
             return checkIfPharmacy(response);
         }
-        else{
-            throw new CommonExceptionHandler(ErrorStatus.PHARMACY_REQUEST_FAILED);
-        }
+        // 구글에서 가져온 응답의 status가 OK 아니면 그냥 약국 아닌걸로
+        return false;
     }
 
-    // placeId로 상세정보를 불러와 Dto로 변환
+    // placeId로 Pharmacy 객체 반환
     @Override
-    public MyPageResponseDTO.PharmacyDto getPharmacyDtoByPlaceId(String placeId) {
-
+    public Pharmacy getPharmacyByPlaceId(String placeId) {
         GooglePlaceDetailsResponse response = getDetailsByPlaceId(placeId);
         GooglePlaceDetailsResponse.Result detailsResult = response.getResult();
-
-        return MyPageResponseDTO.PharmacyDto.builder()
+        return Pharmacy.builder()
                 .name(detailsResult.getName())
                 .placeId(placeId)
-//                .openNow(detailsResult.getOpeningHours().getOpenNow()) // 혹시나 나중에 추가할 수도 있어서 남겨둠
                 .region(getTranslatedLocation(response, detailsResult.getLocationList()))
                 .latitude(detailsResult.getGeometry().getLocation().getLat())
                 .longitude(detailsResult.getGeometry().getLocation().getLng())
-                .country(getCountryName(response))
-//                .periods(detailsResult.getOpeningHours().getPeriods()) // 혹시나 나중에 추가할 수도 있어서 남겨둠
-                .imgUrl(imageUtil.getImageURL(response))
+                .country(PharmacyCountry.getCountryByGoogleName(getCountryName(response)))
                 .build();
+    }
+
+    @Override
+    public String getImgURLByPlaceId(String placeId) {
+        GooglePlaceDetailsResponse response = getDetailsByPlaceId(placeId);
+        return imageUtil.getPharmacyImageURL(response);
     }
 
     // 장소 번역
@@ -107,13 +107,13 @@ public class PharmacyDetailsServiceImpl implements PharmacyDetailsService {
     // api로부터 불러온 정보를 바탕으로 약국인지 확인
     private Boolean checkIfPharmacy(GooglePlaceDetailsResponse response) {
 
-        if (response.getResult() != null && response.getResult().getTypes() != null) {
+        if (response != null && response.getResult() != null && response.getResult().getTypes() != null) {
             List<String> types = response.getResult().getTypes();
             return types.contains("pharmacy") || types.contains("drugstore") || types.contains("hospital") || types.contains("health"); // 약국 중에 장소 타입이 pharmacy 아니고 drugstore로 적혀있는 곳도 있음
-        }else if(response.getResult() == null){
-            throw new CommonExceptionHandler(ErrorStatus.PLACE_NO_RESULT);
+        }else{
+            throw new CommonExceptionHandler(ErrorStatus.PLACE_NO_INFO);
         }
-        return false;
+
     }
 
 }

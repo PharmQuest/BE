@@ -20,17 +20,21 @@ public class ImageUtil {
     private final int IMG_MAX_SIZE = 200;
 
     // photo_reference과 api key 이용하여 이미미 요청 후 -> Base64 인코딩된 url 반환
-    public String getImageURL(GooglePlaceDetailsResponse response ) {
+    public String getPharmacyImageURL(GooglePlaceDetailsResponse response ) {
 
         String photoReference = getPhotoReference(response);
 
         String url = GOOGLE_PLACE_IMG_URL + "maxwidth=" + IMG_MAX_SIZE + "&maxheight" + IMG_MAX_SIZE + "&photo_reference=" + photoReference + "&key=" + API_KEY;
         try {
-            byte[] imageBytes = downloadImage(url);
-            return "data:image/jpeg;base64," + Base64.getEncoder().encodeToString(imageBytes);
+            return encodeToBase64(url);
         }catch (Exception e) { // 문제 있으면 기본 사진 반환
             return "https://umc-pharmquest.s3.ap-northeast-2.amazonaws.com/d09fa082-76d2-4c17-ad0a-e4800814ec61_pharm_default_img_1.jpg";
         }
+    }
+
+    private String encodeToBase64(String url) throws IOException {
+        byte[] imageBytes = downloadImage(url);
+        return "data:image/jpeg;base64," + Base64.getEncoder().encodeToString(imageBytes);
     }
 
     // 여러 사진들 중 하나의 photo_reference 반환

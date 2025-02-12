@@ -19,4 +19,5 @@ public class MedicineDetailResponseDTO {
     private String category;
     private String country;
     private String warnings;
+    private boolean isScrapped;
 }

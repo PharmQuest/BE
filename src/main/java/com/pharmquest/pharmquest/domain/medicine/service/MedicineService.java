@@ -14,12 +14,12 @@ public interface MedicineService {
     List<MedicineOpenapiResponseDTO> getMedicinesbyCategory(MedicineCategory category, int limit);
     List<MedicineOpenapiResponseDTO > getEnMedicines(String query, int limit);
     String getTotalData(String query, int limit);
-    MedicineDetailResponseDTO getMedicineBySplSetId(String splSetId);
+    MedicineDetailResponseDTO getMedicineBySplSetId(Long userId, String splSetId);
     List<Medicine> saveMedicinesByCategory(MedicineCategory category, int limit);
     List<Medicine> saveOtherMedicines(String query, int limit);
 
-    MedicineDetailResponseDTO getMedicineByIdFromDB(Long medicineId) ;
-    MedicineListPageResponseDTO getMedicinesFromDBByCategory(MedicineCategory category, int page, int size);
-    MedicineListPageResponseDTO searchMedicinesByCategoryAndKeyword(MedicineCategory category, String keyword, int page, int size);
+    MedicineDetailResponseDTO getMedicineByIdFromDB(Long userId, Long medicineId) ;
+    MedicineListPageResponseDTO getMedicinesFromDBByCategory(Long userId, MedicineCategory category, int page, int size);
+    MedicineListPageResponseDTO searchMedicinesByCategoryAndKeyword(Long userId, MedicineCategory category, String keyword, int page, int size);
 
 }

@@ -17,6 +17,6 @@ public interface HomePostRepository extends JpaRepository<Post, Long> {
     Optional<Post> findHotPost();
 
     // 최신 게시글 5개 조회
-    List<Post> findTop5ByOrderByCreatedAt();
+    List<Post> findTop5ByOrderByCreatedAtDesc();
 
 }

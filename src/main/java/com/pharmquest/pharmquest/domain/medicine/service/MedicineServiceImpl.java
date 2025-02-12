@@ -8,7 +8,9 @@ import com.pharmquest.pharmquest.domain.medicine.data.MedicineCategoryMapper;
 import com.pharmquest.pharmquest.domain.medicine.data.enums.MedicineCategory;
 import com.pharmquest.pharmquest.domain.medicine.repository.MedRepository;
 import com.pharmquest.pharmquest.domain.medicine.repository.MedicineRepository;
+import com.pharmquest.pharmquest.domain.medicine.repository.MedicineScrapRepository;
 import com.pharmquest.pharmquest.domain.medicine.web.dto.*;
+import com.pharmquest.pharmquest.domain.user.repository.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -25,11 +27,15 @@ public class MedicineServiceImpl implements MedicineService {
     private final MedicineRepository medicineRepository;
     private final MedicineConverter medicineConverter;
     private final MedRepository medRepository;
+    private final MedicineScrapRepository scrapRepository;
+    private final UserRepository userRepository;
 
-    public MedicineServiceImpl(MedicineRepository medicineRepository, MedicineConverter medicineConverter,MedRepository medRepository) {
+    public MedicineServiceImpl(MedicineRepository medicineRepository, MedicineConverter medicineConverter,MedRepository medRepository, MedicineScrapRepository scrapRepository,UserRepository userRepository) {
         this.medicineRepository = medicineRepository;
         this.medicineConverter = medicineConverter;
         this.medRepository = medRepository;
+        this.scrapRepository = scrapRepository;
+        this.userRepository = userRepository;
     }
 
     // 전체 정보 확인용 (FDA API 데이터를 원본 JSON 문자열로 반환) 백엔드 작업용
@@ -111,7 +117,7 @@ public class MedicineServiceImpl implements MedicineService {
 
     // SPL Set ID로 약물 데이터를 조회
     @Override
-    public MedicineDetailResponseDTO getMedicineBySplSetId(String splSetId) {
+    public MedicineDetailResponseDTO getMedicineBySplSetId(Long userId, String splSetId) {
         try {
             // splSetId로 FDA API 요청
             String query = "openfda.spl_set_id:" + splSetId;
@@ -122,7 +128,7 @@ public class MedicineServiceImpl implements MedicineService {
 
             // 결과가 있을 경우 변환
             if (results.isArray() && results.size() > 0) {
-                return medicineConverter.convertToDetail(results.get(0));
+                return medicineConverter.convertToDetail(results.get(0),userId);
             } else {
                 throw new IllegalArgumentException("해당 splSetId를 가진 약물이 없습니다: " + splSetId);
             }
@@ -132,7 +138,7 @@ public class MedicineServiceImpl implements MedicineService {
     }
 
     @Override
-    public MedicineListPageResponseDTO getMedicinesFromDBByCategory(MedicineCategory category, int page, int size) {
+    public MedicineListPageResponseDTO getMedicinesFromDBByCategory(Long userId, MedicineCategory category, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Medicine> medicinesPage = (category == MedicineCategory.ALL)
                 ? medRepository.findAll(pageable)
@@ -144,24 +150,28 @@ public class MedicineServiceImpl implements MedicineService {
         int currentPage = medicinesPage.getNumber()+1;         // 현재 페이지 번호
 
         List<MedicineResponseDTO> medicines = medicinesPage.getContent().stream()
-                .map(medicineConverter::convertFromEntity)
+                .map(medicine -> medicineConverter.convertFromEntity(medicine, userId))
                 .collect(Collectors.toList());
 
         return new MedicineListPageResponseDTO(amountCount, amountPage, currentCount, currentPage, medicines);
     }
 
     @Override
-    public MedicineDetailResponseDTO getMedicineByIdFromDB(Long medicineId) {
+    public MedicineDetailResponseDTO getMedicineByIdFromDB(Long userId, Long medicineId) {
         try {
             // DB에서 medicineTableId를 기준으로 약물 조회
             Medicine medicine = medRepository.findById(medicineId)
                     .orElseThrow(() -> new IllegalArgumentException("해당 ID를 가진 약물이 없습니다: " + medicineId));
 
-            // 저장된 값 확인용 로그 출력
-            System.out.println("조회된 약물의 ID: " + medicine.getId());
-            System.out.println("조회된 약물의 카테고리: " + medicine.getCategory());
-
             String category = MedicineCategoryMapper.toKoreanCategory(medicine.getCategory());
+
+            String splSetId = medicine.getSplSetId();
+
+            boolean isScrapped = (userId != null) && scrapRepository.existsByUserAndMedicine(
+                    userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다.")),
+                    medRepository.findBySplSetId(splSetId).orElse(null)
+
+            );
 
             return new MedicineDetailResponseDTO(
                     medicine.getBrandName(),
@@ -175,8 +185,10 @@ public class MedicineServiceImpl implements MedicineService {
                     medicine.getImgUrl(),
                     category,
                     medicine.getCountry(),
-                    medicine.getWarnings()
+                    medicine.getWarnings(),
+                    isScrapped
             );
+
         } catch (Exception e) {
             throw new RuntimeException("DB에서 약물 세부 정보를 가져오는 중 오류 발생", e);
         }
@@ -233,7 +245,7 @@ public class MedicineServiceImpl implements MedicineService {
                             continue;
                         }
 
-                        MedicineDetailResponseDTO dto = medicineConverter.convertToDetail(result);
+                        MedicineDetailResponseDTO dto = medicineConverter.convertToDetail(result, null);
 
                         if (isValidMedicineDetail(dto)) {
                             Medicine medicine = new Medicine();
@@ -298,7 +310,7 @@ public class MedicineServiceImpl implements MedicineService {
                             continue;
                         }
 
-                        MedicineDetailResponseDTO dto = medicineConverter.convertToDetail(result);
+                        MedicineDetailResponseDTO dto = medicineConverter.convertToDetail(result, null);
 
                         if (isValidMedicineDetail(dto)) {
                             Medicine medicine = new Medicine();
@@ -340,7 +352,7 @@ public class MedicineServiceImpl implements MedicineService {
 
     @Override
     @Transactional(readOnly = true)
-    public MedicineListPageResponseDTO searchMedicinesByCategoryAndKeyword(MedicineCategory category, String keyword, int page, int size) {
+    public MedicineListPageResponseDTO searchMedicinesByCategoryAndKeyword(Long userId, MedicineCategory category, String keyword, int page, int size) {
         try {
             Pageable pageable = PageRequest.of(page , size, Sort.by("id").ascending());
             Page<Medicine> medicinesPage;
@@ -365,7 +377,7 @@ public class MedicineServiceImpl implements MedicineService {
             int currentPage = medicinesPage.getNumber() + 1;         //  1부터 시작하도록 변경
 
             List<MedicineResponseDTO> medicines = medicinesPage.getContent().stream()
-                    .map(medicineConverter::convertFromEntity)
+                    .map(medicine -> medicineConverter.convertFromEntity(medicine, userId))
                     .collect(Collectors.toList());
 
             return new MedicineListPageResponseDTO(amountCount, amountPage, currentCount, currentPage, medicines);

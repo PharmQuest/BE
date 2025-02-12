@@ -24,7 +24,7 @@ public class HomePostService {
     // 최식 게시물 5개를 받아와 인기 게시물과 겹치는 하나는 제외
     public List<Post> getNewPosts(Post hotPost){
 
-        List<Post> newPosts = postRepository.findTop5ByOrderByCreatedAt();
+        List<Post> newPosts = postRepository.findTop5ByOrderByCreatedAtDesc();
 
         if(hotPost != null){ // 인기 게시물이 있을 경우 중복 제거
             newPosts.removeIf( post -> post.equals(hotPost));

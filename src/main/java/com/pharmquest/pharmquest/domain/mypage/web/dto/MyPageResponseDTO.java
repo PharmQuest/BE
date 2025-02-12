@@ -51,6 +51,7 @@ public class MyPageResponseDTO {
         private Double longitude;
         @JsonProperty(value = "img_url")
         private String imgUrl;
+        private Boolean isScrapped;
     }
 
     @Builder

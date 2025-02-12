@@ -177,7 +177,7 @@ public class MyPageServiceImpl implements MyPageService {
         // pharmacy list 기반으로 dto 추출
         List<MyPageResponseDTO.PharmacyDto> pharmacyDtoList = pharmacies.stream()
                 .filter(pharmacy -> country.equals(pharmacy.getCountry()) || country.equals(PharmacyCountry.ALL))
-                .map(myPageConverter::toPharmacyDto)
+                .map(pharmacy1 -> myPageConverter.toPharmacyDto(pharmacy1, user))
                 .toList();
 
         int totalElements = pharmacyDtoList.size();

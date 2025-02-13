@@ -67,8 +67,8 @@ public class PharmacyCommandServiceImpl implements PharmacyCommandService {
     }
 
     @Override
-    public Pharmacy savePharmacy(String placeId) {
+    public void savePharmacy(String placeId) {
         Pharmacy pharmacy = pharmacyDetailsService.getPharmacyByPlaceId(placeId);
-        return pharmacyRepository.save(pharmacy);
+        pharmacyRepository.save(pharmacy);
     }
 }

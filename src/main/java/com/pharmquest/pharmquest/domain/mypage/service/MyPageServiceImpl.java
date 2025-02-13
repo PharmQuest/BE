@@ -171,15 +171,21 @@ public class MyPageServiceImpl implements MyPageService {
     public Page<MyPageResponseDTO.PharmacyDto> getScrapPharmacies(User user, PharmacyCountry country, Integer page, Integer size) {
 
         // 스크랩된 전체 약국 placeId List
+        long prev = 0;
+        log.info("구간 1 {}", System.currentTimeMillis() - prev);
+        prev = System.currentTimeMillis();
         List<String> pharmacyPlaceIdList = user.getPharmacyScraps();
         List<Pharmacy> pharmacies = pharmacyRepository.findAllByPlaceIds(pharmacyPlaceIdList);
 
+        log.info("구간 2 {}", System.currentTimeMillis() - prev);
+        prev = System.currentTimeMillis();
         // pharmacy list 기반으로 dto 추출
         List<MyPageResponseDTO.PharmacyDto> pharmacyDtoList = pharmacies.stream()
                 .filter(pharmacy -> country.equals(pharmacy.getCountry()) || country.equals(PharmacyCountry.ALL))
-                .map(pharmacy1 -> myPageConverter.toPharmacyDto(pharmacy1, user))
+                .map(pharmacy -> myPageConverter.toPharmacyDto(pharmacy, pharmacyPlaceIdList))
                 .toList();
-
+        log.info("구간 3 {}", System.currentTimeMillis() - prev);
+        prev = System.currentTimeMillis();
         int totalElements = pharmacyDtoList.size();
 
         if (size < 1) { // 사이즈 검증

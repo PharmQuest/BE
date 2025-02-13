@@ -55,6 +55,7 @@ public class PharmacyDetailsServiceImpl implements PharmacyDetailsService {
                 .latitude(detailsResult.getGeometry().getLocation().getLat())
                 .longitude(detailsResult.getGeometry().getLocation().getLng())
                 .country(PharmacyCountry.getCountryByGoogleName(getCountryName(response)))
+                .imgUrl(imageUtil.getPharmacyImageURL(response))
                 .build();
     }
 

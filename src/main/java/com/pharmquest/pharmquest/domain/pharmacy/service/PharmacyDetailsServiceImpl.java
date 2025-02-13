@@ -96,8 +96,8 @@ public class PharmacyDetailsServiceImpl implements PharmacyDetailsService {
     // api로부터 불러온 정보를 바탕으로 약국인지 확인
     private Boolean checkIfPharmacy(GooglePlaceDetailsResponse response) {
 
-        if ("OK".equals(response.getStatus())) {
-            return checkIfPharmacy(response);
+        if (!"OK".equals(response.getStatus())) {
+            return false;
         }
 
         if (response != null && response.getResult() != null && response.getResult().getTypes() != null) {

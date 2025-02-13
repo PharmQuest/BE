@@ -83,6 +83,7 @@ public class PharmacyDetailsServiceImpl implements PharmacyDetailsService {
 
     // placeId를 가지고 api로 상세정보 조회
     private GooglePlaceDetailsResponse getDetailsByPlaceId(String placeId) {
+        log.info("google place api 호출");
         return webClient.get()
                 .uri(uriBuilder -> uriBuilder
                         .queryParam("key", API_KEY)

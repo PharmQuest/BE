@@ -98,6 +98,7 @@ public class MyPageConverter {
                 .productImage(medicine.getImgUrl())
                 .country(medicine.getCountry())
                 .categories(medicine.getCategory().name())
+                .isScrapped(true)
                 .build();
     }
 

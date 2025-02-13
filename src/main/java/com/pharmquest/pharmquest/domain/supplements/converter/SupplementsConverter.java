@@ -1,6 +1,7 @@
 package com.pharmquest.pharmquest.domain.supplements.converter;
 
 import com.pharmquest.pharmquest.domain.post.data.enums.Country;
+import com.pharmquest.pharmquest.domain.supplements.data.Enum.CategoryGroup;
 import com.pharmquest.pharmquest.domain.supplements.data.Supplements;
 import com.pharmquest.pharmquest.domain.supplements.repository.SupplementsCategoryRepository;
 import com.pharmquest.pharmquest.domain.supplements.repository.SupplementsRepository;
@@ -54,8 +55,22 @@ public class SupplementsConverter {
         return name.replaceAll("^\\[(한국|미국|일본)\\]\\s*", "");
     }
 
+    public List<String> findParentGroups(List<String> categories) {
+        List<String> result = new ArrayList<>();
+        result.add(CategoryGroup.전체.toString());  // 전체는 항상 포함
+
+        for (CategoryGroup group : CategoryGroup.values()) {
+            if (categories.stream().anyMatch(category -> group.getCategories().contains(category))) {
+                result.add(group.toString());
+            }
+        }
+
+        return result;
+    }
+
     public SupplementsResponseDTO.SupplementsDto toDto(Supplements supplement, Long userId) {
         List<String> categories = supplementsCategoryRepository.findCategoryNamesBySupplementId(supplement.getId());
+        List<String> selectCategories = findParentGroups(categories);
         return SupplementsResponseDTO.SupplementsDto.builder()
                 .id(supplement.getId())
                 .name(supplement.getName())
@@ -67,11 +82,13 @@ public class SupplementsConverter {
                 .scrapCount(supplement.getScrapCount())
                 .category4(supplement.getCategory4())
                 .categories(categories)
+                .selectCategorise(selectCategories)
                 .build();
     }
 
     public SupplementsResponseDTO.SupplementsSearchResponseDto toSearchDto(Supplements supplement, Long userId) {
         List<String> categories = supplementsCategoryRepository.findCategoryNamesBySupplementId(supplement.getId());
+        List<String> selectCategories = findParentGroups(categories);
         return SupplementsResponseDTO.SupplementsSearchResponseDto.builder()
                 .id(supplement.getId())
                 .name(supplement.getName())
@@ -83,12 +100,14 @@ public class SupplementsConverter {
                 .scrapCount(supplement.getScrapCount())
                 .category4(supplement.getCategory4())
                 .categories(categories)
+                .selectCategories(selectCategories)
                 .build();
     }
 
     public SupplementsResponseDTO.SupplementsDetailResponseDto toDetailDto(Supplements supplement, Long userId) {
         List<String> categories = supplementsCategoryRepository.findCategoryNamesBySupplementId(supplement.getId());
         List<Supplements> relatedSupplements = supplementsRepository.findRelatedSupplements(supplement.getId(), PageRequest.of(0, 6));
+        List<String> selectCategories = findParentGroups(categories);
 
         if (relatedSupplements.size() < 6){
             List<Long> excludeIds = new ArrayList<>();
@@ -141,9 +160,11 @@ public class SupplementsConverter {
                 .purpose(purposeList)
                 .warning(warningList)
                 .categories(categories)
+                .selectCategorise(selectCategories)
                 .relatedSupplements(relatedSupplements.stream()
                         .map(s -> {
                             List<String> relatedCategories = supplementsCategoryRepository.findCategoryNamesBySupplementId(s.getId());
+                            List<String> relatedSelectCategories = findParentGroups(relatedCategories);
                             return SupplementsResponseDTO.RelatedSupplementDto.builder()
                                     .id(s.getId())
                                     .name(s.getName())
@@ -153,6 +174,7 @@ public class SupplementsConverter {
                                     .productName(processProductName(supplement.getName()))
                                     .country(processCountryName(supplement.getCountry()))
                                     .categories(relatedCategories)
+                                    .selectCategorise(relatedSelectCategories)
                                     .isScrapped(isSupplementScrappedByUser(s, userId))
                                     .scrapCount(s.getScrapCount())
                                     .build();

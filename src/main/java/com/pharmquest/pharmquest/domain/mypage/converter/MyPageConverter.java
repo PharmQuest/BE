@@ -28,8 +28,6 @@ import java.util.stream.Collectors;
 public class MyPageConverter {
     private final SupplementsCategoryRepository supplementsCategoryRepository;
     private final SupplementsScrapRepository supplementsScrapRepository;
-    private final PharmacyDetailsService pharmacyDetailsService;
-    private final PharmacyQueryService pharmacyQueryService;
 
     private String processProductName(String name) {
         return name.replaceAll("^\\[(한국|미국|일본)\\]\\s*", "");

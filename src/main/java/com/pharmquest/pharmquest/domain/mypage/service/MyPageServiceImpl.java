@@ -175,7 +175,7 @@ public class MyPageServiceImpl implements MyPageService {
         log.info("구간 1 {}", System.currentTimeMillis() - prev);
         prev = System.currentTimeMillis();
         List<String> pharmacyPlaceIdList = user.getPharmacyScraps();
-        List<Pharmacy> pharmacies = pharmacyRepository.findAllByPlaceIds(pharmacyPlaceIdList);
+        List<Pharmacy> pharmacies = pharmacyRepository.findAllByPlaceIdList(pharmacyPlaceIdList);
 
         log.info("구간 2 {}", System.currentTimeMillis() - prev);
         prev = System.currentTimeMillis();

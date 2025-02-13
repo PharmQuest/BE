@@ -9,10 +9,10 @@ import java.util.List;
 
 public interface PharmacyRepository extends JpaRepository<Pharmacy, Long> {
 
-    public Boolean existsByPlaceId(String placeId);
+    Boolean existsByPlaceId(String placeId);
 
     @Query(value = "SELECT * FROM pharmacy WHERE place_id IN (:placeIds)", nativeQuery = true)
-    List<Pharmacy> findAllByPlaceIds(@Param("placeIds") List<String> placeIds);
+    List<Pharmacy> findAllByPlaceIdList(@Param("placeIds") List<String> placeIdList);
 
 
 }

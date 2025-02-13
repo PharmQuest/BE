@@ -32,17 +32,6 @@ public class PharmacyDetailsServiceImpl implements PharmacyDetailsService {
         this.imageUtil = imageUtil;
     }
 
-    @Override
-    public Boolean isPharmacyByPlaceId(String placeId) {
-
-        GooglePlaceDetailsResponse response = getDetailsByPlaceId(placeId);
-        if ("OK".equals(response.getStatus())) {
-            return checkIfPharmacy(response);
-        }
-        // 구글에서 가져온 응답의 status가 OK 아니면 그냥 약국 아닌걸로
-        return false;
-    }
-
     // placeId로 Pharmacy 객체 반환
     @Override
     public Pharmacy getPharmacyByPlaceId(String placeId) {
@@ -62,12 +51,6 @@ public class PharmacyDetailsServiceImpl implements PharmacyDetailsService {
                 .country(PharmacyCountry.getCountryByGoogleName(getCountryName(response)))
                 .imgUrl(imageUtil.getPharmacyImageURL(response))
                 .build();
-    }
-
-    @Override
-    public String getImgURLByPlaceId(String placeId) {
-        GooglePlaceDetailsResponse response = getDetailsByPlaceId(placeId);
-        return imageUtil.getPharmacyImageURL(response);
     }
 
     // 장소 번역
@@ -112,6 +95,10 @@ public class PharmacyDetailsServiceImpl implements PharmacyDetailsService {
 
     // api로부터 불러온 정보를 바탕으로 약국인지 확인
     private Boolean checkIfPharmacy(GooglePlaceDetailsResponse response) {
+
+        if ("OK".equals(response.getStatus())) {
+            return checkIfPharmacy(response);
+        }
 
         if (response != null && response.getResult() != null && response.getResult().getTypes() != null) {
             List<String> types = response.getResult().getTypes();

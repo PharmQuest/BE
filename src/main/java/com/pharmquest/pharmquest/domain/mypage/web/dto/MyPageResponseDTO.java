@@ -38,6 +38,7 @@ public class MyPageResponseDTO {
         private String productImage;
         private String categories;
         private String country;
+        private boolean isScrapped;
     }
 
     @Builder

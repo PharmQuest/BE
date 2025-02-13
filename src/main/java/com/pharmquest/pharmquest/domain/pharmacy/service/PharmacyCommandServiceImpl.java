@@ -42,8 +42,6 @@ public class PharmacyCommandServiceImpl implements PharmacyCommandService {
             // placeId 검증
             if(placeId == null || placeId.isEmpty()) { // 값이 없음
                 throw new CommonExceptionHandler(ErrorStatus.PHARMACY_PLACE_ID_NULL);
-            }else if(!pharmacyDetailsService.isPharmacyByPlaceId(placeId)) { // placeId에 해당하는 장소가 약국이 아님
-                throw new CommonExceptionHandler(ErrorStatus.NOT_A_PHARMACY);
             }
 
             // 스크랩 목록에 placeId 추가

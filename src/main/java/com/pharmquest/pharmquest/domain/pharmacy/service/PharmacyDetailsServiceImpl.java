@@ -48,6 +48,11 @@ public class PharmacyDetailsServiceImpl implements PharmacyDetailsService {
     public Pharmacy getPharmacyByPlaceId(String placeId) {
         GooglePlaceDetailsResponse response = getDetailsByPlaceId(placeId);
         GooglePlaceDetailsResponse.Result detailsResult = response.getResult();
+
+        if (!checkIfPharmacy(response)) {
+            throw new CommonExceptionHandler(ErrorStatus.NOT_A_PHARMACY);
+        }
+
         return Pharmacy.builder()
                 .name(detailsResult.getName())
                 .placeId(placeId)

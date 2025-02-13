@@ -41,6 +41,7 @@ public class SupplementsResponseDTO {
         private int scrapCount;
         private String category4;
         private List<String> categories;
+        private List<String> selectCategorise;
     }
 
     @Builder
@@ -70,6 +71,7 @@ public class SupplementsResponseDTO {
         private int scrapCount;
         private String category4;
         private List<String> categories;
+        private List<String> selectCategories;
     }
 
     @Builder
@@ -97,6 +99,7 @@ public class SupplementsResponseDTO {
         private String brand;
         private String maker;
         private List<String> categories;
+        private List<String> selectCategorise;
         private boolean isScrapped;
         private int scrapCount;
     }
@@ -120,6 +123,7 @@ public class SupplementsResponseDTO {
         private List<String> purpose;
         private List<String> warning;
         private List<String> categories;
+        private List<String> selectCategorise;
         private List<RelatedSupplementDto> relatedSupplements;
     }
 }

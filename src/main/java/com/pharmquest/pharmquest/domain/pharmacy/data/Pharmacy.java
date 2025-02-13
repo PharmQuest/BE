@@ -1,5 +1,6 @@
 package com.pharmquest.pharmquest.domain.pharmacy.data;
 
+import com.pharmquest.pharmquest.domain.pharmacy.converter.PlaceIdConverter;
 import com.pharmquest.pharmquest.domain.pharmacy.data.enums.PharmacyCountry;
 import com.pharmquest.pharmquest.global.data.BaseEntity;
 import jakarta.persistence.*;
@@ -33,6 +34,10 @@ public class Pharmacy extends BaseEntity {
 
     @Column(nullable = false)
     private Double longitude;
+
+    @Lob
+    @Column(columnDefinition = "TEXT")
+    private String imgUrl;
 
 }
 

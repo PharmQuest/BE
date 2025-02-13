@@ -24,6 +24,7 @@ import com.pharmquest.pharmquest.global.apiPayload.exception.handler.PostHandler
 import com.pharmquest.pharmquest.global.service.S3Service;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -36,6 +37,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class PostCommandServiceImpl implements PostCommandService {
 
     private final PostRepository postRepository;
@@ -108,7 +110,6 @@ public class PostCommandServiceImpl implements PostCommandService {
 
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new PostHandler(ErrorStatus.POST_NOT_EXIST));
-
         boolean isLiked = likeRepository.existsByPostIdAndUserId(postId, userId);
         boolean isScrapped = scrapRepository.existsByPostIdAndUserId(postId, userId);
         boolean isOwnPost = userId.equals(post.getUser().getId());

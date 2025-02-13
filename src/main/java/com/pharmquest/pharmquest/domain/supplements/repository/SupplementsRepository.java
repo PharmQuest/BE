@@ -22,7 +22,7 @@ public interface SupplementsRepository extends JpaRepository<Supplements, Long> 
     JOIN SupplementsCategory sc ON s.id = sc.supplement.id
     WHERE sc.category.id IN (
         SELECT sc2.category.id
-        FROM SupplementsCategory sc2 
+        FROM SupplementsCategory sc2
         WHERE sc2.supplement.id = :supplementId
     )
     AND s.id != :supplementId

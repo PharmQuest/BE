@@ -28,8 +28,6 @@ import java.util.stream.Collectors;
 public class MyPageConverter {
     private final SupplementsCategoryRepository supplementsCategoryRepository;
     private final SupplementsScrapRepository supplementsScrapRepository;
-    private final PharmacyDetailsService pharmacyDetailsService;
-    private final PharmacyQueryService pharmacyQueryService;
 
     private String processProductName(String name) {
         return name.replaceAll("^\\[(한국|미국|일본)\\]\\s*", "");
@@ -135,7 +133,7 @@ public class MyPageConverter {
                 .build();
     }
 
-    public MyPageResponseDTO.PharmacyDto toPharmacyDto(Pharmacy pharmacy, User user) {
+    public MyPageResponseDTO.PharmacyDto toPharmacyDto(Pharmacy pharmacy, List<String> placeIdList) {
 
         return MyPageResponseDTO.PharmacyDto.builder()
                 .name(pharmacy.getName())
@@ -143,8 +141,8 @@ public class MyPageConverter {
                 .region(pharmacy.getRegion())
                 .latitude(pharmacy.getLatitude())
                 .longitude(pharmacy.getLongitude())
-                .isScrapped(pharmacyQueryService.checkIfScrapPharmacy(pharmacy.getPlaceId(), user))
-                .imgUrl(pharmacyDetailsService.getImgURLByPlaceId(pharmacy.getPlaceId()))
+                .isScrapped(placeIdList.contains(pharmacy.getPlaceId()))
+                .imgUrl(pharmacy.getImgUrl())
                 .build();
     }
 }

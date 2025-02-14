@@ -12,6 +12,7 @@ import com.pharmquest.pharmquest.domain.medicine.service.TranslationService;
 import com.pharmquest.pharmquest.domain.medicine.web.dto.MedicineDetailResponseDTO;
 import com.pharmquest.pharmquest.domain.medicine.web.dto.MedicineOpenapiResponseDTO;
 import com.pharmquest.pharmquest.domain.medicine.web.dto.MedicineResponseDTO;
+import com.pharmquest.pharmquest.domain.medicine.web.dto.MedicineSaveDetailResponseDTO;
 import com.pharmquest.pharmquest.domain.user.repository.UserRepository;
 import org.springframework.stereotype.Component;
 
@@ -81,10 +82,13 @@ public class MedicineConverter {
         String country = "미국";
         String warnings = translate(getFirstValue(result, "warnings"));
 
-        boolean isScrapped = (userId != null) && scrapRepository.existsByUserAndMedicine(
-                userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다.")),
-                medRepository.findBySplSetId(splSetId).orElse(null)
-        );
+        boolean isScrapped = false;
+        if (userId != null) {
+            isScrapped = scrapRepository.existsByUserAndMedicine(
+                    userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다.")),
+                    medRepository.findBySplSetId(splSetId).orElse(null)
+            );
+        }
 
         return new MedicineDetailResponseDTO(
                 brandName,
@@ -102,6 +106,46 @@ public class MedicineConverter {
                 isScrapped
         );
     }
+
+    public MedicineSaveDetailResponseDTO SaveConvertToDetail(JsonNode result, Long userId) {
+        String brandName = translate(getFirstValue(result, "openfda.brand_name"));
+        String genericName = translate(getFirstValue(result, "openfda.generic_name"));
+        MedicineCategory categoryEnum = MedicineCategoryMapper.getCategory(
+                getFirstValue(result, "purpose"),
+                getFirstValue(result, "active_ingredient"),
+                "",
+                getFirstValue(result, "openfda.route")
+        );
+        String category = MedicineCategoryMapper.toKoreanCategory(categoryEnum);
+        String substanceName = translate(getFirstValue(result, "openfda.substance_name"));
+        String activeIngredient = translate(getFirstValue(result, "active_ingredient"));
+        String purpose = translate(getFirstValue(result, "purpose"));
+        String indicationsAndUsage = translate(getFirstValue(result, "indications_and_usage"));
+        String dosageAndAdministration = translate(getFirstValue(result, "dosage_and_administration"));
+
+        String splSetId = getFirstValue(result, "openfda.spl_set_id");
+        String imgUrl = fetchImageUrl(splSetId);
+        String country = "미국";
+        String warnings = translate(getFirstValue(result, "warnings"));
+
+
+
+        return new MedicineSaveDetailResponseDTO(
+                brandName,
+                genericName,
+                substanceName,
+                activeIngredient,
+                purpose,
+                indicationsAndUsage,
+                dosageAndAdministration,
+                splSetId,
+                imgUrl,
+                category,
+                country,
+                warnings
+        );
+    }
+
 
 
     // 번역 없이 변환
@@ -163,10 +207,13 @@ public class MedicineConverter {
         }
         String category = MedicineCategoryMapper.toKoreanCategory(medicine.getCategory());
 
-        boolean isScrapped = (userId != null) && scrapRepository.existsByUserAndMedicine(
-                userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다.")),
-                medicine
-        );
+        boolean isScrapped = false;
+        if (userId != null) {
+            isScrapped = scrapRepository.existsByUserAndMedicine(
+                    userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다.")),
+                    medicine
+            );
+        }
         return new MedicineResponseDTO(
                 medicine.getId(),
                 medicine.getBrandName(),

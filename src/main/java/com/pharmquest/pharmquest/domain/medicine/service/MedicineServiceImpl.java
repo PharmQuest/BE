@@ -165,13 +165,14 @@ public class MedicineServiceImpl implements MedicineService {
 
             String category = MedicineCategoryMapper.toKoreanCategory(medicine.getCategory());
 
-            String splSetId = medicine.getSplSetId();
-
-            boolean isScrapped = (userId != null) && scrapRepository.existsByUserAndMedicine(
-                    userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다.")),
-                    medRepository.findBySplSetId(splSetId).orElse(null)
-
-            );
+            boolean isScrapped = false;
+            if (userId != null) { // 로그인한 경우만 스크랩 여부 확인
+                isScrapped = scrapRepository.existsByUserAndMedicine(
+                        userRepository.findById(userId)
+                                .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다.")),
+                        medicine
+                );
+            }
 
             return new MedicineDetailResponseDTO(
                     medicine.getBrandName(),
@@ -214,6 +215,18 @@ public class MedicineServiceImpl implements MedicineService {
                 isValid(dto.getWarnings());
     }
 
+    private boolean isValidSaveMedicineDetail(MedicineSaveDetailResponseDTO dto) {
+        return isValid(dto.getBrandName()) &&
+                isValid(dto.getGenericName()) &&
+                isValid(dto.getSubstanceName()) &&
+                isValid(dto.getActiveIngredient()) &&
+                isValid(dto.getPurpose()) &&
+                isValid(dto.getIndicationsAndUsage()) &&
+                isValid(dto.getDosageAndAdministration()) &&
+                isValid(dto.getImgUrl()) &&
+                isValid(dto.getWarnings());
+    }
+
     // 공통된 유효성 검사 로직
     private boolean isValid(String value) {
         return value != null && !value.isEmpty() && !value.equalsIgnoreCase("Unknown") && !value.equals("알려지지 않은");
@@ -245,9 +258,9 @@ public class MedicineServiceImpl implements MedicineService {
                             continue;
                         }
 
-                        MedicineDetailResponseDTO dto = medicineConverter.convertToDetail(result, null);
+                        MedicineSaveDetailResponseDTO dto = medicineConverter.SaveConvertToDetail(result, null);
 
-                        if (isValidMedicineDetail(dto)) {
+                        if (isValidSaveMedicineDetail(dto)) {
                             Medicine medicine = new Medicine();
                             medicine.setBrandName(dto.getBrandName());
                             medicine.setGenericName(dto.getGenericName());
@@ -310,9 +323,9 @@ public class MedicineServiceImpl implements MedicineService {
                             continue;
                         }
 
-                        MedicineDetailResponseDTO dto = medicineConverter.convertToDetail(result, null);
+                        MedicineSaveDetailResponseDTO dto = medicineConverter.SaveConvertToDetail(result, null);
 
-                        if (isValidMedicineDetail(dto)) {
+                        if (isValidSaveMedicineDetail(dto)) {
                             Medicine medicine = new Medicine();
                             medicine.setBrandName(dto.getBrandName());
                             medicine.setGenericName(dto.getGenericName());
@@ -385,8 +398,4 @@ public class MedicineServiceImpl implements MedicineService {
             throw new RuntimeException("DB에서 약물 데이터를 검색하는 중 오류 발생", e);
         }
     }
-
-
-
-
 }

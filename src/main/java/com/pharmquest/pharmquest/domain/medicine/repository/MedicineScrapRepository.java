@@ -27,5 +27,4 @@ public interface MedicineScrapRepository extends JpaRepository<MedicineScrap, Lo
     @Query("SELECT ms FROM MedicineScrap ms JOIN ms.medicine m WHERE ms.user.id = :userId AND (:country IS NULL OR m.country = :country)")
     Page<MedicineScrap> findMedicineByUserIdAndCountry(@Param("userId") Long userId, @Param("country") String country, Pageable pageable);
 
-
 }

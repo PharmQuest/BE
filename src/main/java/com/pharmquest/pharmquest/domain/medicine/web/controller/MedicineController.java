@@ -51,13 +51,14 @@ public class MedicineController {
     @Operation(summary = "카테고리별 약물 검색", description = "DB에서 특정 카테고리별로 약물을 검색합니다.")
     @GetMapping("/lists")
     public ResponseEntity<ApiResponse<MedicineListPageResponseDTO>>searchMedicinesByCategory(
-            @Parameter(hidden = true) @RequestHeader("Authorization") String authorizationHeader,
+            @Parameter(hidden = true) @RequestHeader(value = "Authorization", required = false) String authorizationHeader,
             @Parameter(description = "카테고리 선택", required = true)
             @RequestParam(defaultValue = "ALL") MedicineCategory category,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size) {
         try {
-            Long userId = jwtUtil.getUserFromHeader(authorizationHeader).getId();
+            Long userId = (authorizationHeader != null && !authorizationHeader.isEmpty()) ?
+                    jwtUtil.getUserFromHeader(authorizationHeader).getId() : null;
             MedicineListPageResponseDTO medicines = medicineService.getMedicinesFromDBByCategory(userId, category, page - 1, size);
             return ApiResponse.onSuccess(SuccessStatus.MEDICINE_FETCH_SUCCESS, medicines);
         } catch (Exception e) {
@@ -94,9 +95,10 @@ public class MedicineController {
 
     @Operation(summary = "약물 ID를 이용한 상세 검색", description = "DB에서 약물 ID를 기반으로 약물 정보를 조회합니다.")
     @GetMapping("/detail")
-    public ResponseEntity<ApiResponse<MedicineDetailResponseDTO>> searchByIdFromDB(@Parameter(hidden = true) @RequestHeader("Authorization") String authorizationHeader, @RequestParam Long medicineId) {
+    public ResponseEntity<ApiResponse<MedicineDetailResponseDTO>> searchByIdFromDB(@Parameter(hidden = true) @RequestHeader(value = "Authorization", required = false) String authorizationHeader, @RequestParam Long medicineId) {
         try {
-            Long userId = jwtUtil.getUserFromHeader(authorizationHeader).getId();
+            Long userId = (authorizationHeader != null && !authorizationHeader.isEmpty()) ?
+                    jwtUtil.getUserFromHeader(authorizationHeader).getId() : null;
             MedicineDetailResponseDTO medicine = medicineService.getMedicineByIdFromDB(userId, medicineId);
             return ApiResponse.onSuccess(SuccessStatus.MEDICINE_FETCH_SUCCESS, medicine);
         } catch (Exception e) {
@@ -111,7 +113,7 @@ public class MedicineController {
                     description = "저장할 카테고리 선택 (진통/해열 -> PAIN_RELIEF, 소화/위장 -> DIGESTIVE)",
                     in = ParameterIn.QUERY
             )
-            @RequestParam MedicineCategory category,  // ✅ Enum 직접 사용 (Swagger에서 토글 지원)
+            @RequestParam MedicineCategory category,  //  Enum 직접 사용 (Swagger에서 토글 지원)
             @RequestParam(defaultValue = "10") int limit) {
         try {
             List<Medicine> savedMedicines = medicineService.saveMedicinesByCategory(category, limit);
@@ -151,19 +153,18 @@ public class MedicineController {
     @Operation(summary = "약물 검색 API", description = "카테고리 및 키워드를 이용해 DB에서 약물을 검색합니다.")
     @GetMapping("/search")
     public ResponseEntity<ApiResponse<MedicineListPageResponseDTO>> searchMedicinesByCategoryAndKeyword(
-            @Parameter(hidden = true) @RequestHeader("Authorization") String authorizationHeader,
+            @Parameter(hidden = true) @RequestHeader(value = "Authorization", required = false) String authorizationHeader,
             @RequestParam(defaultValue = "ALL") MedicineCategory category,
             @RequestParam(defaultValue = "") String keyword,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size) {
         try {
-            Long userId = jwtUtil.getUserFromHeader(authorizationHeader).getId();
+            Long userId = (authorizationHeader != null && !authorizationHeader.isEmpty()) ?
+                    jwtUtil.getUserFromHeader(authorizationHeader).getId() : null;
             MedicineListPageResponseDTO medicines = medicineService.searchMedicinesByCategoryAndKeyword(userId, category, keyword, page - 1, size);
             return ApiResponse.onSuccess(SuccessStatus.MEDICINE_FETCH_SUCCESS, medicines);
         } catch (Exception e) {
             return ApiResponse.onFailure(ErrorStatus.MEDICINE_NOT_FOUND);
         }
     }
-
-
 }

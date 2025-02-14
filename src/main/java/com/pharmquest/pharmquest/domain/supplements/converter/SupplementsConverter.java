@@ -82,7 +82,7 @@ public class SupplementsConverter {
                 .scrapCount(supplement.getScrapCount())
                 .category4(supplement.getCategory4())
                 .categories(categories)
-                .selectCategorise(selectCategories)
+                .selectCategories(selectCategories)
                 .build();
     }
 
@@ -160,7 +160,7 @@ public class SupplementsConverter {
                 .purpose(purposeList)
                 .warning(warningList)
                 .categories(categories)
-                .selectCategorise(selectCategories)
+                .selectCategories(selectCategories)
                 .relatedSupplements(relatedSupplements.stream()
                         .map(s -> {
                             List<String> relatedCategories = supplementsCategoryRepository.findCategoryNamesBySupplementId(s.getId());
@@ -174,7 +174,7 @@ public class SupplementsConverter {
                                     .productName(processProductName(supplement.getName()))
                                     .country(processCountryName(supplement.getCountry()))
                                     .categories(relatedCategories)
-                                    .selectCategorise(relatedSelectCategories)
+                                    .selectCategories(relatedSelectCategories)
                                     .isScrapped(isSupplementScrappedByUser(s, userId))
                                     .scrapCount(s.getScrapCount())
                                     .build();

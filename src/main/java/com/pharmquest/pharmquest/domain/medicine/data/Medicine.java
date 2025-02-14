@@ -29,5 +29,4 @@ public class Medicine {
     private String country;
     @Column(columnDefinition = "TEXT")
     private String warnings;
-    private boolean isScrapped;
 }

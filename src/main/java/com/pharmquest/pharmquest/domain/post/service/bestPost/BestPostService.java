@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface BestPostService {
 
-    Page<Post> getBestPosts(Long userId, Integer page);
+    Page<Post> getBestPosts(Integer page);
 
     List<Post> getRandomBestPosts(int count);
 }

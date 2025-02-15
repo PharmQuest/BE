@@ -21,7 +21,7 @@ public class BestPostServiceImpl implements BestPostService {
 
 
     @Override
-    public Page<Post> getBestPosts(Long userId, Integer page) {
+    public Page<Post> getBestPosts(Integer page) {
 
         PageRequest pageRequest = PageRequest.of(page - 1, 20, Sort.by(Sort.Direction.DESC, "createdAt"));
 

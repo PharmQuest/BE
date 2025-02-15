@@ -267,11 +267,9 @@ public class PostController {
 
     @GetMapping("/best-posts/lists")
     @Operation(summary = "베스트 인기글 리스트 조회 API")
-    public ApiResponse<PostResponseDTO.PostPreViewListDTO> getBestPostList(@Parameter (hidden = true) @RequestHeader(value = "Authorization",required = false) String authorizationHeader, @RequestParam(name="page")Integer page){
+    public ApiResponse<PostResponseDTO.PostPreViewListDTO> getBestPostList(@RequestParam(name="page")Integer page){
 
-        User user = jwtUtil.getUserFromHeader(authorizationHeader);
-
-        Page<Post> bestPostList = bestPostService.getBestPosts(user.getId(),  page);
+        Page<Post> bestPostList = bestPostService.getBestPosts(page);
 
         return ApiResponse.onSuccess(PostConverter.postPreViewListDTO(bestPostList));
 

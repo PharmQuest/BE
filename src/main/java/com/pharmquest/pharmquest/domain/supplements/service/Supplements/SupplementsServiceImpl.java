@@ -27,6 +27,7 @@ import com.pharmquest.pharmquest.domain.supplements.data.Enum.CategoryKeyword;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -66,9 +67,23 @@ public class SupplementsServiceImpl implements SupplementsService {
             throw new CommonExceptionHandler(ErrorStatus.SUPPLEMENTS_NO_FILTERED);
         }
 
+        List<Long> pageSupplementIds = supplementsPage.getContent().stream()
+                .map(Supplements::getId)
+                .collect(Collectors.toList());
+
+        Map<Long, List<String>> categoryMap = supplementsCategoryRepository
+                .findCategoryNamesBySupplementIds(pageSupplementIds).stream()
+                .collect(Collectors.groupingBy(
+                        row -> (Long) row[0],
+                        Collectors.mapping(
+                                row -> (String) row[1],
+                                Collectors.toList()
+                        )
+                ));
+
         List<SupplementsResponseDTO.SupplementsDto> supplementsDtos = supplementsPage.getContent().stream()
                 .map(supplement -> {
-                    SupplementsResponseDTO.SupplementsDto dto = supplementsConverter.toDto(supplement, userId);
+                    SupplementsResponseDTO.SupplementsDto dto = supplementsConverter.toDto(supplement, userId, categoryMap);
                     dto.setType("SUPPLEMENT");
                     return dto;
                 })
@@ -88,7 +103,7 @@ public class SupplementsServiceImpl implements SupplementsService {
             if ((i + 1) % 9 == 0 && ad != null) {
                 SupplementsResponseDTO.SupplementsDto adDto = SupplementsResponseDTO.SupplementsDto.builder()
                         .type("AD")
-                        .id(ad.getId())
+                        .id(-ad.getId())
                         .name(ad.getName())
                         .country("광고")
                         .productName(supplementsConverter.processAdName(ad.getName()))
@@ -138,9 +153,23 @@ public class SupplementsServiceImpl implements SupplementsService {
             throw new CommonExceptionHandler(ErrorStatus.SUPPLEMENTS_NO_SEARCH_RESULT);
         }
 
+        List<Long> pageSupplementIds = supplementsPage.getContent().stream()
+                .map(Supplements::getId)
+                .collect(Collectors.toList());
+
+        Map<Long, List<String>> categoryMap = supplementsCategoryRepository
+                .findCategoryNamesBySupplementIds(pageSupplementIds).stream()
+                .collect(Collectors.groupingBy(
+                        row -> (Long) row[0],
+                        Collectors.mapping(
+                                row -> (String) row[1],
+                                Collectors.toList()
+                        )
+                ));
+
         List<SupplementsResponseDTO.SupplementsSearchResponseDto> supplementsDtos = supplementsPage.getContent().stream()
                 .map(supplement -> {
-                    SupplementsResponseDTO.SupplementsSearchResponseDto dto = supplementsConverter.toSearchDto(supplement, userId);
+                    SupplementsResponseDTO.SupplementsSearchResponseDto dto = supplementsConverter.toSearchDto(supplement, userId, categoryMap);
                     dto.setType("SUPPLEMENT");
                     return dto;
                 })
@@ -160,7 +189,7 @@ public class SupplementsServiceImpl implements SupplementsService {
             if ((i + 1) % 9 == 0 && ad != null) {
                 SupplementsResponseDTO.SupplementsSearchResponseDto adDto = SupplementsResponseDTO.SupplementsSearchResponseDto.builder()
                         .type("AD")
-                        .id(ad.getId())
+                        .id(-ad.getId())
                         .name(ad.getName())
                         .country("광고")
                         .productName(supplementsConverter.processAdName(ad.getName()))

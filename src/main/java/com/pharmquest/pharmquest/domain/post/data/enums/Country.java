@@ -20,7 +20,8 @@ public enum Country {
     PHILIPPINES("필리핀", "PH"),
     SINGAPORE("싱가포르", "SG"),
     EUROPE("유럽", "EU"),
-    NONE("선택없음", "NONE");
+    NONE("선택없음", "NONE"),
+    ALL("전체", "ALL");
 
     private final String koreanName;
     private final String shortName;

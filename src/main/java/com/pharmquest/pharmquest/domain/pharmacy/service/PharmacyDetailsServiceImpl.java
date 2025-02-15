@@ -49,8 +49,20 @@ public class PharmacyDetailsServiceImpl implements PharmacyDetailsService {
                 .latitude(detailsResult.getGeometry().getLocation().getLat())
                 .longitude(detailsResult.getGeometry().getLocation().getLng())
                 .country(PharmacyCountry.getCountryByGoogleName(getCountryName(response)))
-                .imgUrl(imageUtil.getPharmacyImageURL(response))
+                .imgUrl(imageUtil.getPharmacyImageURL(getPhotoReference(placeId)))
                 .build();
+    }
+
+    // 여러 사진들 중 하나( 첫 번째 )의 photo_reference 반환
+    @Override
+    public String getPhotoReference(String placeId) {
+        GooglePlaceDetailsResponse response = getDetailsByPlaceId(placeId);
+        List<GooglePlaceDetailsResponse.Photo> photos = response.getResult().getPhotos();
+        // 사진이 없으면 일단 빈 문자열 반환
+        if (photos.isEmpty()) {
+            return "";
+        }
+        return photos.get(0).getPhotoReference();
     }
 
     // 장소 번역
@@ -83,7 +95,7 @@ public class PharmacyDetailsServiceImpl implements PharmacyDetailsService {
 
     // placeId를 가지고 api로 상세정보 조회
     private GooglePlaceDetailsResponse getDetailsByPlaceId(String placeId) {
-        log.info("google place api 호출");
+        log.info("google place api 호출. placeId = {}", placeId);
         return webClient.get()
                 .uri(uriBuilder -> uriBuilder
                         .queryParam("key", API_KEY)

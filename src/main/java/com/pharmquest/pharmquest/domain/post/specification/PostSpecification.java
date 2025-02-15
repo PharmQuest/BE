@@ -29,7 +29,7 @@ public class PostSpecification {
             }
 
             //country 조건 추가
-            if (country != null) {
+            if (country != null && country!= Country.ALL) {
                 predicates.add(criteriaBuilder.equal(root.get("country"), country));
             }
 

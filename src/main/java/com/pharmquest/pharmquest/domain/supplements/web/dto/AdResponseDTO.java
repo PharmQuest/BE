@@ -5,6 +5,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class AdResponseDTO {
 
     @Builder
@@ -12,16 +15,11 @@ public class AdResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class AdResponseDto {
+        private String type;
         private Long id;
-        private String smallImageUrl;
-    }
-
-    @Builder
-    @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class AdLargeResponseDto {
-        private Long id;
-        private String largeImageUrl;
+        private String name;
+        private String productName;
+        private String image;
+        private boolean isAd = true;
     }
 }

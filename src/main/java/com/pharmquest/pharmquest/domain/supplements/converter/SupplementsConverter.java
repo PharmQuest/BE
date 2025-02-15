@@ -55,6 +55,10 @@ public class SupplementsConverter {
         return name.replaceAll("^\\[(한국|미국|일본)\\]\\s*", "");
     }
 
+    public String processAdName(String name) {
+        return name.replace("[광고]", "").trim();
+    }
+
     public List<String> findParentGroups(List<String> categories) {
         List<String> result = new ArrayList<>();
         result.add(CategoryGroup.전체.toString());  // 전체는 항상 포함

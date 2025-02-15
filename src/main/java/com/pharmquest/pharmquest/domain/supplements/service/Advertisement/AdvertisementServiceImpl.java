@@ -7,34 +7,28 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class AdvertisementServiceImpl implements AdvertisementService {
     private final AdvertisementRepository advertisementRepository;
 
     public AdResponseDTO.AdResponseDto getAdvertisementByPage(int page) {
-        long totalAds = advertisementRepository.count();
-        if (totalAds == 0) {
+        List<Advertisement> ads = advertisementRepository.findAll();
+        if (ads.isEmpty()) {
             throw new EntityNotFoundException("No advertisements available");
         }
 
-        long adId = ((page - 1) % totalAds) + 1; // 모듈러 연산으로 광고 순환
-
-        Advertisement ad = advertisementRepository.findById(adId)
-                .orElseThrow(() -> new EntityNotFoundException("Advertisement not found"));
+        int index = (page - 1) % ads.size();
+        Advertisement ad = ads.get(index);
 
         return AdResponseDTO.AdResponseDto.builder()
                 .id(ad.getId())
-                .smallImageUrl(ad.getSmallImageUrl())
-                .build();
-    }
-
-    public AdResponseDTO.AdLargeResponseDto getAdvertisementById(long id) {
-        Advertisement ad = advertisementRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Advertisement not found"));
-        return AdResponseDTO.AdLargeResponseDto.builder()
-                .id(ad.getId())
-                .largeImageUrl(ad.getLargeImageUrl())
+                .name(ad.getName())
+                .image(ad.getImageUrl())
+                .productName(ad.getName())
+                .isAd(true)
                 .build();
     }
 }

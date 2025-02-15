@@ -1,9 +1,8 @@
 package com.pharmquest.pharmquest.domain.supplements.web.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import lombok.*;
 
 import java.util.List;
 
@@ -28,9 +27,11 @@ public class SupplementsResponseDTO {
     // 응답용 DTO
     @Builder
     @Getter
+    @Setter
     @NoArgsConstructor
     @AllArgsConstructor
     public static class SupplementsDto {
+        private String type;
         private Long id;
         private String name;
         private String country;
@@ -42,6 +43,7 @@ public class SupplementsResponseDTO {
         private String category4;
         private List<String> categories;
         private List<String> selectCategories;
+        private boolean isAd = false;
     }
 
     @Builder
@@ -52,15 +54,16 @@ public class SupplementsResponseDTO {
         private int amountCount;
         private int currentPage;
         private int currentCount;
-        private AdResponseDTO.AdResponseDto adResponse;
-        private List<SupplementsDto> supplements;
+        private List<SupplementsDto> items;
     }
 
     @Builder
     @Getter
+    @Setter
     @NoArgsConstructor
     @AllArgsConstructor
     public static class SupplementsSearchResponseDto {
+        private String type;
         private Long id;
         private String name;
         private String country;
@@ -72,6 +75,7 @@ public class SupplementsResponseDTO {
         private String category4;
         private List<String> categories;
         private List<String> selectCategories;
+        private boolean isAd = false;
     }
 
     @Builder
@@ -82,8 +86,7 @@ public class SupplementsResponseDTO {
         private int amountCount;
         private int currentPage;
         private int currentCount;
-        private AdResponseDTO.AdResponseDto adResponse;
-        private List<SupplementsSearchResponseDto> supplements;
+        private List<SupplementsSearchResponseDto> items;
     }
 
     @Builder

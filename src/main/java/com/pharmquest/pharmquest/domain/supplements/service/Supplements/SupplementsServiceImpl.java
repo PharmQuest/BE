@@ -12,6 +12,7 @@ import com.pharmquest.pharmquest.domain.supplements.repository.SupplementsReposi
 import com.pharmquest.pharmquest.domain.supplements.service.Advertisement.AdvertisementService;
 import com.pharmquest.pharmquest.domain.supplements.service.DailyMed.DailyMedService;
 import com.pharmquest.pharmquest.domain.supplements.service.Naver.NaverShoppingService;
+import com.pharmquest.pharmquest.domain.supplements.web.dto.AdResponseDTO;
 import com.pharmquest.pharmquest.domain.supplements.web.dto.DailyMedResponseDTO;
 import com.pharmquest.pharmquest.domain.supplements.web.dto.SupplementsResponseDTO;
 import com.pharmquest.pharmquest.global.apiPayload.code.status.ErrorStatus;
@@ -65,15 +66,52 @@ public class SupplementsServiceImpl implements SupplementsService {
             throw new CommonExceptionHandler(ErrorStatus.SUPPLEMENTS_NO_FILTERED);
         }
 
+        List<SupplementsResponseDTO.SupplementsDto> supplementsDtos = supplementsPage.getContent().stream()
+                .map(supplement -> {
+                    SupplementsResponseDTO.SupplementsDto dto = supplementsConverter.toDto(supplement, userId);
+                    dto.setType("SUPPLEMENT");
+                    return dto;
+                })
+                .collect(Collectors.toList());
+
+        // 광고 가져오기
+        AdResponseDTO.AdResponseDto ad = advertisementService.getAdvertisementByPage(supplementsPage.getNumber() + 1);
+
+        List<SupplementsResponseDTO.SupplementsDto> items = new ArrayList<>();
+        for (int i = 0; i < supplementsDtos.size(); i++) {
+            // 영양제 추가
+            SupplementsResponseDTO.SupplementsDto supplement = supplementsDtos.get(i);
+            supplement.setType("SUPPLEMENT");
+            items.add(supplement);
+
+            // 9개의 영양제 후에 광고 삽입
+            if ((i + 1) % 9 == 0 && ad != null) {
+                SupplementsResponseDTO.SupplementsDto adDto = SupplementsResponseDTO.SupplementsDto.builder()
+                        .type("AD")
+                        .id(ad.getId())
+                        .name(ad.getName())
+                        .country("광고")
+                        .productName(supplementsConverter.processAdName(ad.getName()))
+                        .image(ad.getImage())
+                        .brand("")
+                        .scrapCount(0)
+                        .category4("")
+                        .categories(new ArrayList<>())
+                        .selectCategories(new ArrayList<>())
+                        .isAd(true)
+                        .isScrapped(false)
+                        .build();
+
+                items.add(adDto);
+            }
+        }
+
         return SupplementsResponseDTO.SupplementsPageResponseDto.builder()
                 .amountPage(supplementsPage.getTotalPages())
                 .amountCount((int) supplementsPage.getTotalElements())
                 .currentPage(supplementsPage.getNumber() + 1)
                 .currentCount(supplementsPage.getNumberOfElements())
-                .adResponse(advertisementService.getAdvertisementByPage(supplementsPage.getNumber() + 1))
-                .supplements(supplementsPage.getContent().stream()
-                        .map(supplement -> supplementsConverter.toDto(supplement, userId))
-                        .collect(Collectors.toList()))
+                .items(items)
                 .build();
     }
 
@@ -99,15 +137,53 @@ public class SupplementsServiceImpl implements SupplementsService {
         if (supplementsPage.isEmpty()) {
             throw new CommonExceptionHandler(ErrorStatus.SUPPLEMENTS_NO_SEARCH_RESULT);
         }
+
+        List<SupplementsResponseDTO.SupplementsSearchResponseDto> supplementsDtos = supplementsPage.getContent().stream()
+                .map(supplement -> {
+                    SupplementsResponseDTO.SupplementsSearchResponseDto dto = supplementsConverter.toSearchDto(supplement, userId);
+                    dto.setType("SUPPLEMENT");
+                    return dto;
+                })
+                .collect(Collectors.toList());
+
+        // 광고 가져오기
+        AdResponseDTO.AdResponseDto ad = advertisementService.getAdvertisementByPage(supplementsPage.getNumber() + 1);
+
+        List<SupplementsResponseDTO.SupplementsSearchResponseDto> items = new ArrayList<>();
+        for (int i = 0; i < supplementsDtos.size(); i++) {
+            // 영양제 추가
+            SupplementsResponseDTO.SupplementsSearchResponseDto supplement = supplementsDtos.get(i);
+            supplement.setType("SUPPLEMENT");
+            items.add(supplement);
+
+            // 9개의 영양제 후에 광고 삽입
+            if ((i + 1) % 9 == 0 && ad != null) {
+                SupplementsResponseDTO.SupplementsSearchResponseDto adDto = SupplementsResponseDTO.SupplementsSearchResponseDto.builder()
+                        .type("AD")
+                        .id(ad.getId())
+                        .name(ad.getName())
+                        .country("광고")
+                        .productName(supplementsConverter.processAdName(ad.getName()))
+                        .image(ad.getImage())
+                        .brand("")
+                        .scrapCount(0)
+                        .category4("")
+                        .categories(new ArrayList<>())
+                        .selectCategories(new ArrayList<>())
+                        .isAd(true)
+                        .isScrapped(false)
+                        .build();
+
+                items.add(adDto);
+            }
+        }
+
         return SupplementsResponseDTO.SupplementsSearchPageResponseDto.builder()
                 .amountPage(supplementsPage.getTotalPages())
                 .amountCount((int) supplementsPage.getTotalElements())
                 .currentPage(supplementsPage.getNumber() + 1)
                 .currentCount(supplementsPage.getNumberOfElements())
-                .adResponse(advertisementService.getAdvertisementByPage(supplementsPage.getNumber() + 1))
-                .supplements(supplementsPage.getContent().stream()
-                        .map(supplement -> supplementsConverter.toSearchDto(supplement, userId))
-                        .collect(Collectors.toList()))
+                .items(items)
                 .build();
     }
 

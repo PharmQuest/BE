@@ -18,8 +18,8 @@ public class Advertisement {
     private long id;
 
     @Column(nullable = false)
-    private String smallImageUrl;
+    private String name;
 
     @Column(nullable = false)
-    private String largeImageUrl;
+    private String ImageUrl;
 }

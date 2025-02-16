@@ -90,7 +90,8 @@ public class SupplementsServiceImpl implements SupplementsService {
                 .collect(Collectors.toList());
 
         // 광고 가져오기
-        AdResponseDTO.AdResponseDto ad = advertisementService.getAdvertisementByPage(supplementsPage.getNumber() + 1);
+        List<AdResponseDTO.AdResponseDto> ads = advertisementService.getAdvertisementByPage(supplementsPage.getNumber() + 1);
+        int adIndex = 0;
 
         List<SupplementsResponseDTO.SupplementsDto> items = new ArrayList<>();
         for (int i = 0; i < supplementsDtos.size(); i++) {
@@ -100,7 +101,8 @@ public class SupplementsServiceImpl implements SupplementsService {
             items.add(supplement);
 
             // 9개의 영양제 후에 광고 삽입
-            if ((i + 1) % 9 == 0 && ad != null) {
+            if ((i + 1) % 9 == 0 && !ads.isEmpty() && adIndex < ads.size()) {
+                AdResponseDTO.AdResponseDto ad = ads.get(adIndex++);
                 SupplementsResponseDTO.SupplementsDto adDto = SupplementsResponseDTO.SupplementsDto.builder()
                         .type("AD")
                         .id(-ad.getId())
@@ -176,7 +178,8 @@ public class SupplementsServiceImpl implements SupplementsService {
                 .collect(Collectors.toList());
 
         // 광고 가져오기
-        AdResponseDTO.AdResponseDto ad = advertisementService.getAdvertisementByPage(supplementsPage.getNumber() + 1);
+        List<AdResponseDTO.AdResponseDto> ads = advertisementService.getAdvertisementByPage(supplementsPage.getNumber() + 1);
+        int adIndex = 0;
 
         List<SupplementsResponseDTO.SupplementsSearchResponseDto> items = new ArrayList<>();
         for (int i = 0; i < supplementsDtos.size(); i++) {
@@ -186,7 +189,8 @@ public class SupplementsServiceImpl implements SupplementsService {
             items.add(supplement);
 
             // 9개의 영양제 후에 광고 삽입
-            if ((i + 1) % 9 == 0 && ad != null) {
+            if ((i + 1) % 9 == 0 && !ads.isEmpty() && adIndex < ads.size()) {
+                AdResponseDTO.AdResponseDto ad = ads.get(adIndex++);
                 SupplementsResponseDTO.SupplementsSearchResponseDto adDto = SupplementsResponseDTO.SupplementsSearchResponseDto.builder()
                         .type("AD")
                         .id(-ad.getId())

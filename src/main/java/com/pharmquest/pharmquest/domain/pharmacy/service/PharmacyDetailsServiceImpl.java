@@ -49,14 +49,25 @@ public class PharmacyDetailsServiceImpl implements PharmacyDetailsService {
                 .latitude(detailsResult.getGeometry().getLocation().getLat())
                 .longitude(detailsResult.getGeometry().getLocation().getLng())
                 .country(PharmacyCountry.getCountryByGoogleName(getCountryName(response)))
-                .imgUrl(imageUtil.getPharmacyImageURL(getPhotoReference(placeId)))
+                .imgUrl(imageUtil.getPharmacyImageURL(getPhotoReference(response)))
                 .build();
     }
 
-    // 여러 사진들 중 하나( 첫 번째 )의 photo_reference 반환
+    // 여러 사진들 중 하나( 첫 번째 )의 photo_reference 반환 - placeId 이용
     @Override
     public String getPhotoReference(String placeId) {
         GooglePlaceDetailsResponse response = getDetailsByPlaceId(placeId);
+        return getPhotoReferenceByResponse(response);
+    }
+
+    // 여러 사진들 중 하나( 첫 번째 )의 photo_reference 반환 - GooglePlaceDetailsResponse 이용
+    @Override
+    public String getPhotoReference(GooglePlaceDetailsResponse response) {
+        return getPhotoReferenceByResponse(response);
+    }
+
+    // GooglePlaceDetailsResponse으로 약국의 photoReference 반환 - 2개의 getPhotoReference()에 공통으로 이용
+    private String getPhotoReferenceByResponse(GooglePlaceDetailsResponse response) {
         List<GooglePlaceDetailsResponse.Photo> photos = response.getResult().getPhotos();
         // 사진이 없으면 일단 빈 문자열 반환
         if (photos.isEmpty()) {

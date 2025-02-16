@@ -19,7 +19,7 @@ public class ImageUtil {
     private final String GOOGLE_PLACE_IMG_URL = "https://maps.googleapis.com/maps/api/place/photo?";
     private final int IMG_MAX_SIZE = 200;
 
-    // photo_reference과 api key 이용하여 이미미 요청 후 -> Base64 인코딩된 url 반환
+    // photo_reference과 api key 이용하여 이미지 요청 후 -> Base64 인코딩된 url 반환
     public String getPharmacyImageURL(String photoReference) {
 
         String url = GOOGLE_PLACE_IMG_URL + "maxwidth=" + IMG_MAX_SIZE + "&maxheight" + IMG_MAX_SIZE + "&photo_reference=" + photoReference + "&key=" + API_KEY;

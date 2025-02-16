@@ -27,6 +27,7 @@ import com.pharmquest.pharmquest.domain.supplements.data.Enum.CategoryKeyword;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -66,16 +67,31 @@ public class SupplementsServiceImpl implements SupplementsService {
             throw new CommonExceptionHandler(ErrorStatus.SUPPLEMENTS_NO_FILTERED);
         }
 
+        List<Long> pageSupplementIds = supplementsPage.getContent().stream()
+                .map(Supplements::getId)
+                .collect(Collectors.toList());
+
+        Map<Long, List<String>> categoryMap = supplementsCategoryRepository
+                .findCategoryNamesBySupplementIds(pageSupplementIds).stream()
+                .collect(Collectors.groupingBy(
+                        row -> (Long) row[0],
+                        Collectors.mapping(
+                                row -> (String) row[1],
+                                Collectors.toList()
+                        )
+                ));
+
         List<SupplementsResponseDTO.SupplementsDto> supplementsDtos = supplementsPage.getContent().stream()
                 .map(supplement -> {
-                    SupplementsResponseDTO.SupplementsDto dto = supplementsConverter.toDto(supplement, userId);
+                    SupplementsResponseDTO.SupplementsDto dto = supplementsConverter.toDto(supplement, userId, categoryMap);
                     dto.setType("SUPPLEMENT");
                     return dto;
                 })
                 .collect(Collectors.toList());
 
         // 광고 가져오기
-        AdResponseDTO.AdResponseDto ad = advertisementService.getAdvertisementByPage(supplementsPage.getNumber() + 1);
+        List<AdResponseDTO.AdResponseDto> ads = advertisementService.getAdvertisementByPage(supplementsPage.getNumber() + 1);
+        int adIndex = 0;
 
         List<SupplementsResponseDTO.SupplementsDto> items = new ArrayList<>();
         for (int i = 0; i < supplementsDtos.size(); i++) {
@@ -85,10 +101,11 @@ public class SupplementsServiceImpl implements SupplementsService {
             items.add(supplement);
 
             // 9개의 영양제 후에 광고 삽입
-            if ((i + 1) % 9 == 0 && ad != null) {
+            if ((i + 1) % 9 == 0 && !ads.isEmpty() && adIndex < ads.size()) {
+                AdResponseDTO.AdResponseDto ad = ads.get(adIndex++);
                 SupplementsResponseDTO.SupplementsDto adDto = SupplementsResponseDTO.SupplementsDto.builder()
                         .type("AD")
-                        .id(ad.getId())
+                        .id(-ad.getId())
                         .name(ad.getName())
                         .country("광고")
                         .productName(supplementsConverter.processAdName(ad.getName()))
@@ -138,16 +155,31 @@ public class SupplementsServiceImpl implements SupplementsService {
             throw new CommonExceptionHandler(ErrorStatus.SUPPLEMENTS_NO_SEARCH_RESULT);
         }
 
+        List<Long> pageSupplementIds = supplementsPage.getContent().stream()
+                .map(Supplements::getId)
+                .collect(Collectors.toList());
+
+        Map<Long, List<String>> categoryMap = supplementsCategoryRepository
+                .findCategoryNamesBySupplementIds(pageSupplementIds).stream()
+                .collect(Collectors.groupingBy(
+                        row -> (Long) row[0],
+                        Collectors.mapping(
+                                row -> (String) row[1],
+                                Collectors.toList()
+                        )
+                ));
+
         List<SupplementsResponseDTO.SupplementsSearchResponseDto> supplementsDtos = supplementsPage.getContent().stream()
                 .map(supplement -> {
-                    SupplementsResponseDTO.SupplementsSearchResponseDto dto = supplementsConverter.toSearchDto(supplement, userId);
+                    SupplementsResponseDTO.SupplementsSearchResponseDto dto = supplementsConverter.toSearchDto(supplement, userId, categoryMap);
                     dto.setType("SUPPLEMENT");
                     return dto;
                 })
                 .collect(Collectors.toList());
 
         // 광고 가져오기
-        AdResponseDTO.AdResponseDto ad = advertisementService.getAdvertisementByPage(supplementsPage.getNumber() + 1);
+        List<AdResponseDTO.AdResponseDto> ads = advertisementService.getAdvertisementByPage(supplementsPage.getNumber() + 1);
+        int adIndex = 0;
 
         List<SupplementsResponseDTO.SupplementsSearchResponseDto> items = new ArrayList<>();
         for (int i = 0; i < supplementsDtos.size(); i++) {
@@ -157,10 +189,11 @@ public class SupplementsServiceImpl implements SupplementsService {
             items.add(supplement);
 
             // 9개의 영양제 후에 광고 삽입
-            if ((i + 1) % 9 == 0 && ad != null) {
+            if ((i + 1) % 9 == 0 && !ads.isEmpty() && adIndex < ads.size()) {
+                AdResponseDTO.AdResponseDto ad = ads.get(adIndex++);
                 SupplementsResponseDTO.SupplementsSearchResponseDto adDto = SupplementsResponseDTO.SupplementsSearchResponseDto.builder()
                         .type("AD")
-                        .id(ad.getId())
+                        .id(-ad.getId())
                         .name(ad.getName())
                         .country("광고")
                         .productName(supplementsConverter.processAdName(ad.getName()))

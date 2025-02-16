@@ -45,9 +45,4 @@ public class PharmacyController {
         return ApiResponse.of(SuccessStatus.PHARMACY_IF_SCRAP, new PharmacyResponseDTO.checkScrap(ifScrap));
     }
 
-    @PatchMapping("/change")
-    public void change() {
-        pharmacyS3UpdateService.updatePharmacyImage();
-    }
-
 }

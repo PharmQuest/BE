@@ -37,7 +37,7 @@ public class Pharmacy extends BaseEntity {
     private Double longitude;
 
     @Lob
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "LONGTEXT")
     @Setter
     private String imgUrl;
 

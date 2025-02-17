@@ -14,7 +14,7 @@ import java.util.List;
 
 @Configuration
 public class SwaggerConfig {
-    
+
     @Bean
     public OpenAPI api() {
         SecurityScheme apiKey = new SecurityScheme()
@@ -33,7 +33,7 @@ public class SwaggerConfig {
                         .version("1.0")
                         .description("PharmQuest 프로젝트 API 문서"))
                 .servers(List.of(
-                        new Server().url("https://pharmquest.store").description("Production Server") // 🔹 HTTPS 지원
+                        new Server().url("https://api.pharmquest.store").description("Production API Server")
                 ))
                 .components(new Components().addSecuritySchemes("Bearer Token", apiKey))
                 .addSecurityItem(securityRequirement);

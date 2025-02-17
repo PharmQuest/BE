@@ -11,10 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -72,8 +69,8 @@ public class SupplementsConverter {
         return result;
     }
 
-    public SupplementsResponseDTO.SupplementsDto toDto(Supplements supplement, Long userId) {
-        List<String> categories = supplementsCategoryRepository.findCategoryNamesBySupplementId(supplement.getId());
+    public SupplementsResponseDTO.SupplementsDto toDto(Supplements supplement, Long userId, Map<Long, List<String>> categoryMap) {
+        List<String> categories = categoryMap.getOrDefault(supplement.getId(), Collections.emptyList());
         List<String> selectCategories = findParentGroups(categories);
         return SupplementsResponseDTO.SupplementsDto.builder()
                 .id(supplement.getId())
@@ -90,8 +87,8 @@ public class SupplementsConverter {
                 .build();
     }
 
-    public SupplementsResponseDTO.SupplementsSearchResponseDto toSearchDto(Supplements supplement, Long userId) {
-        List<String> categories = supplementsCategoryRepository.findCategoryNamesBySupplementId(supplement.getId());
+    public SupplementsResponseDTO.SupplementsSearchResponseDto toSearchDto(Supplements supplement, Long userId, Map<Long, List<String>> categoryMap) {
+        List<String> categories = categoryMap.getOrDefault(supplement.getId(), Collections.emptyList());
         List<String> selectCategories = findParentGroups(categories);
         return SupplementsResponseDTO.SupplementsSearchResponseDto.builder()
                 .id(supplement.getId())

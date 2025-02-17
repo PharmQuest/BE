@@ -19,10 +19,8 @@ public class ImageUtil {
     private final String GOOGLE_PLACE_IMG_URL = "https://maps.googleapis.com/maps/api/place/photo?";
     private final int IMG_MAX_SIZE = 200;
 
-    // photo_reference과 api key 이용하여 이미미 요청 후 -> Base64 인코딩된 url 반환
-    public String getPharmacyImageURL(GooglePlaceDetailsResponse response ) {
-
-        String photoReference = getPhotoReference(response);
+    // photo_reference과 api key 이용하여 이미지 요청 후 -> Base64 인코딩된 url 반환
+    public String getPharmacyImageURL(String photoReference) {
 
         String url = GOOGLE_PLACE_IMG_URL + "maxwidth=" + IMG_MAX_SIZE + "&maxheight" + IMG_MAX_SIZE + "&photo_reference=" + photoReference + "&key=" + API_KEY;
         try {
@@ -35,18 +33,6 @@ public class ImageUtil {
     private String encodeToBase64(String url) throws IOException {
         byte[] imageBytes = downloadImage(url);
         return "data:image/jpeg;base64," + Base64.getEncoder().encodeToString(imageBytes);
-    }
-
-    // 여러 사진들 중 하나의 photo_reference 반환
-    // getImageBase64()의 파라미터로 사용
-    private String getPhotoReference(GooglePlaceDetailsResponse response) {
-
-        List<GooglePlaceDetailsResponse.Photo> photos = response.getResult().getPhotos();
-        // 사진이 없으면 일단 빈 문자열 반환
-        if (photos.isEmpty()) {
-            return "";
-        }
-        return photos.get(0).getPhotoReference();
     }
 
     private byte[] downloadImage(String imageUrl) throws IOException {

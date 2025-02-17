@@ -1,14 +1,15 @@
 package com.pharmquest.pharmquest.domain.pharmacy.data;
 
-import com.pharmquest.pharmquest.domain.pharmacy.converter.PlaceIdConverter;
 import com.pharmquest.pharmquest.domain.pharmacy.data.enums.PharmacyCountry;
 import com.pharmquest.pharmquest.global.data.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.extern.slf4j.Slf4j;
 
 @Entity
 @Getter
 @Builder
+@Slf4j
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class Pharmacy extends BaseEntity {
@@ -36,7 +37,8 @@ public class Pharmacy extends BaseEntity {
     private Double longitude;
 
     @Lob
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "LONGTEXT")
+    @Setter
     private String imgUrl;
 
 }

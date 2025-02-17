@@ -2,6 +2,7 @@ package com.pharmquest.pharmquest.domain.pharmacy.web.controller;
 
 import com.pharmquest.pharmquest.domain.pharmacy.service.PharmacyCommandService;
 import com.pharmquest.pharmquest.domain.pharmacy.service.PharmacyQueryService;
+import com.pharmquest.pharmquest.domain.pharmacy.service.PharmacyS3UpdateService;
 import com.pharmquest.pharmquest.domain.pharmacy.web.dto.PharmacyResponseDTO;
 import com.pharmquest.pharmquest.domain.token.JwtUtil;
 import com.pharmquest.pharmquest.domain.user.data.User;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/pharmacy")
 public class PharmacyController {
 
+    private final PharmacyS3UpdateService pharmacyS3UpdateService;
     private final PharmacyCommandService pharmacyCommandService;
     private final PharmacyQueryService pharmacyQueryService;
     private final JwtUtil jwtUtil;

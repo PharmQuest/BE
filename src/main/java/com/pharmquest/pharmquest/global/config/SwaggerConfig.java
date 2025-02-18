@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Configuration
@@ -27,16 +28,26 @@ public class SwaggerConfig {
         SecurityRequirement securityRequirement = new SecurityRequirement()
                 .addList("Bearer Token");
 
+        List<Server> servers = new ArrayList<>();
+        if (isLocalEnvironment()) {
+            servers.add(new Server().url("http://localhost:8080").description("Local Server"));
+        } else {
+            servers.add(new Server().url("https://api.pharmquest.store").description("Production API Server"));
+        }
+
         return new OpenAPI()
                 .info(new Info()
                         .title("PharmQuest API")
                         .version("1.0")
                         .description("PharmQuest 프로젝트 API 문서"))
-                .servers(List.of(
-                        new Server().url("https://api.pharmquest.store").description("Production API Server")
-                ))
+                .servers(servers)
                 .components(new Components().addSecuritySchemes("Bearer Token", apiKey))
                 .addSecurityItem(securityRequirement);
+    }
+
+    private boolean isLocalEnvironment() {
+        String env = System.getProperty("spring.profiles.active", "local");
+        return "local".equals(env);
     }
 
 }

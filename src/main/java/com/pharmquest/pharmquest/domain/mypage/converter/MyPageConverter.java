@@ -9,6 +9,7 @@ import com.pharmquest.pharmquest.domain.pharmacy.web.dto.GooglePlaceDetailsRespo
 import com.pharmquest.pharmquest.domain.post.data.Post;
 import com.pharmquest.pharmquest.domain.post.data.enums.Country;
 import com.pharmquest.pharmquest.domain.post.data.mapping.Comment;
+import com.pharmquest.pharmquest.domain.supplements.converter.SupplementsConverter;
 import com.pharmquest.pharmquest.domain.supplements.data.Enum.CategoryKeyword;
 import com.pharmquest.pharmquest.domain.supplements.data.Supplements;
 import com.pharmquest.pharmquest.domain.supplements.repository.SupplementsScrapRepository;
@@ -27,7 +28,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class MyPageConverter {
     private final SupplementsCategoryRepository supplementsCategoryRepository;
-    private final SupplementsScrapRepository supplementsScrapRepository;
+    private final SupplementsConverter supplementsConverter;
 
     private String processProductName(String name) {
         return name.replaceAll("^\\[(한국|미국|일본)\\]\\s*", "");
@@ -48,6 +49,7 @@ public class MyPageConverter {
 
     public MyPageResponseDTO.SupplementsResponseDto toSupplementsDto(Supplements supplements) {
         List<String> categories = supplementsCategoryRepository.findCategoryNamesBySupplementId(supplements.getId());
+        List<String> selectCategories = supplementsConverter.findParentGroups(categories);
         return MyPageResponseDTO.SupplementsResponseDto.builder()
                 .id(supplements.getId())
                 .name(supplements.getName())
@@ -57,6 +59,7 @@ public class MyPageConverter {
                 .country(processCountryName(supplements.getCountry()))
                 .isScrapped(true)
                 .categories(categories)
+                .selectCategories(selectCategories)
                 .build();
     }
 

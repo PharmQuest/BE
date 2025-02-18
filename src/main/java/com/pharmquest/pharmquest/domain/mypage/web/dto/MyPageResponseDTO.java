@@ -25,6 +25,7 @@ public class MyPageResponseDTO {
         private String brand;
         private boolean isScrapped;
         private List<String> categories;
+        private List<String> selectCategories;
     }
 
     @Builder

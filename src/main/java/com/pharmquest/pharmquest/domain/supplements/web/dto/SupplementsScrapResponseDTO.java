@@ -12,5 +12,4 @@ public class SupplementsScrapResponseDTO {
     private boolean isScrapped;
     private int scrapCount;
     private String message;
-    private List<String> selectCategories;
 }

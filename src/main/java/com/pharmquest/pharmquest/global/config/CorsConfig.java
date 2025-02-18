@@ -19,7 +19,7 @@ public class CorsConfig {
                                 "https://api.pharmquest.store", // 🔹 백엔드 서브도메인 추가
                                 "http://localhost:8080"
                         )
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                        .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
                         .allowedHeaders("*")
                         .allowCredentials(true);
             }

@@ -1,5 +1,6 @@
 package com.pharmquest.pharmquest.domain.medicine.web.dto;
 
+import com.pharmquest.pharmquest.domain.medicine.data.enums.MedicineCategory;
 import lombok.*;
 
 @Getter
@@ -20,4 +21,5 @@ public class KoreanMedicineResponseDTO {
     private String openDe;          // 공개일자
     private String updateDe;        // 수정일자
     private String itemImage;       // 이미지 URL
+    private MedicineCategory category;
 }

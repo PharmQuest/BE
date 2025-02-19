@@ -10,7 +10,6 @@ import com.pharmquest.pharmquest.domain.medicine.repository.KoreanMedicineReposi
 import com.pharmquest.pharmquest.domain.medicine.repository.MedRepository;
 import com.pharmquest.pharmquest.domain.medicine.repository.MedicineRepository;
 import com.pharmquest.pharmquest.domain.medicine.web.dto.KoreanMedicineResponseDTO;
-import com.pharmquest.pharmquest.domain.medicine.web.dto.UnifiedMedicineDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

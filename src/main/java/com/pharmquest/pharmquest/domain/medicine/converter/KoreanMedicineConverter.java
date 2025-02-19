@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.pharmquest.pharmquest.domain.medicine.data.Medicine;
 import com.pharmquest.pharmquest.domain.medicine.data.enums.MedicineCategory;
 import com.pharmquest.pharmquest.domain.medicine.web.dto.KoreanMedicineResponseDTO;
-import com.pharmquest.pharmquest.domain.medicine.web.dto.UnifiedMedicineDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

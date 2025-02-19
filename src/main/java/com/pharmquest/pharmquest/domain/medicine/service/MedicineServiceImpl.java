@@ -1,26 +1,34 @@
 package com.pharmquest.pharmquest.domain.medicine.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.pharmquest.pharmquest.domain.medicine.converter.KoreanMedicineConverter;
 import com.pharmquest.pharmquest.domain.medicine.converter.MedicineConverter;
 import com.pharmquest.pharmquest.domain.medicine.data.Medicine;
 import com.pharmquest.pharmquest.domain.medicine.data.MedicineCategoryMapper;
 import com.pharmquest.pharmquest.domain.medicine.data.enums.MedicineCategory;
+import com.pharmquest.pharmquest.domain.medicine.repository.KoreanMedicineRepository;
 import com.pharmquest.pharmquest.domain.medicine.repository.MedRepository;
 import com.pharmquest.pharmquest.domain.medicine.repository.MedicineRepository;
 import com.pharmquest.pharmquest.domain.medicine.repository.MedicineScrapRepository;
 import com.pharmquest.pharmquest.domain.medicine.web.dto.*;
 import com.pharmquest.pharmquest.domain.user.repository.UserRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Mono;
+
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-
+@Slf4j
 @Service
 public class MedicineServiceImpl implements MedicineService {
 
@@ -37,6 +45,7 @@ public class MedicineServiceImpl implements MedicineService {
         this.scrapRepository = scrapRepository;
         this.userRepository = userRepository;
     }
+
 
     // 전체 정보 확인용 (FDA API 데이터를 원본 JSON 문자열로 반환) 백엔드 작업용
     @Override
@@ -398,4 +407,51 @@ public class MedicineServiceImpl implements MedicineService {
             throw new RuntimeException("DB에서 약물 데이터를 검색하는 중 오류 발생", e);
         }
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public MedicineListPageResponseDTO searchMedicinesByCategoryKeywordAndCountry(Long userId, MedicineCategory category, String keyword, String country, int page, int size) {
+        try {
+            Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending());
+            Page<Medicine> medicinesPage;
+
+            // ✅ 전체 국가 (ALL)인 경우, 기존 로직과 동일하게 처리
+            if (country.equalsIgnoreCase("ALL")) {
+                if (category == MedicineCategory.ALL) {
+                    medicinesPage = (keyword != null && !keyword.isEmpty())
+                            ? medRepository.findByKeyword(keyword, pageable)
+                            : medRepository.findAll(pageable);
+                } else {
+                    medicinesPage = (keyword != null && !keyword.isEmpty())
+                            ? medRepository.findByCategoryAndKeyword(category, keyword, pageable)
+                            : medRepository.findByCategory(category, pageable);
+                }
+            } else {
+                // ✅ 특정 국가(미국 or 한국)로 필터링
+                if (category == MedicineCategory.ALL) {
+                    medicinesPage = (keyword != null && !keyword.isEmpty())
+                            ? medRepository.findByKeywordAndCountry(keyword, country, pageable)
+                            : medRepository.findByCategoryAndCountry(category, country, pageable);
+                } else {
+                    medicinesPage = (keyword != null && !keyword.isEmpty())
+                            ? medRepository.findByCategoryKeywordAndCountry(category, keyword, country, pageable)
+                            : medRepository.findByCategoryAndCountry(category, country, pageable);
+                }
+            }
+
+            long amountCount = medicinesPage.getTotalElements(); // 전체 개수
+            int amountPage = medicinesPage.getTotalPages();      // 전체 페이지 수
+            int currentCount = medicinesPage.getNumberOfElements(); // 현재 페이지의 개수
+            int currentPage = medicinesPage.getNumber() + 1;         //  1부터 시작하도록 변경
+
+            List<MedicineResponseDTO> medicines = medicinesPage.getContent().stream()
+                    .map(medicine -> medicineConverter.convertFromEntity(medicine, userId))
+                    .collect(Collectors.toList());
+
+            return new MedicineListPageResponseDTO(amountCount, amountPage, currentCount, currentPage, medicines);
+        } catch (Exception e) {
+            throw new RuntimeException("DB에서 약물 데이터를 검색하는 중 오류 발생", e);
+        }
+    }
+
 }

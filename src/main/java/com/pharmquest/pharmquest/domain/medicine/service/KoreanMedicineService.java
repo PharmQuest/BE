@@ -78,6 +78,8 @@ public class KoreanMedicineService {
         return koreanMedicineRepository.fetchMedicineData()
                 .flatMapIterable(responses -> {
                     List<Medicine> medicineList = new ArrayList<>();
+                    int savedCount = 0;  // 저장 개수 추적
+
                     for (String responseBody : responses) {
                         try {
                             JsonNode rootNode = objectMapper.readTree(responseBody);
@@ -86,22 +88,45 @@ public class KoreanMedicineService {
                             if (!itemsNode.isArray()) continue;
 
                             for (JsonNode item : itemsNode) {
+                                if (savedCount >= 20) break;
+
                                 KoreanMedicineResponseDTO dto = koreanMedicineConverter.convertToDTO(item, category);
-                                if (dto != null) {
-                                    medicineList.add(koreanMedicineConverter.convertToMedicineEntity(dto));
+                                if (dto != null && isValidKoreanMedicine(dto)) {  // 빈 값이 없는 데이터만 저장
+                                    Medicine medicine = koreanMedicineConverter.convertToMedicineEntity(dto);
+                                    medicineList.add(medicine);
+                                    savedCount++;
                                 }
                             }
                         } catch (Exception e) {
                             log.error("❌ JSON 파싱 오류: {}", e.getMessage());
                         }
+
+                        if (savedCount >= 20) break;  //  15개 저장 완료되면 반복 종료
                     }
+
                     return medicineList;
                 })
-                .doOnNext(medicine -> {
-                    medRepository.save(medicine); // ✅ 개별 저장
-                    medRepository.flush(); // ✅ 즉시 DB 반영
-                })
+                .take(20)
+                .doOnNext(medRepository::save)  // 개별 저장
                 .then();
     }
+
+    private boolean isValidKoreanMedicine(KoreanMedicineResponseDTO dto) {
+        return isValid(dto.getItemName()) &&
+                isValid(dto.getEfcyQesitm()) &&
+                isValid(dto.getUseMethodQesitm()) &&
+                isValid(dto.getAtpnQesitm()) &&
+                isValid(dto.getIntrcQesitm()) &&
+                isValid(dto.getSeQesitm()) &&
+                isValid(dto.getDepositMethodQesitm()) &&
+                isValid(dto.getOpenDe()) &&
+                isValid(dto.getUpdateDe()) &&
+                isValid(dto.getItemImage());
+    }
+
+    private boolean isValid(String value) {
+        return value != null && !value.isEmpty() && !value.equalsIgnoreCase("Unknown");
+    }
+
 
 }

@@ -6,6 +6,7 @@ import com.pharmquest.pharmquest.domain.medicine.data.enums.MedicineCategory;
 import com.pharmquest.pharmquest.domain.medicine.web.dto.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 
@@ -21,5 +22,5 @@ public interface MedicineService {
     MedicineDetailResponseDTO getMedicineByIdFromDB(Long userId, Long medicineId) ;
     MedicineListPageResponseDTO getMedicinesFromDBByCategory(Long userId, MedicineCategory category, int page, int size);
     MedicineListPageResponseDTO searchMedicinesByCategoryAndKeyword(Long userId, MedicineCategory category, String keyword, int page, int size);
-
+    MedicineListPageResponseDTO searchMedicinesByCategoryKeywordAndCountry(Long userId, MedicineCategory category, String keyword, String country, int page, int size);
 }

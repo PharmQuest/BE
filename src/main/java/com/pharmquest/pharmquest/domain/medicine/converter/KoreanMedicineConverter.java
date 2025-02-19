@@ -30,18 +30,18 @@ public class KoreanMedicineConverter {
     private String bucketName;
 
     /**
-     * ✅ JSON 데이터를 KoreanMedicineResponseDTO로 변환 (S3 URL 적용)
+     * JSON 데이터를 KoreanMedicineResponseDTO로 변환 (S3 URL 적용)
      */
     public KoreanMedicineResponseDTO convertToDTO(JsonNode item, MedicineCategory category) {
         String itemImage = item.path("itemImage").asText("").trim();
 
-        // ✅ 이미지가 없으면 DTO 변환하지 않음
+        // 이미지가 없으면 DTO 변환하지 않음
         if (itemImage.isEmpty()) {
             log.info("⛔ 이미지가 없는 약품 제외됨: {}", item.path("itemName").asText(""));
             return null;
         }
 
-        // ✅ S3에 업로드 후 새로운 URL 사용
+        // S3에 업로드 후 새로운 URL 사용
         String s3ImageUrl = uploadImageToS3(itemImage);
 
         return KoreanMedicineResponseDTO.builder()
@@ -56,34 +56,34 @@ public class KoreanMedicineConverter {
                 .depositMethodQesitm(item.path("depositMethodQesitm").asText(""))
                 .openDe(item.path("openDe").asText(""))
                 .updateDe(item.path("updateDe").asText(""))
-                .itemImage(s3ImageUrl) // ✅ 변환된 S3 URL 적용
+                .itemImage(s3ImageUrl) // 변환된 S3 URL 적용
                 .category(category)
                 .build();
     }
 
     public Medicine convertToMedicineEntity(KoreanMedicineResponseDTO dto) {
         Medicine medicine = new Medicine();
-        medicine.setBrandName(dto.getItemName());  // ✅ 제품명
-        medicine.setGenericName(dto.getEntpName());  // ✅ 제조사
-        medicine.setPurpose(dto.getEfcyQesitm());  // ✅ 효능/효과
-        medicine.setIndicationsAndUsage(dto.getEfcyQesitm());  // ✅ 효능/효과
-        medicine.setDosageAndAdministration(dto.getUseMethodQesitm());  // ✅ 사용법
-        medicine.setSplSetId(dto.getItemSeq());  // ✅ 품목 일련번호
-        medicine.setImgUrl(dto.getItemImage());  // ✅ 이미지 URL
-        medicine.setCategory(dto.getCategory());  // ✅ 카테고리
-        medicine.setCountry("Korea");  // ✅ 국가는 한국으로 설정
-        medicine.setWarnings(dto.getAtpnQesitm());  // ✅ 주의사항
+        medicine.setBrandName(dto.getItemName());  //  제품명
+        medicine.setGenericName(dto.getItemName());  //
+        medicine.setPurpose(dto.getEfcyQesitm());  //  효능/효과
+        medicine.setIndicationsAndUsage(dto.getEfcyQesitm());  // 효능/효과
+        medicine.setDosageAndAdministration(dto.getUseMethodQesitm());  // 사용법
+        medicine.setSplSetId(dto.getItemSeq());  // 품목 일련번호
+        medicine.setImgUrl(dto.getItemImage());  // 이미지 URL
+        medicine.setCategory(dto.getCategory());  // 카테고리
+        medicine.setCountry("한국");  // 국가는 한국으로 설정
+        medicine.setWarnings(dto.getAtpnQesitm());  // 주의사항
 
-        // ✅ 한국 의약품에는 없는 필드 → NULL 처리
-        medicine.setSubstanceName(null);
-        medicine.setActiveIngredient(null);
+        // 한국 의약품에는 없는 필드 하이픈 표시
+        medicine.setSubstanceName("-");
+        medicine.setActiveIngredient("-");
 
         return medicine;
     }
 
 
     /**
-     * ✅ 이미지를 S3에 업로드 후 S3 URL 반환
+     * 이미지를 S3에 업로드 후 S3 URL 반환
      */
     private String uploadImageToS3(String imageUrl) {
         try {
@@ -102,7 +102,7 @@ public class KoreanMedicineConverter {
 
             return amazonS3.getUrl(bucketName, fileName).toString(); // 업로드된 S3 URL 반환
         } catch (Exception e) {
-            log.error("❌ S3 업로드 실패, 기존 이미지 URL 사용: {}", imageUrl);
+            log.error(" S3 업로드 실패, 기존 이미지 URL 사용: {}", imageUrl);
             return imageUrl; // S3 업로드 실패 시 기존 URL 유지
         }
     }

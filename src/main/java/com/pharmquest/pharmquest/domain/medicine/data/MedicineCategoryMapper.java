@@ -8,7 +8,7 @@ public class MedicineCategoryMapper {
 
     private static final Map<MedicineCategory, String> categoryToKorean = new HashMap<>();
     private static final Map<String, MedicineCategory> koreanToCategory = new HashMap<>();
-
+    private static final Map<MedicineCategory, String> categoryToEffectKeyword = new HashMap<>();
     static {
         categoryToKorean.put(MedicineCategory.PAIN_RELIEF, "진통/해열");
         categoryToKorean.put(MedicineCategory.DIGESTIVE, "소화/위장");
@@ -24,6 +24,14 @@ public class MedicineCategoryMapper {
         for (Map.Entry<MedicineCategory, String> entry : categoryToKorean.entrySet()) {
             koreanToCategory.put(entry.getValue(), entry.getKey());
         }
+
+        categoryToEffectKeyword.put(MedicineCategory.PAIN_RELIEF, "진통 해열");
+        categoryToEffectKeyword.put(MedicineCategory.DIGESTIVE, "소화 위장");
+        categoryToEffectKeyword.put(MedicineCategory.COLD, "감기 기침 콧물");
+        categoryToEffectKeyword.put(MedicineCategory.ALLERGY, "알레르기 두드러기");
+        categoryToEffectKeyword.put(MedicineCategory.ANTISEPTIC, "상처 소독");
+        categoryToEffectKeyword.put(MedicineCategory.MOTION_SICKNESS, "멀미");
+        categoryToEffectKeyword.put(MedicineCategory.EYE_DROPS, "눈 안약");
     }
 
     // ✅ 영어 -> 한글 변환
@@ -118,5 +126,27 @@ public class MedicineCategoryMapper {
             default:
                 return null; // 전체 조회 시 별도 쿼리 없음
         }
+    }
+
+    // ✅ `MedicineCategory`을 `efcyQesitm` 검색 키워드로 변환하는 메서드 추가
+    public static String getEffectKeywordForCategory(MedicineCategory category) {
+        return categoryToEffectKeyword.get(category);
+    }
+
+    // ✅ `efcyQesitm`을 기반으로 `MedicineCategory`를 판별하는 새 메서드 추가
+    public static boolean isOtherCategory(String efcyQesitm) {
+        if (efcyQesitm == null || efcyQesitm.isEmpty()) {
+            return true;
+        }
+
+        for (String keywords : categoryToEffectKeyword.values()) {
+            for (String keyword : keywords.split(" ")) {
+                if (efcyQesitm.contains(keyword)) {
+                    return false; // ✅ 다른 카테고리에 포함되면 OTHER이 아님
+                }
+            }
+        }
+
+        return true; // ✅ OTHER 카테고리에 해당
     }
 }

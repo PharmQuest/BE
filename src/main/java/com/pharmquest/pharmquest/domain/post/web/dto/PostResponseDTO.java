@@ -73,6 +73,7 @@ public class PostResponseDTO {
         Boolean isLiked;
         Boolean isScraped;
         Boolean isOwnPost;
+        Boolean isReported;
         String imageUrl;
         List<CommentResponseDTO.CommentDTO> comments;
         Integer listSize;

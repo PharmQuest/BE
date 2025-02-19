@@ -67,6 +67,7 @@ public class PostConverter {
             Boolean isScraped,
             Boolean isOwnPost,
             Boolean isBestPost,
+            Boolean isReported,
             List<CommentResponseDTO.CommentDTO> topLevelComment,
             Page<Comment> parentCommentsPage
     ) {
@@ -85,6 +86,7 @@ public class PostConverter {
                 .isScraped(isScraped)
                 .isOwnPost(isOwnPost)
                 .isBestPost(isBestPost)
+                .isReported(isReported)
                 .imageUrl(post.getPostImgURL())
                 .comments(topLevelComment)
                 .isFirst(parentCommentsPage.isFirst())

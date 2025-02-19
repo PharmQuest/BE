@@ -40,7 +40,8 @@ public class SecurityConfig {
         config.setAllowedOrigins(List.of(
                 "https://pharmquest.store",  // 프론트엔드 도메인
                 "https://api.pharmquest.store",// 백엔드 서브도메인
-                "http://localhost:8080"
+                "http://localhost:8080",
+                "http://localhost:3000"
         ));
         config.setAllowedHeaders(List.of("*"));
         config.setExposedHeaders(List.of("Authorization"));

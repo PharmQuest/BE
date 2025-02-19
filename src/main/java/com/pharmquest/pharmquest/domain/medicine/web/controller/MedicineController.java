@@ -33,7 +33,7 @@ public class MedicineController {
     }
 
     // 번역된 약물 정보 검색
-    @Operation(summary = "번역 버전 약물 검색", description = "백엔드 확인용 프론트 사용x")
+    @Operation(summary = "백엔드 사용o, 프론트 x |  번역 버전 약물 검색", description = "백엔드 확인용 프론트 사용x")
     @GetMapping("test/searchOpenAPI/ko")
     public List<MedicineOpenapiResponseDTO> searchMedicines(
             @RequestParam(defaultValue = "openfda.product_type:OTC") String query,
@@ -41,7 +41,7 @@ public class MedicineController {
         return medicineService.getMedicines(query, limit);
     }
 
-    @Operation(summary = "카테고리별 약물 검색", description = "백엔드 확인용 프론트 사용x FDA API에서 특정 카테고리의 약물 정보를 가져옵니다.")
+    @Operation(summary = "백엔드 사용o, 프론트 x | 카테고리별 약물 검색", description = "백엔드 확인용 프론트 사용x FDA API에서 특정 카테고리의 약물 정보를 가져옵니다.")
     @GetMapping("/test/lists")
     public List<MedicineOpenapiResponseDTO> searchMedicinesByCategory(
             @RequestParam MedicineCategory category,  // ✅ String 대신 Enum 사용
@@ -68,7 +68,7 @@ public class MedicineController {
 
 
     // 번역되지 않은 약물 정보 검색
-    @Operation(summary = "번역적용x 약물 검색", description = "백엔드 확인용 프론트 사용x")
+    @Operation(summary = "백엔드 사용o, 프론트 x |  번역적용x 약물 검색", description = "백엔드 확인용 프론트 사용x")
     @GetMapping("test/searchOpenAPI/english")
     public List<MedicineOpenapiResponseDTO> searchEnMedicines(
             @RequestParam(defaultValue = "openfda.product_type:OTC") String query,
@@ -77,7 +77,7 @@ public class MedicineController {
     }
 
     // FDA API에서 전체 데이터 원본 반환
-    @Operation(summary = "원본 칼럼 전체 확인", description = "백엔드 확인용 프론트 사용x")
+    @Operation(summary = "백엔드 사용o, 프론트 x |  원본 칼럼 전체 확인", description = "백엔드 확인용 프론트 사용x")
     @GetMapping("test/total")
     public String viewTotal(
             @RequestParam(defaultValue = "openfda.product_type:OTC") String query,
@@ -86,7 +86,7 @@ public class MedicineController {
     }
 
     // SPL Set ID로 약물 세부 정보 검색
-    @Operation(summary = "세부 내용 확인", description = "백엔드 확인용 프론트 사용x")
+    @Operation(summary = "백엔드 사용o, 프론트 x | 세부 내용 확인", description = "백엔드 확인용 프론트 사용x")
     @GetMapping("test/detail")
     public MedicineDetailResponseDTO searchBySplSetId(@Parameter(hidden = true) @RequestHeader("Authorization") String authorizationHeader,@RequestParam String splSetId) {
         Long userId = jwtUtil.getUserFromHeader(authorizationHeader).getId();
@@ -106,7 +106,7 @@ public class MedicineController {
         }
     }
 
-    @Operation(summary = "FDA API 데이터를 DB에 저장", description = "백엔드 db 저장용 프론트 사용 x FDA API에서 특정 카테고리의 약물 정보를 받아와 DB에 저장합니다.")
+    @Operation(summary = "백엔드 사용o, 프론트 x |  FDA API 데이터를 DB에 저장", description = "백엔드 db 저장용 프론트 사용 x FDA API에서 특정 카테고리의 약물 정보를 받아와 DB에 저장합니다.")
     @PostMapping("/save")
     public ResponseEntity<ApiResponse<List<Medicine>>> saveMedicineByCategory(
             @Parameter(
@@ -124,7 +124,7 @@ public class MedicineController {
     }
 
 
-    @Operation(summary = "기타 카테고리 약물 DB 저장", description = "백엔드 db 저장용 프론트 사용 x FDA API에서 기타 카테고리 약물 정보를 받아와 DB에 저장합니다.")
+    @Operation(summary = "백엔드 사용o, 프론트 x | 기타 카테고리 약물 DB 저장", description = "FDA API에서 기타 카테고리 약물 정보를 받아와 DB에 저장합니다.")
     @PostMapping("/save/other")
     public ResponseEntity<ApiResponse<List<Medicine>>> saveOtherMedicines(
             @RequestParam(defaultValue = "NOT (purpose:(\"Pain reliever\" OR \"Fever reducer\" OR \"Antacid\" OR \n" +
@@ -143,15 +143,15 @@ public class MedicineController {
         }
     }
 
-    @Operation(summary = "Get all medicines", description = "Retrieve a list of all medicines.")
+    @Operation(summary = "백엔드 사용o, 프론트 x | Get all medicines", description = "Retrieve a list of all medicines.")
     // 전체 약물 조회 API
     @GetMapping
     public List<Medicine> getAllMedicines() {
         return medRepository.findAll(); // DB에서 전체 데이터 조회
     }
 
-    @Operation(summary = "약물 검색 API", description = "카테고리 및 키워드를 이용해 DB에서 약물을 검색합니다.")
-    @GetMapping("/search")
+    @Operation(summary = "백엔드 사용o, 프론트 x | 약물 검색 API", description = "백엔드 사용o, 프론트 x | 카테고리 및 키워드를 이용해 DB에서 약물을 검색합니다.")
+    @GetMapping("test/search")
     public ResponseEntity<ApiResponse<MedicineListPageResponseDTO>> searchMedicinesByCategoryAndKeyword(
             @Parameter(hidden = true) @RequestHeader(value = "Authorization", required = false) String authorizationHeader,
             @RequestParam(defaultValue = "ALL") MedicineCategory category,
@@ -162,6 +162,26 @@ public class MedicineController {
             Long userId = (authorizationHeader != null && !authorizationHeader.isEmpty()) ?
                     jwtUtil.getUserFromHeader(authorizationHeader).getId() : null;
             MedicineListPageResponseDTO medicines = medicineService.searchMedicinesByCategoryAndKeyword(userId, category, keyword, page - 1, size);
+            return ApiResponse.onSuccess(SuccessStatus.MEDICINE_FETCH_SUCCESS, medicines);
+        } catch (Exception e) {
+            return ApiResponse.onFailure(ErrorStatus.MEDICINE_NOT_FOUND);
+        }
+    }
+
+    @Operation(summary = "국가별, 카테고리별, 키워드 검색", description = "DB에서 국가(ALL, 미국, 한국), 카테고리, 키워드를 기반으로 약물을 검색합니다.")
+    @GetMapping("/search")
+    public ResponseEntity<ApiResponse<MedicineListPageResponseDTO>> searchMedicinesByCategoryKeywordAndCountry(
+            @Parameter(hidden = true) @RequestHeader(value = "Authorization", required = false) String authorizationHeader,
+            @RequestParam(defaultValue = "ALL") MedicineCategory category,
+            @RequestParam(defaultValue = "ALL") String country,  // 국가 필터 추가
+            @RequestParam(defaultValue = "") String keyword,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        try {
+            Long userId = (authorizationHeader != null && !authorizationHeader.isEmpty())
+                    ? jwtUtil.getUserFromHeader(authorizationHeader).getId() : null;
+
+            MedicineListPageResponseDTO medicines = medicineService.searchMedicinesByCategoryKeywordAndCountry(userId, category, keyword, country, page - 1, size);
             return ApiResponse.onSuccess(SuccessStatus.MEDICINE_FETCH_SUCCESS, medicines);
         } catch (Exception e) {
             return ApiResponse.onFailure(ErrorStatus.MEDICINE_NOT_FOUND);

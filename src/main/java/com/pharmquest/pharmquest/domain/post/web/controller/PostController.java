@@ -267,9 +267,15 @@ public class PostController {
 
     @GetMapping("/best-posts/lists")
     @Operation(summary = "베스트 인기글 리스트 조회 API")
-    public ApiResponse<PostResponseDTO.PostPreViewListDTO> getBestPostList(@RequestParam(name="page")Integer page){
+    public ApiResponse<PostResponseDTO.PostPreViewListDTO> getBestPostList(@Parameter (hidden = true) @RequestHeader(value = "Authorization",required = false) String authorizationHeader, @RequestParam(name="page")Integer page){
 
-        Page<Post> bestPostList = bestPostService.getBestPosts(page);
+        Long userId = null;
+        if (authorizationHeader != null) {
+            User user = jwtUtil.getUserFromHeader(authorizationHeader);
+            userId = user.getId();
+        }
+
+        Page<Post> bestPostList = bestPostService.getBestPosts(userId, page);
 
         return ApiResponse.onSuccess(PostConverter.postPreViewListDTO(bestPostList));
 
@@ -277,9 +283,14 @@ public class PostController {
 
     @GetMapping("/best-posts/random")
     @Operation(summary = "베스트 인기글 랜덤 조회API")
-    public ApiResponse<PostResponseDTO.BestPostListDTO> getRandomBestPosts() {
+    public ApiResponse<PostResponseDTO.BestPostListDTO> getRandomBestPosts(@Parameter (hidden = true) @RequestHeader(value = "Authorization",required = false) String authorizationHeader) {
 
-        List<Post> bestPostRandList = bestPostService.getRandomBestPosts(3);
+        Long userId = null;
+        if (authorizationHeader != null) {
+            User user = jwtUtil.getUserFromHeader(authorizationHeader);
+            userId = user.getId();
+        }
+        List<Post> bestPostRandList = bestPostService.getRandomBestPosts(userId,3);
 
         return ApiResponse.onSuccess(PostConverter.postRandomDTO(bestPostRandList));
 

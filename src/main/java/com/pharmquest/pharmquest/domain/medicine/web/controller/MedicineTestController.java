@@ -190,4 +190,14 @@ public class MedicineTestController {
                 .doOnError(error -> log.error("❌ API 요청 중 오류 발생: {}", error.getMessage()));
     }
 
+    @PostMapping("/save/by-category")
+    public Mono<ResponseEntity<String>> saveMedicineByCategory(
+            @RequestParam MedicineCategory category) {
+
+        log.info("🔹 요청된 카테고리 저장: {}", category);
+
+        return koreanMedicineService.saveKoreanMedicinesToDB(category)
+                .then(Mono.just(ResponseEntity.ok("✅ 카테고리 " + category + " 의약품 저장 완료!")));
+    }
+
 }

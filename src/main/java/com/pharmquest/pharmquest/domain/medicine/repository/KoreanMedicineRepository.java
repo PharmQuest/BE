@@ -35,7 +35,7 @@ public class KoreanMedicineRepository {
     public Mono<List<String>> fetchMedicineData() {
         List<Mono<String>> apiRequests = new ArrayList<>();
 
-        for (int i = 1; i <= 5; i++) {
+        for (int i = 1; i <= 1; i++) {
             try {
                 String encodedServiceKey = URLEncoder.encode(serviceKey, StandardCharsets.UTF_8.toString());
                 String encodedPageNo = URLEncoder.encode(String.valueOf(i), StandardCharsets.UTF_8.toString());

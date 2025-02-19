@@ -21,15 +21,31 @@ public class BestPostServiceImpl implements BestPostService {
 
 
     @Override
-    public Page<Post> getBestPosts(Integer page) {
+    public Page<Post> getBestPosts(Long userId,Integer page) {
 
         PageRequest pageRequest = PageRequest.of(page - 1, 20, Sort.by(Sort.Direction.DESC, "createdAt"));
 
-        return bestPostRepository.findBestPosts(pageRequest);
+        if (userId == null) {
+            // 로그인하지 않은 경우
+            return bestPostRepository.findBestPosts(pageRequest);
+        } else {
+            // 로그인한 경우
+            return bestPostRepository.findBestPostsByUser(userId, pageRequest);
+        }
+
     }
 
-    public List<Post> getRandomBestPosts(int count) {
-        List<Long> randomIds = bestPostRepository.findRandomPostIds(count);
+    public List<Post> getRandomBestPosts(Long userId, int count) {
+
+        List<Long> randomIds=null;
+        if (userId == null) {
+            randomIds = bestPostRepository.findRandomPostIds(count);
+
+        }
+        else{
+            randomIds = bestPostRepository.findRandomPostIdsExcludingReportedByUser(userId, count);
+        }
+
         return postRepository.findByIdIn(randomIds);
     }
 }

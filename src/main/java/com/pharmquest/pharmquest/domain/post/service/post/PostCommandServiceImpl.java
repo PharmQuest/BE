@@ -12,6 +12,7 @@ import com.pharmquest.pharmquest.domain.post.repository.comment.CommentLikeRepos
 import com.pharmquest.pharmquest.domain.post.repository.comment.PostCommentRepository;
 import com.pharmquest.pharmquest.domain.post.repository.like.PostLikeRepository;
 import com.pharmquest.pharmquest.domain.post.repository.post.PostRepository;
+import com.pharmquest.pharmquest.domain.post.repository.report.PostReportRepository;
 import com.pharmquest.pharmquest.domain.post.repository.scrap.PostScrapRepository;
 import com.pharmquest.pharmquest.domain.post.specification.PostSpecification;
 import com.pharmquest.pharmquest.domain.post.web.dto.CommentResponseDTO;
@@ -32,7 +33,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -46,8 +46,9 @@ public class PostCommandServiceImpl implements PostCommandService {
     private final PostCommentRepository commentRepository;
     private final CommentLikeRepository commentLikeRepository;
     private final BestPostRepository bestPostRepository;
+    private final PostReportRepository reportRepository;
     private final S3Service s3Service;
-    private final PostConverter postConverter;
+
 
     private final UserRepository userRepository;
 
@@ -114,6 +115,7 @@ public class PostCommandServiceImpl implements PostCommandService {
         boolean isScrapped = scrapRepository.existsByPostIdAndUserId(postId, userId);
         boolean isOwnPost = userId.equals(post.getUser().getId());
         boolean isBestPost = bestPostRepository.existsByPostId(postId);
+        boolean isReported = reportRepository.existsByPostIdAndUserId(postId, userId);
 
         // 최상위 댓글 페이지네이션
         Page<Comment> parentCommentsPage = commentRepository.findByPostAndParentIsNull(
@@ -145,7 +147,7 @@ public class PostCommandServiceImpl implements PostCommandService {
                 })
                 .collect(Collectors.toList());
 
-        return PostConverter.postDetailDTO(post, isLiked, isScrapped, isOwnPost, isBestPost, topLevelComments, parentCommentsPage);
+        return PostConverter.postDetailDTO(post, isLiked, isScrapped, isOwnPost, isBestPost, isReported, topLevelComments, parentCommentsPage);
     }
 
     //게시글 제목, 내용으로 검색(카테고리, 나라 별 필터링, 20개씩 페이징)

@@ -1,9 +1,10 @@
 package com.pharmquest.pharmquest.domain.medicine.data;
 import com.pharmquest.pharmquest.domain.medicine.data.enums.MedicineCategory;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
 import java.util.Map;
-
+@Slf4j
 public class MedicineCategoryMapper {
 
     private static final Map<MedicineCategory, String> categoryToKorean = new HashMap<>();
@@ -25,13 +26,15 @@ public class MedicineCategoryMapper {
             koreanToCategory.put(entry.getValue(), entry.getKey());
         }
 
-        categoryToEffectKeyword.put(MedicineCategory.PAIN_RELIEF, "진통 해열");
-        categoryToEffectKeyword.put(MedicineCategory.DIGESTIVE, "소화 위장");
-        categoryToEffectKeyword.put(MedicineCategory.COLD, "감기 기침 콧물");
-        categoryToEffectKeyword.put(MedicineCategory.ALLERGY, "알레르기 두드러기");
-        categoryToEffectKeyword.put(MedicineCategory.ANTISEPTIC, "상처 소독");
+        categoryToEffectKeyword.put(MedicineCategory.PAIN_RELIEF, "진통");
+        categoryToEffectKeyword.put(MedicineCategory.DIGESTIVE, "소화");
+        categoryToEffectKeyword.put(MedicineCategory.COLD, "감기");
+        categoryToEffectKeyword.put(MedicineCategory.ALLERGY, "알레르기");
+        categoryToEffectKeyword.put(MedicineCategory.ANTISEPTIC, "상처");
         categoryToEffectKeyword.put(MedicineCategory.MOTION_SICKNESS, "멀미");
-        categoryToEffectKeyword.put(MedicineCategory.EYE_DROPS, "눈 안약");
+        categoryToEffectKeyword.put(MedicineCategory.EYE_DROPS, "눈 건조");
+        categoryToEffectKeyword.put(MedicineCategory.OTHER, "기타");
+        categoryToEffectKeyword.put(MedicineCategory.ALL, "전체");
     }
 
     // ✅ 영어 -> 한글 변환
@@ -41,8 +44,21 @@ public class MedicineCategoryMapper {
 
     // ✅ 한글 -> 영어 변환
     public static MedicineCategory toEnglishCategory(String koreanCategory) {
-        return koreanToCategory.getOrDefault(koreanCategory, MedicineCategory.OTHER);
+        if (koreanCategory == null || koreanCategory.trim().isEmpty()) {
+            log.warn("❗ 변환할 수 없는 카테고리(빈 값) -> OTHER로 설정");
+            return MedicineCategory.OTHER;
+        }
+
+        MedicineCategory category = koreanToCategory.get(koreanCategory);
+
+        if (category == null) {
+            log.warn("❗ 알 수 없는 카테고리 '{}' -> 기본값 OTHER 반환", koreanCategory);
+            return MedicineCategory.OTHER;
+        }
+
+        return category; // ✅ 정확한 카테고리 반환
     }
+
 
     public static MedicineCategory getCategory(String purpose, String activeIngredient, String pharmClassEpc, String route) {
         // Null-safe 초기화
@@ -130,23 +146,7 @@ public class MedicineCategoryMapper {
 
     // ✅ `MedicineCategory`을 `efcyQesitm` 검색 키워드로 변환하는 메서드 추가
     public static String getEffectKeywordForCategory(MedicineCategory category) {
-        return categoryToEffectKeyword.get(category);
+        return categoryToEffectKeyword.getOrDefault(category,"");
     }
 
-    // ✅ `efcyQesitm`을 기반으로 `MedicineCategory`를 판별하는 새 메서드 추가
-    public static boolean isOtherCategory(String efcyQesitm) {
-        if (efcyQesitm == null || efcyQesitm.isEmpty()) {
-            return true;
-        }
-
-        for (String keywords : categoryToEffectKeyword.values()) {
-            for (String keyword : keywords.split(" ")) {
-                if (efcyQesitm.contains(keyword)) {
-                    return false; // ✅ 다른 카테고리에 포함되면 OTHER이 아님
-                }
-            }
-        }
-
-        return true; // ✅ OTHER 카테고리에 해당
-    }
 }

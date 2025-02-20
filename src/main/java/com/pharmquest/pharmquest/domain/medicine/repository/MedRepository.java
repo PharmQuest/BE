@@ -13,7 +13,7 @@ import java.util.Optional;
 
 public interface MedRepository extends JpaRepository<Medicine, Long> {
     boolean existsBySplSetId(String splSetId);
-    Optional<Medicine> findBySplSetIdIgnoreCase(String splSetId);
+
     Page<Medicine> findByCategory(MedicineCategory category, Pageable pageable);
     @Query("SELECT m FROM Medicine m WHERE LOWER(m.brandName) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
             "OR LOWER(m.indicationsAndUsage) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
@@ -39,7 +39,6 @@ public interface MedRepository extends JpaRepository<Medicine, Long> {
     Page<Medicine> findByCategoryAndCountry(@Param("category") MedicineCategory category,
                                             @Param("country") String country,
                                             Pageable pageable);
-
     //  카테고리 + 키워드 + 국가 필터 추가
     @Query("SELECT m FROM Medicine m WHERE m.category = :category " +
             "AND (:country = 'ALL' OR LOWER(m.country) = LOWER(:country)) " +

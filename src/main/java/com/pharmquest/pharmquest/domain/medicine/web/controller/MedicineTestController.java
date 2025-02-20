@@ -79,9 +79,23 @@ public class MedicineTestController {
                 .doOnError(error -> log.error("API 요청 중 오류 발생: {}", error.getMessage()));
     }
 
+
+    @Operation(summary = "카테고리별 약품 저장", description = "카테고리를 선택하면 해당하는 키워드로 검색된 10개의 약품을 DB에 저장합니다.")
+    @PostMapping("/save/by-category")
+    public Mono<ResponseEntity<String>> saveMedicineByCategory(
+            @Parameter(description = "저장할 카테고리") @RequestParam MedicineCategory category) {
+
+        log.info("🔹 요청된 카테고리 저장: {}", category);
+
+        return koreanMedicineService.saveKoreanMedicinesToDB(category)
+                .then(Mono.just(ResponseEntity.ok("카테고리 " + category + " 의약품 저장 완료!")));
+    }
+
+
+    @Operation(summary = "카테고리별 약품 검색", description = "카테고리를 선택하면 해당하는 키워드로 약품을 검색합니다.")
     @GetMapping("/search/by-category")
     public Mono<ResponseEntity<List<KoreanMedicineResponseDTO>>> searchMedicineByCategory(
-            @RequestParam MedicineCategory category) {
+            @Parameter(description = "검색할 카테고리") @RequestParam MedicineCategory category) {
 
         log.info("🔹 요청된 카테고리: {}", category);
 
@@ -90,14 +104,6 @@ public class MedicineTestController {
                 .doOnError(error -> log.error("API 요청 중 오류 발생: {}", error.getMessage()));
     }
 
-    @PostMapping("/save/by-category")
-    public Mono<ResponseEntity<String>> saveMedicineByCategory(
-            @RequestParam MedicineCategory category) {
 
-        log.info("🔹 요청된 카테고리 저장: {}", category);
-
-        return koreanMedicineService.saveKoreanMedicinesToDB(category)
-                .then(Mono.just(ResponseEntity.ok("카테고리 " + category + " 의약품 저장 완료!")));
-    }
 
 }

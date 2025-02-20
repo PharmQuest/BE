@@ -7,8 +7,11 @@ import com.pharmquest.pharmquest.domain.post.data.Post;
 import com.pharmquest.pharmquest.domain.post.data.enums.Country;
 import com.pharmquest.pharmquest.domain.post.data.enums.PostCategory;
 import com.pharmquest.pharmquest.domain.post.data.mapping.Comment;
+import com.pharmquest.pharmquest.domain.post.data.mapping.CommentLike;
+import com.pharmquest.pharmquest.domain.post.data.mapping.CommentReport;
 import com.pharmquest.pharmquest.domain.post.repository.bestPost.BestPostRepository;
 import com.pharmquest.pharmquest.domain.post.repository.comment.CommentLikeRepository;
+import com.pharmquest.pharmquest.domain.post.repository.comment.CommentReportRepository;
 import com.pharmquest.pharmquest.domain.post.repository.comment.PostCommentRepository;
 import com.pharmquest.pharmquest.domain.post.repository.like.PostLikeRepository;
 import com.pharmquest.pharmquest.domain.post.repository.post.PostRepository;
@@ -46,6 +49,7 @@ public class PostCommandServiceImpl implements PostCommandService {
     private final PostScrapRepository scrapRepository;
     private final PostCommentRepository commentRepository;
     private final CommentLikeRepository commentLikeRepository;
+    private final CommentReportRepository commentReportRepository;
     private final BestPostRepository bestPostRepository;
     private final PostReportRepository reportRepository;
     private final S3Service s3Service;
@@ -110,43 +114,59 @@ public class PostCommandServiceImpl implements PostCommandService {
     @Override
     public PostResponseDTO.PostDetailDTO getPost(Long userId, Long postId, Integer page) {
 
-        Post post = postRepository.findById(postId)
+        Post post = postRepository.findWithCommentsScrapsLikesById(postId)
                 .orElseThrow(() -> new PostHandler(ErrorStatus.POST_NOT_EXIST));
-        boolean isLiked = likeRepository.existsByPostIdAndUserId(postId, userId);
-        boolean isScrapped = scrapRepository.existsByPostIdAndUserId(postId, userId);
-        boolean isOwnPost = userId.equals(post.getUser().getId());
-        boolean isBestPost = bestPostRepository.existsByPostId(postId);
-        boolean isReported = reportRepository.existsByPostIdAndUserId(postId, userId);
+        boolean isLiked = post.getLikes().stream() // 좋아요 여부
+                .anyMatch(postLike -> postLike.getUser().getId().equals(userId));
+        boolean isScrapped = post.getScraps().stream() // 스크랩 여부
+                .anyMatch(postScrap -> postScrap.getUser().getId().equals(userId));
+        boolean isOwnPost = userId.equals(post.getUser().getId()); // 본인이 쓴 글인지
+        boolean isBestPost = post.getBest() != null; // 베스트 게시글 여부
+        boolean isReported = post.getReports().stream() // 신고 여부
+                .anyMatch(postReport -> postReport.getUser().getId().equals(userId));
 
+        log.info("최상위 댓글 페이지네이션");
         // 최상위 댓글 페이지네이션
         Page<Comment> parentCommentsPage = commentRepository.findByPostAndParentIsNull(
                 post,
                 PageRequest.of(page - 1, 5)
         );
 
+        log.info("최상위 댓글 처리");
+        List<Long> likedCommentsIdList = commentLikeRepository.findByUserId(userId).stream() // 사용자가 좋아요 누른 게시글들의 Id List
+                .map(commentLike -> commentLike.getComment().getId())
+                .toList();
+
+        List<Long> reportedCommentIdList = commentReportRepository.findByUserId(userId).stream() // 사용자가 신고한 댓글들
+                .map(commentReport -> commentReport.getComment().getId())
+                .toList();
+        
         // 최상위 댓글 처리
         List<CommentResponseDTO.CommentDTO> topLevelComments = parentCommentsPage.getContent().stream()
                 .map(comment -> {
 
-                    boolean isCommentLiked = commentLikeRepository.existsByCommentIdAndUserId(comment.getId(), userId);
+                    boolean isCommentLiked = likedCommentsIdList.contains(comment.getId());
                     boolean isOwnComment = userId.equals(comment.getUser().getId());
                     boolean isPostAuthor = post.getUser().getId().equals(comment.getUser().getId());
+                    boolean isReportedComment = reportedCommentIdList.contains(comment.getId());
 
                     List<CommentResponseDTO.CommentDTO> replies = comment.getChildren().stream()
                             .map(child -> {
-                                boolean isChildLiked = commentLikeRepository.existsByCommentIdAndUserId(child.getId(), userId);
+                                boolean isChildLiked = likedCommentsIdList.contains(comment.getId());
                                 boolean isChildOwnComment = userId.equals(child.getUser().getId());
                                 boolean isChildPostAuthor = post.getUser().getId().equals(child.getUser().getId());
-                                return PostCommentConverter.toComment(child, isChildLiked, isChildPostAuthor, isChildOwnComment);
+                                boolean isChildReportedComment = reportedCommentIdList.contains(comment.getId());
+                                return PostCommentConverter.toComment(child, isChildLiked, isChildPostAuthor, isChildOwnComment, isChildReportedComment);
                             })
                             .collect(Collectors.toList());
 
-                    return PostCommentConverter.toComment(comment, isCommentLiked, isPostAuthor, isOwnComment)
+                    return PostCommentConverter.toComment(comment, isCommentLiked, isPostAuthor, isOwnComment, isReportedComment)
                             .toBuilder()
                             .replies(replies)
                             .build();
                 })
                 .collect(Collectors.toList());
+
 
         return PostConverter.postDetailDTO(post, isLiked, isScrapped, isOwnPost, isBestPost, isReported, topLevelComments, parentCommentsPage);
     }

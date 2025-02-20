@@ -7,7 +7,6 @@ import java.util.Optional;
 
 public interface PostReportRepository extends JpaRepository<PostReport, Long> {
 
-    boolean existsByPostIdAndUserId(Long postId, Long userId);
     Optional<PostReport> findByPostIdAndUserId(Long postId, Long userId);
     int countByPostId(Long postId);
 

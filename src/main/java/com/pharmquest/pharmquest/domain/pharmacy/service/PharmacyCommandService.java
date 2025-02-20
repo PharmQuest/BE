@@ -5,5 +5,4 @@ import com.pharmquest.pharmquest.global.apiPayload.code.status.SuccessStatus;
 
 public interface PharmacyCommandService {
     SuccessStatus scrapPharmacy(User user, String placeId);
-    void savePharmacy(String placeId);
 }

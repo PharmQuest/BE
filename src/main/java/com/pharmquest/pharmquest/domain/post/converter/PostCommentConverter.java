@@ -25,7 +25,7 @@ public class PostCommentConverter {
 
 
     @Builder
-    public static CommentResponseDTO.CommentDTO toComment(Comment comment,Boolean isLiked, Boolean isPostAuthor, Boolean isOwnComment) {
+    public static CommentResponseDTO.CommentDTO toComment(Comment comment,Boolean isLiked, Boolean isPostAuthor, Boolean isOwnComment, Boolean isReported) {
 
             return CommentResponseDTO.CommentDTO.builder()
                     .commentId(comment.getId())
@@ -37,6 +37,7 @@ public class PostCommentConverter {
                     .isPostAuthor(isPostAuthor)
                     .isOwnComment(isOwnComment)
                     .isDeleted(comment.isDeleted())
+                    .isReported(isReported)
                     .createdAt(comment.getCreatedAt())
                     .parentId(comment.getParent() != null ? comment.getParent().getId():null)
                     .parentName(comment.getParent() != null ? comment.getParent().getUser().getEmail().substring(0, comment.getParent().getUser().getEmail().indexOf("@")): null)

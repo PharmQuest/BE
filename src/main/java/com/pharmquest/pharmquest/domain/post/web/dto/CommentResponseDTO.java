@@ -34,6 +34,7 @@ public class CommentResponseDTO {
         private Boolean isPostAuthor;
         private Boolean isOwnComment;
         private Boolean isDeleted;
+        private Boolean isReported;
         private Integer likeCount;
         private Boolean isLiked;
         private List<CommentDTO> replies;

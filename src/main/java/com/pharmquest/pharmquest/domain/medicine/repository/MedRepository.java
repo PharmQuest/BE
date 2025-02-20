@@ -47,4 +47,8 @@ public interface MedRepository extends JpaRepository<Medicine, Long> {
             "OR LOWER(m.indicationsAndUsage) LIKE LOWER(CONCAT('%', :keyword, '%')))")
     Page<Medicine> findByCategoryKeywordAndCountry(MedicineCategory category, String keyword, String country, Pageable pageable);
 
+    @Query("SELECT m FROM Medicine m WHERE (:country = 'ALL' OR LOWER(m.country) = LOWER(:country))")
+    Page<Medicine> findByCountry(String country, Pageable pageable);
+
+
 }

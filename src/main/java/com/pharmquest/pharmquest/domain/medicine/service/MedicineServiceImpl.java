@@ -382,58 +382,39 @@ public class MedicineServiceImpl implements MedicineService {
 
             log.info("🔹 검색 요청 - 카테고리: {}, 키워드: {}, 국가: {}", category, keyword, country);
 
-            // ✅ 1. 키워드가 없는 경우 → 카테고리와 국가만 필터링
+            // ✅ 1. 키워드가 없는 경우 → 카테고리와 국가만 필터링 (쿼리에서 필터링)
             if (keyword == null || keyword.trim().isEmpty()) {
                 medicinesPage = (category == MedicineCategory.ALL)
-                        ? medRepository.findAll(pageable)
+                        ? medRepository.findByCountry(country, pageable)  // ✅ 국가 필터 먼저 적용
                         : medRepository.findByCategoryAndCountry(category, country, pageable);
             }
-            // ✅ 2. 키워드가 있는 경우 → 카테고리 + 키워드 + 국가 필터링
+            // ✅ 2. 키워드가 있는 경우 → 카테고리 + 키워드 + 국가 필터링 (쿼리에서 필터링)
             else {
                 medicinesPage = (category == MedicineCategory.ALL)
-                        ? medRepository.findByKeywordAndCountry(keyword, country, pageable)
+                        ? medRepository.findByKeywordAndCountry(keyword, country, pageable)  // ✅ 국가 필터 + 키워드 적용
                         : medRepository.findByCategoryKeywordAndCountry(category, keyword, country, pageable);
             }
 
-            // ✅ 3. 전체 개수 계산
-            long totalCountBeforeFiltering = medicinesPage.getTotalElements();
-            log.info("🔹 초기 검색 결과 개수 (카테고리 & 키워드 필터링 적용 후): {}", totalCountBeforeFiltering);
+            // ✅ 3. 전체 개수 재계산 (필터링 후)
+            long amountCount = medicinesPage.getTotalElements(); // 필터링된 전체 개수
+            int amountPage = (int) Math.ceil((double) amountCount / size); // 필터링된 전체 페이지 수
+            int currentCount = medicinesPage.getNumberOfElements(); // 현재 페이지 개수
+            int currentPage = medicinesPage.getNumber() + 1; // 현재 페이지 번호
 
-            // ✅ 4. 기존 필터링된 데이터를 가져오기
-            List<Medicine> filteredMedicines = new ArrayList<>(medicinesPage.getContent());
+            log.info("🔹 전체 개수 (amountCount): {}", amountCount);
+            log.info("🔹 전체 페이지 수 (amountPage): {}", amountPage);
+            log.info("🔹 현재 페이지 개수 (currentCount): {}", currentCount);
 
-            // ✅ 5. 국가 필터링 (출력 직전)
-            if (!"ALL".equalsIgnoreCase(country)) {
-                log.info("🔹 국가 필터링 적용 - 현재 국가: {}", country);
-                List<Medicine> beforeFiltering = new ArrayList<>(filteredMedicines);
-
-                filteredMedicines = beforeFiltering.stream()
-                        .filter(medicine -> country.equalsIgnoreCase(medicine.getCountry()))
-                        .collect(Collectors.toList());
-
-                log.info("🔹 국가 필터링 전 개수: {}", beforeFiltering.size());
-                log.info("🔹 국가 필터링 후 개수: {}", filteredMedicines.size());
-            }
-
-            // ✅ 6. 페이징 계산 (전체 개수 유지)
-            int amountPage = (int) Math.ceil((double) totalCountBeforeFiltering / size); // 전체 페이지 수
-            int currentCount = filteredMedicines.size(); // 현재 페이지의 개수
-
-            // ✅ 7. 결과 변환
-            List<MedicineResponseDTO> medicines = filteredMedicines.stream()
+            // ✅ 4. 결과 변환
+            List<MedicineResponseDTO> medicines = medicinesPage.getContent().stream()
                     .map(medicine -> medicineConverter.convertFromEntity(medicine, userId))
                     .collect(Collectors.toList());
 
-            // ✅ 8. 최종 로그 출력
-            log.info("🔹 최종 반환 데이터 개수: {}", currentCount);
-            filteredMedicines.forEach(medicine -> log.info("✅ 최종 결과 - 이름: {}, 국가: {}, 카테고리: {}",
-                    medicine.getBrandName(), medicine.getCountry(), medicine.getCategory()));
-
             return new MedicineListPageResponseDTO(
-                    totalCountBeforeFiltering, // 전체 개수 (국가 필터링 적용 전)
-                    amountPage,  // 전체 페이지 수
-                    currentCount, // 현재 페이지의 개수
-                    page + 1, // 현재 페이지 번호
+                    amountCount,  // ✅ 국가 필터링 후의 전체 개수
+                    amountPage,   // ✅ 국가 필터링 후의 전체 페이지 수
+                    currentCount, // ✅ 현재 페이지의 개수
+                    currentPage,  // ✅ 현재 페이지 번호
                     medicines);
 
         } catch (Exception e) {
@@ -441,8 +422,6 @@ public class MedicineServiceImpl implements MedicineService {
             throw new RuntimeException("DB에서 약물 데이터를 검색하는 중 오류 발생", e);
         }
     }
-
-
 
 
 

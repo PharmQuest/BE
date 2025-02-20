@@ -41,11 +41,8 @@ public interface PostRepository extends JpaRepository<Post, Long>, PostRepositor
 
     Page<Post> findPostByUserIdOrderByCreatedAtDesc(Long userId, Pageable pageable);
 
-    @Query("SELECT p FROM Post p LEFT JOIN FETCH p.comments WHERE p.id = :postId")
-    Optional<Post> findWithCommentsById(@Param("postId") Long postId);
-
     @Query("""
-    SELECT p FROM Post p
+    SELECT DISTINCT p FROM Post p
     LEFT JOIN FETCH p.comments
     LEFT JOIN FETCH p.scraps s
     LEFT JOIN FETCH s.user

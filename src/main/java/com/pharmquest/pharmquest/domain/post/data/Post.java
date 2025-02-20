@@ -71,9 +71,9 @@ public class Post extends BaseEntity {
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
     private Set<PostReport> reports =  new HashSet<>();
-    
+
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
-    private List<Comment> comments = new ArrayList<>();
+    private Set<Comment> comments = new HashSet<>();
     
     @OneToOne(mappedBy = "post", cascade = CascadeType.ALL)
     private BestPost best;

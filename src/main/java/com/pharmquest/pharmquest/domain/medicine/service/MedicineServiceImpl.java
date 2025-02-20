@@ -415,34 +415,25 @@ public class MedicineServiceImpl implements MedicineService {
             Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending());
             Page<Medicine> medicinesPage;
 
-            // ✅ 전체 국가 (ALL)인 경우, 기존 로직과 동일하게 처리
-            if (country.equalsIgnoreCase("ALL")) {
-                if (category == MedicineCategory.ALL) {
-                    medicinesPage = (keyword != null && !keyword.isEmpty())
-                            ? medRepository.findByKeyword(keyword, pageable)
-                            : medRepository.findAll(pageable);
-                } else {
-                    medicinesPage = (keyword != null && !keyword.isEmpty())
-                            ? medRepository.findByCategoryAndKeyword(category, keyword, pageable)
-                            : medRepository.findByCategory(category, pageable);
-                }
+            // ✅ 키워드가 없는 경우, 기존 카테고리 + 국가 필터 적용
+            if (keyword == null || keyword.trim().isEmpty()) {
+                medicinesPage = (category == MedicineCategory.ALL)
+                        ? medRepository.findByCategoryAndCountry(category, country, pageable)
+                        : medRepository.findByCategory(category, pageable);
             } else {
-                // ✅ 특정 국가(미국 or 한국)로 필터링
-                if (category == MedicineCategory.ALL) {
-                    medicinesPage = (keyword != null && !keyword.isEmpty())
-                            ? medRepository.findByKeywordAndCountry(keyword, country, pageable)
-                            : medRepository.findByCategoryAndCountry(category, country, pageable);
-                } else {
-                    medicinesPage = (keyword != null && !keyword.isEmpty())
-                            ? medRepository.findByCategoryKeywordAndCountry(category, keyword, country, pageable)
-                            : medRepository.findByCategoryAndCountry(category, country, pageable);
+                // ✅ 키워드가 있는 경우, 카테고리 + 키워드 + 국가 필터 적용
+                medicinesPage = medRepository.findByCategoryKeywordAndCountry(category, keyword, country, pageable);
+
+                // ✅ 만약 카테고리 + 키워드 조합에서 결과가 없다면, 카테고리 필터를 제외하고 키워드만 검색
+                if (medicinesPage.isEmpty()) {
+                    medicinesPage = medRepository.findByKeywordAndCountry(keyword, country, pageable);
                 }
             }
 
             long amountCount = medicinesPage.getTotalElements(); // 전체 개수
             int amountPage = medicinesPage.getTotalPages();      // 전체 페이지 수
             int currentCount = medicinesPage.getNumberOfElements(); // 현재 페이지의 개수
-            int currentPage = medicinesPage.getNumber() + 1;         //  1부터 시작하도록 변경
+            int currentPage = medicinesPage.getNumber() + 1;         // 1부터 시작하도록 변경
 
             List<MedicineResponseDTO> medicines = medicinesPage.getContent().stream()
                     .map(medicine -> medicineConverter.convertFromEntity(medicine, userId))

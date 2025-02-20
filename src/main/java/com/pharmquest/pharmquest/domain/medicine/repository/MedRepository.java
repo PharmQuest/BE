@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -33,9 +34,11 @@ public interface MedRepository extends JpaRepository<Medicine, Long> {
     Page<Medicine> findByKeywordAndCountry(String keyword, String country, Pageable pageable);
 
     //  카테고리 + 국가 필터 추가
-    @Query("SELECT m FROM Medicine m WHERE LOWER(m.category) = LOWER(:category) " +
+    @Query("SELECT m FROM Medicine m WHERE m.category = :category " +
             "AND (:country = 'ALL' OR LOWER(m.country) = LOWER(:country)) ")
-    Page<Medicine> findByCategoryAndCountry(MedicineCategory category, String country, Pageable pageable);
+    Page<Medicine> findByCategoryAndCountry(@Param("category") MedicineCategory category,
+                                            @Param("country") String country,
+                                            Pageable pageable);
 
     //  카테고리 + 키워드 + 국가 필터 추가
     @Query("SELECT m FROM Medicine m WHERE m.category = :category " +

@@ -374,75 +374,76 @@ public class MedicineServiceImpl implements MedicineService {
 
     @Override
     @Transactional(readOnly = true)
-    public MedicineListPageResponseDTO searchMedicinesByCategoryAndKeyword(Long userId, MedicineCategory category, String keyword, int page, int size) {
-        try {
-            Pageable pageable = PageRequest.of(page , size, Sort.by("id").ascending());
-            Page<Medicine> medicinesPage;
-
-            if (category == MedicineCategory.ALL) {
-                if (keyword != null && !keyword.isEmpty()) {
-                    medicinesPage = medRepository.findByKeyword(keyword, pageable);
-                } else {
-                    medicinesPage = medRepository.findAll(pageable);
-                }
-            } else {
-                if (keyword != null && !keyword.isEmpty()) {
-                    medicinesPage = medRepository.findByCategoryAndKeyword(category, keyword, pageable);
-                } else {
-                    medicinesPage = medRepository.findByCategory(category, pageable);
-                }
-            }
-
-            long amountCount = medicinesPage.getTotalElements(); // 전체 개수
-            int amountPage = medicinesPage.getTotalPages();      // 전체 페이지 수
-            int currentCount = medicinesPage.getNumberOfElements(); // 현재 페이지의 개수
-            int currentPage = medicinesPage.getNumber() + 1;         //  1부터 시작하도록 변경
-
-            List<MedicineResponseDTO> medicines = medicinesPage.getContent().stream()
-                    .map(medicine -> medicineConverter.convertFromEntity(medicine, userId))
-                    .collect(Collectors.toList());
-
-            return new MedicineListPageResponseDTO(amountCount, amountPage, currentCount, currentPage, medicines);
-        } catch (Exception e) {
-            throw new RuntimeException("DB에서 약물 데이터를 검색하는 중 오류 발생", e);
-        }
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public MedicineListPageResponseDTO searchMedicinesByCategoryKeywordAndCountry(Long userId, MedicineCategory category, String keyword, String country, int page, int size) {
+    public MedicineListPageResponseDTO searchMedicinesByCategoryAndKeyword(Long userId, MedicineCategory category,
+                                                                           String keyword, String country, int page, int size) {
         try {
             Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending());
             Page<Medicine> medicinesPage;
 
-            // ✅ 키워드가 없는 경우, 기존 카테고리 + 국가 필터 적용
+            log.info("🔹 검색 요청 - 카테고리: {}, 키워드: {}, 국가: {}", category, keyword, country);
+
+            // ✅ 1. 키워드가 없는 경우 → 카테고리와 국가만 필터링
             if (keyword == null || keyword.trim().isEmpty()) {
                 medicinesPage = (category == MedicineCategory.ALL)
-                        ? medRepository.findByCategoryAndCountry(category, country, pageable)
-                        : medRepository.findByCategory(category, pageable);
-            } else {
-                // ✅ 키워드가 있는 경우, 카테고리 + 키워드 + 국가 필터 적용
-                medicinesPage = medRepository.findByCategoryKeywordAndCountry(category, keyword, country, pageable);
-
-                // ✅ 만약 카테고리 + 키워드 조합에서 결과가 없다면, 카테고리 필터를 제외하고 키워드만 검색
-                if (medicinesPage.isEmpty()) {
-                    medicinesPage = medRepository.findByKeywordAndCountry(keyword, country, pageable);
-                }
+                        ? medRepository.findAll(pageable)
+                        : medRepository.findByCategoryAndCountry(category, country, pageable);
+            }
+            // ✅ 2. 키워드가 있는 경우 → 카테고리 + 키워드 + 국가 필터링
+            else {
+                medicinesPage = (category == MedicineCategory.ALL)
+                        ? medRepository.findByKeywordAndCountry(keyword, country, pageable)
+                        : medRepository.findByCategoryKeywordAndCountry(category, keyword, country, pageable);
             }
 
-            long amountCount = medicinesPage.getTotalElements(); // 전체 개수
-            int amountPage = medicinesPage.getTotalPages();      // 전체 페이지 수
-            int currentCount = medicinesPage.getNumberOfElements(); // 현재 페이지의 개수
-            int currentPage = medicinesPage.getNumber() + 1;         // 1부터 시작하도록 변경
+            // ✅ 3. 전체 개수 계산
+            long totalCountBeforeFiltering = medicinesPage.getTotalElements();
+            log.info("🔹 초기 검색 결과 개수 (카테고리 & 키워드 필터링 적용 후): {}", totalCountBeforeFiltering);
 
-            List<MedicineResponseDTO> medicines = medicinesPage.getContent().stream()
+            // ✅ 4. 기존 필터링된 데이터를 가져오기
+            List<Medicine> filteredMedicines = new ArrayList<>(medicinesPage.getContent());
+
+            // ✅ 5. 국가 필터링 (출력 직전)
+            if (!"ALL".equalsIgnoreCase(country)) {
+                log.info("🔹 국가 필터링 적용 - 현재 국가: {}", country);
+                List<Medicine> beforeFiltering = new ArrayList<>(filteredMedicines);
+
+                filteredMedicines = beforeFiltering.stream()
+                        .filter(medicine -> country.equalsIgnoreCase(medicine.getCountry()))
+                        .collect(Collectors.toList());
+
+                log.info("🔹 국가 필터링 전 개수: {}", beforeFiltering.size());
+                log.info("🔹 국가 필터링 후 개수: {}", filteredMedicines.size());
+            }
+
+            // ✅ 6. 페이징 계산 (전체 개수 유지)
+            int amountPage = (int) Math.ceil((double) totalCountBeforeFiltering / size); // 전체 페이지 수
+            int currentCount = filteredMedicines.size(); // 현재 페이지의 개수
+
+            // ✅ 7. 결과 변환
+            List<MedicineResponseDTO> medicines = filteredMedicines.stream()
                     .map(medicine -> medicineConverter.convertFromEntity(medicine, userId))
                     .collect(Collectors.toList());
 
-            return new MedicineListPageResponseDTO(amountCount, amountPage, currentCount, currentPage, medicines);
+            // ✅ 8. 최종 로그 출력
+            log.info("🔹 최종 반환 데이터 개수: {}", currentCount);
+            filteredMedicines.forEach(medicine -> log.info("✅ 최종 결과 - 이름: {}, 국가: {}, 카테고리: {}",
+                    medicine.getBrandName(), medicine.getCountry(), medicine.getCategory()));
+
+            return new MedicineListPageResponseDTO(
+                    totalCountBeforeFiltering, // 전체 개수 (국가 필터링 적용 전)
+                    amountPage,  // 전체 페이지 수
+                    currentCount, // 현재 페이지의 개수
+                    page + 1, // 현재 페이지 번호
+                    medicines);
+
         } catch (Exception e) {
+            log.error("❌ DB에서 약물 데이터를 검색하는 중 오류 발생", e);
             throw new RuntimeException("DB에서 약물 데이터를 검색하는 중 오류 발생", e);
         }
     }
+
+
+
+
 
 }

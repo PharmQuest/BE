@@ -1,9 +1,10 @@
 package com.pharmquest.pharmquest.domain.medicine.data;
 import com.pharmquest.pharmquest.domain.medicine.data.enums.MedicineCategory;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
 import java.util.Map;
-
+@Slf4j
 public class MedicineCategoryMapper {
 
     private static final Map<MedicineCategory, String> categoryToKorean = new HashMap<>();
@@ -43,8 +44,21 @@ public class MedicineCategoryMapper {
 
     // ✅ 한글 -> 영어 변환
     public static MedicineCategory toEnglishCategory(String koreanCategory) {
-        return koreanToCategory.getOrDefault(koreanCategory, MedicineCategory.OTHER);
+        if (koreanCategory == null || koreanCategory.trim().isEmpty()) {
+            log.warn("❗ 변환할 수 없는 카테고리(빈 값) -> OTHER로 설정");
+            return MedicineCategory.OTHER;
+        }
+
+        MedicineCategory category = koreanToCategory.get(koreanCategory);
+
+        if (category == null) {
+            log.warn("❗ 알 수 없는 카테고리 '{}' -> 기본값 OTHER 반환", koreanCategory);
+            return MedicineCategory.OTHER;
+        }
+
+        return category; // ✅ 정확한 카테고리 반환
     }
+
 
     public static MedicineCategory getCategory(String purpose, String activeIngredient, String pharmClassEpc, String route) {
         // Null-safe 초기화
@@ -135,20 +149,4 @@ public class MedicineCategoryMapper {
         return categoryToEffectKeyword.getOrDefault(category,"");
     }
 
-    // ✅ `efcyQesitm`을 기반으로 `MedicineCategory`를 판별하는 새 메서드 추가
-    public static boolean isOtherCategory(String efcyQesitm) {
-        if (efcyQesitm == null || efcyQesitm.isEmpty()) {
-            return true;
-        }
-
-        for (String keywords : categoryToEffectKeyword.values()) {
-            for (String keyword : keywords.split(" ")) {
-                if (efcyQesitm.contains(keyword)) {
-                    return false; // ✅ 다른 카테고리에 포함되면 OTHER이 아님
-                }
-            }
-        }
-
-        return true; // ✅ OTHER 카테고리에 해당
-    }
 }

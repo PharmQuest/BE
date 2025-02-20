@@ -29,86 +29,33 @@ public class KoreanMedicineService {
     private final KoreanMedicineConverter koreanMedicineConverter;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    /**
-     * ✅ 특정 카테고리의 한국 약 데이터를 가져옴
-     */
-//    public Mono<List<KoreanMedicineResponseDTO>> getMedicinesByCategory(MedicineCategory category) {
-//        String effectKeyword = MedicineCategoryMapper.getEffectKeywordForCategory(category);
-//        boolean isOtherCategory = (category == MedicineCategory.OTHER);
-//
-//        return koreanMedicineRepository.fetchMedicineData().map(responses -> {
-//            List<KoreanMedicineResponseDTO> filteredItems = new ArrayList<>();
-//
-//            for (String responseBody : responses) {
-//                try {
-//                    JsonNode rootNode = objectMapper.readTree(responseBody);
-//                    JsonNode itemsNode = rootNode.path("body").path("items");
-//
-//                    if (!itemsNode.isArray()) continue;
-//
-//                    for (JsonNode item : itemsNode) {
-//                        String efcyText = item.path("efcyQesitm").asText("");
-//
-//                        boolean matchesCategory = effectKeyword != null && efcyText.contains(effectKeyword);
-//                        boolean isOther = MedicineCategoryMapper.isOtherCategory(efcyText);
-//
-//                        if ((isOtherCategory && isOther) || (!isOtherCategory && matchesCategory)) {
-//                            KoreanMedicineResponseDTO dto = koreanMedicineConverter.convertToDTO(item, category);
-//                            if (dto != null) {
-//                                filteredItems.add(dto);
-//                            }
-//                        }
-//
-//                        if (filteredItems.size() >= 10) break;
-//                    }
-//
-//                    if (filteredItems.size() >= 10) break;
-//
-//                } catch (Exception e) {
-//                    log.error("❌ JSON 파싱 오류: {}", e.getMessage());
-//                }
-//            }
-//
-//            return filteredItems;
-//        });
-//    }
+
 
     public Mono<Void> saveKoreanMedicinesToDB(MedicineCategory category) {
-        return koreanMedicineRepository.fetchMedicineData()
-                .flatMapIterable(responses -> {
-                    List<Medicine> medicineList = new ArrayList<>();
-                    int savedCount = 0;  // 저장 개수 추적
+        String keyword = MedicineCategoryMapper.getEffectKeywordForCategory(category);
 
-                    for (String responseBody : responses) {
-                        try {
-                            JsonNode rootNode = objectMapper.readTree(responseBody);
-                            JsonNode itemsNode = rootNode.path("body").path("items");
+        if (keyword == null || keyword.isEmpty()) {
+            log.warn("❗ 카테고리에 해당하는 키워드가 없음: {}", category);
+            return Mono.empty();
+        }
 
-                            if (!itemsNode.isArray()) continue;
-
-                            for (JsonNode item : itemsNode) {
-                                if (savedCount >= 20) break;
-
-                                KoreanMedicineResponseDTO dto = koreanMedicineConverter.convertToDTO(item, category);
-                                if (dto != null && isValidKoreanMedicine(dto)) {  // 빈 값이 없는 데이터만 저장
-                                    Medicine medicine = koreanMedicineConverter.convertToMedicineEntity(dto);
-                                    medicineList.add(medicine);
-                                    savedCount++;
-                                }
-                            }
-                        } catch (Exception e) {
-                            log.error("❌ JSON 파싱 오류: {}", e.getMessage());
-                        }
-
-                        if (savedCount >= 20) break;  //  15개 저장 완료되면 반복 종료
-                    }
-
-                    return medicineList;
-                })
-                .take(20)
-                .doOnNext(medRepository::save)  // 개별 저장
+        return getMedicinesByKeyword(keyword, category)  // 🔹 DTO에 category 직접 주입
+                .map(medicines -> medicines.stream()
+                        .limit(10)
+                        .toList())
+                .flatMapMany(Flux::fromIterable)
+                .map(koreanMedicineConverter::convertToMedicineEntity)
+                .doOnNext(medicine -> log.info("🟢 변환된 엔티티 저장: {} (카테고리: {})", medicine.getBrandName(), medicine.getCategory())) //  로그 확인
+                .collectList()
+                .flatMap(medicineList -> Mono.fromCallable(() -> medRepository.saveAll(medicineList)))
                 .then();
     }
+
+
+
+
+
+
 
     private boolean isValidKoreanMedicine(KoreanMedicineResponseDTO dto) {
         return isValid(dto.getItemName()) &&
@@ -126,7 +73,7 @@ public class KoreanMedicineService {
     }
 
 
-    public Mono<List<KoreanMedicineResponseDTO>> getMedicinesByKeyword(String keyword) {
+    public Mono<List<KoreanMedicineResponseDTO>> getMedicinesByKeyword(String keyword, MedicineCategory category) {
         return koreanMedicineRepository.fetchMedicineDataWithKeyword(keyword).map(responses -> {
             List<KoreanMedicineResponseDTO> filteredItems = new ArrayList<>();
 
@@ -151,9 +98,9 @@ public class KoreanMedicineService {
                                     .seQesitm(item.path("seQesitm").asText(""))
                                     .depositMethodQesitm(item.path("depositMethodQesitm").asText(""))
                                     .itemImage(item.path("itemImage").asText(""))
+                                    .category(category)  //  요청된 카테고리 그대로 설정
                                     .build();
 
-                            // ✅ null 값이 없는 데이터만 추가
                             if (isValidKoreanMedicine(dto)) {
                                 filteredItems.add(dto);
                             }
@@ -169,6 +116,10 @@ public class KoreanMedicineService {
         });
     }
 
+
+
+
+
     public Mono<List<KoreanMedicineResponseDTO>> getMedicinesByCategory(MedicineCategory category) {
         String keyword = MedicineCategoryMapper.getEffectKeywordForCategory(category);
 
@@ -177,9 +128,15 @@ public class KoreanMedicineService {
             return Mono.just(new ArrayList<>());
         }
 
-        return getMedicinesByKeyword(keyword)
-                .map(medicines -> medicines.stream().limit(10).toList()); // 최대 10개만 반환
+        return getMedicinesByKeyword(keyword,category)
+                .map(medicines -> medicines.stream()
+                        .peek(medicine -> medicine.setCategory(category)) //  DTO에 카테고리 설정
+                        .limit(10)
+                        .toList());
     }
+
+
+
 
 
 }

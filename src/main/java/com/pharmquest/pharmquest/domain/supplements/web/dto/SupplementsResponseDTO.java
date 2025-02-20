@@ -46,6 +46,7 @@ public class SupplementsResponseDTO {
         private boolean isAd = false;
     }
 
+    //전체 리스트용 dto
     @Builder
     @Getter
     @AllArgsConstructor
@@ -57,6 +58,7 @@ public class SupplementsResponseDTO {
         private List<SupplementsDto> items;
     }
 
+    //검색 영양제용 dto
     @Builder
     @Getter
     @Setter
@@ -78,6 +80,7 @@ public class SupplementsResponseDTO {
         private boolean isAd = false;
     }
 
+    //검색 리스트용 dto
     @Builder
     @Getter
     @AllArgsConstructor
@@ -89,6 +92,7 @@ public class SupplementsResponseDTO {
         private List<SupplementsSearchResponseDto> items;
     }
 
+    //연관 영양제용 dto
     @Builder
     @Getter
     @NoArgsConstructor
@@ -107,6 +111,7 @@ public class SupplementsResponseDTO {
         private int scrapCount;
     }
 
+    //영양제 상세정보용 dto
     @Builder
     @Getter
     @NoArgsConstructor

@@ -7,11 +7,13 @@ import com.pharmquest.pharmquest.domain.post.data.Post;
 import com.pharmquest.pharmquest.domain.post.data.enums.Country;
 import com.pharmquest.pharmquest.domain.post.data.enums.PostCategory;
 import com.pharmquest.pharmquest.domain.post.data.mapping.Comment;
-import com.pharmquest.pharmquest.domain.post.data.mapping.CommentLike;
 import com.pharmquest.pharmquest.domain.post.repository.bestPost.BestPostRepository;
 import com.pharmquest.pharmquest.domain.post.repository.comment.CommentLikeRepository;
 import com.pharmquest.pharmquest.domain.post.repository.comment.PostCommentRepository;
+import com.pharmquest.pharmquest.domain.post.repository.like.PostLikeRepository;
 import com.pharmquest.pharmquest.domain.post.repository.post.PostRepository;
+import com.pharmquest.pharmquest.domain.post.repository.report.PostReportRepository;
+import com.pharmquest.pharmquest.domain.post.repository.scrap.PostScrapRepository;
 import com.pharmquest.pharmquest.domain.post.specification.PostSpecification;
 import com.pharmquest.pharmquest.domain.post.web.dto.CommentResponseDTO;
 import com.pharmquest.pharmquest.domain.post.web.dto.PostRequestDTO;
@@ -31,6 +33,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -39,9 +42,12 @@ import java.util.stream.Collectors;
 public class PostCommandServiceImpl implements PostCommandService {
 
     private final PostRepository postRepository;
+    private final PostLikeRepository likeRepository;
+    private final PostScrapRepository scrapRepository;
     private final PostCommentRepository commentRepository;
     private final CommentLikeRepository commentLikeRepository;
     private final BestPostRepository bestPostRepository;
+    private final PostReportRepository reportRepository;
     private final S3Service s3Service;
 
 
@@ -104,45 +110,31 @@ public class PostCommandServiceImpl implements PostCommandService {
     @Override
     public PostResponseDTO.PostDetailDTO getPost(Long userId, Long postId, Integer page) {
 
-        // 여기서 밑에 boolean 들까지 fetch join으로 query 보냄
-        Post post = postRepository.findWithCommentsScrapsLikesById(postId)
+        Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new PostHandler(ErrorStatus.POST_NOT_EXIST));
+        boolean isLiked = likeRepository.existsByPostIdAndUserId(postId, userId);
+        boolean isScrapped = scrapRepository.existsByPostIdAndUserId(postId, userId);
+        boolean isOwnPost = userId.equals(post.getUser().getId());
+        boolean isBestPost = bestPostRepository.existsByPostId(postId);
+        boolean isReported = reportRepository.existsByPostIdAndUserId(postId, userId);
 
-        boolean isLiked = post.getLikes().stream() // 좋아요 여부
-                .anyMatch(postLike -> postLike.getUser().getId().equals(userId));
-        boolean isScrapped = post.getScraps().stream() // 스크랩 여부
-                .anyMatch(postScrap -> postScrap.getUser().getId().equals(userId));
-        boolean isOwnPost = userId.equals(post.getUser().getId()); // 본인이 쓴 글인지
-        boolean isBestPost = post.getBest() != null; // 베스트 게시글 여부
-        boolean isReported = post.getReports().stream() // 신고 여부
-                .anyMatch(postReport -> postReport.getUser().getId().equals(userId));
-
-
-        log.info("최상위 댓글 페이지네이션");
         // 최상위 댓글 페이지네이션
         Page<Comment> parentCommentsPage = commentRepository.findByPostAndParentIsNull(
                 post,
                 PageRequest.of(page - 1, 5)
         );
 
-        log.info("최상위 댓글 처리");
-        List<CommentLike> commentLikeList = commentLikeRepository.findByUserId(userId); // 사용자가 좋아요 누른 댓글 불러옴
-        
-        List<Long> commentIdList = commentLikeList.stream() // 그 댓글들의 Id를 List로 추출
-                .map(commentLike -> commentLike.getComment().getId())
-                .toList();
-
         // 최상위 댓글 처리
         List<CommentResponseDTO.CommentDTO> topLevelComments = parentCommentsPage.getContent().stream()
                 .map(comment -> {
 
-                    boolean isCommentLiked = commentIdList.contains(comment.getId());
+                    boolean isCommentLiked = commentLikeRepository.existsByCommentIdAndUserId(comment.getId(), userId);
                     boolean isOwnComment = userId.equals(comment.getUser().getId());
                     boolean isPostAuthor = post.getUser().getId().equals(comment.getUser().getId());
 
                     List<CommentResponseDTO.CommentDTO> replies = comment.getChildren().stream()
                             .map(child -> {
-                                boolean isChildLiked = commentIdList.contains(comment.getId());
+                                boolean isChildLiked = commentLikeRepository.existsByCommentIdAndUserId(child.getId(), userId);
                                 boolean isChildOwnComment = userId.equals(child.getUser().getId());
                                 boolean isChildPostAuthor = post.getUser().getId().equals(child.getUser().getId());
                                 return PostCommentConverter.toComment(child, isChildLiked, isChildPostAuthor, isChildOwnComment);

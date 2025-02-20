@@ -7,16 +7,19 @@ import com.pharmquest.pharmquest.domain.user.repository.UserRepository;
 import com.pharmquest.pharmquest.global.apiPayload.code.status.ErrorStatus;
 import com.pharmquest.pharmquest.global.apiPayload.code.status.SuccessStatus;
 import com.pharmquest.pharmquest.global.apiPayload.exception.handler.CommonExceptionHandler;
+import jakarta.persistence.LockModeType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
-@Transactional
+@Transactional(isolation = Isolation.SERIALIZABLE)
 @RequiredArgsConstructor
 public class PharmacyCommandServiceImpl implements PharmacyCommandService {
 
@@ -32,9 +35,7 @@ public class PharmacyCommandServiceImpl implements PharmacyCommandService {
         boolean isScraped = true;
 
         // 테이블에 약국 정보 이미 있는지 체크 후, 없다면 저장
-        if (!pharmacyRepository.existsByPlaceId(placeId)){
-            savePharmacy(placeId);
-        }
+        savePharmacy(placeId);
 
         // 해당 약국이 이미 스크랩되어있는지 체크.
         if(!pharmacyScraps.contains(placeId)) { // 스크랩 되어있지 않았다면 저장
@@ -64,9 +65,10 @@ public class PharmacyCommandServiceImpl implements PharmacyCommandService {
 
     }
 
-    @Override
-    public void savePharmacy(String placeId) {
-        Pharmacy pharmacy = pharmacyDetailsService.getPharmacyByPlaceId(placeId);
-        pharmacyRepository.save(pharmacy);
+    private void savePharmacy(String placeId) {
+        if (!pharmacyRepository.existsByPlaceId(placeId)){
+            Pharmacy pharmacy = pharmacyDetailsService.getPharmacyByPlaceId(placeId);
+            pharmacyRepository.save(pharmacy);
+        }
     }
 }

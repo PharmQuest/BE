@@ -44,17 +44,13 @@ public class KoreanMedicineConverter {
         String s3ImageUrl = uploadImageToS3(itemImage);
 
         return KoreanMedicineResponseDTO.builder()
-                .entpName(item.path("entpName").asText(""))
                 .itemName(item.path("itemName").asText(""))
                 .itemSeq(item.path("itemSeq").asText(""))
                 .efcyQesitm(item.path("efcyQesitm").asText(""))
                 .useMethodQesitm(item.path("useMethodQesitm").asText(""))
                 .atpnQesitm(item.path("atpnQesitm").asText(""))
-                .intrcQesitm(item.path("intrcQesitm").asText(""))
                 .seQesitm(item.path("seQesitm").asText(""))
                 .depositMethodQesitm(item.path("depositMethodQesitm").asText(""))
-                .openDe(item.path("openDe").asText(""))
-                .updateDe(item.path("updateDe").asText(""))
                 .itemImage(s3ImageUrl) // 변환된 S3 URL 적용
                 .category(category)
                 .build();
@@ -63,7 +59,7 @@ public class KoreanMedicineConverter {
     public Medicine convertToMedicineEntity(KoreanMedicineResponseDTO dto) {
         Medicine medicine = new Medicine();
         medicine.setBrandName(dto.getItemName());  //  제품명
-        medicine.setGenericName(dto.getItemName());  //
+        medicine.setGenericName("-");  //
         medicine.setPurpose(dto.getEfcyQesitm());  //  효능/효과
         medicine.setIndicationsAndUsage(dto.getEfcyQesitm());  // 효능/효과
         medicine.setDosageAndAdministration(dto.getUseMethodQesitm());  // 사용법

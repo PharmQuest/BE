@@ -25,13 +25,15 @@ public class MedicineCategoryMapper {
             koreanToCategory.put(entry.getValue(), entry.getKey());
         }
 
-        categoryToEffectKeyword.put(MedicineCategory.PAIN_RELIEF, "진통 해열");
-        categoryToEffectKeyword.put(MedicineCategory.DIGESTIVE, "소화 위장");
-        categoryToEffectKeyword.put(MedicineCategory.COLD, "감기 기침 콧물");
-        categoryToEffectKeyword.put(MedicineCategory.ALLERGY, "알레르기 두드러기");
-        categoryToEffectKeyword.put(MedicineCategory.ANTISEPTIC, "상처 소독");
+        categoryToEffectKeyword.put(MedicineCategory.PAIN_RELIEF, "진통");
+        categoryToEffectKeyword.put(MedicineCategory.DIGESTIVE, "소화");
+        categoryToEffectKeyword.put(MedicineCategory.COLD, "감기");
+        categoryToEffectKeyword.put(MedicineCategory.ALLERGY, "알레르기");
+        categoryToEffectKeyword.put(MedicineCategory.ANTISEPTIC, "상처");
         categoryToEffectKeyword.put(MedicineCategory.MOTION_SICKNESS, "멀미");
-        categoryToEffectKeyword.put(MedicineCategory.EYE_DROPS, "눈 안약");
+        categoryToEffectKeyword.put(MedicineCategory.EYE_DROPS, "눈 건조");
+        categoryToEffectKeyword.put(MedicineCategory.OTHER, "기타");
+        categoryToEffectKeyword.put(MedicineCategory.ALL, "전체");
     }
 
     // ✅ 영어 -> 한글 변환
@@ -130,7 +132,7 @@ public class MedicineCategoryMapper {
 
     // ✅ `MedicineCategory`을 `efcyQesitm` 검색 키워드로 변환하는 메서드 추가
     public static String getEffectKeywordForCategory(MedicineCategory category) {
-        return categoryToEffectKeyword.get(category);
+        return categoryToEffectKeyword.getOrDefault(category,"");
     }
 
     // ✅ `efcyQesitm`을 기반으로 `MedicineCategory`를 판별하는 새 메서드 추가

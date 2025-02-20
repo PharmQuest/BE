@@ -49,7 +49,7 @@ public class MedicineConverter {
 
         String splSetId = getFirstValue(result, "openfda.spl_set_id");
         String imgUrl = fetchImageUrl(splSetId);
-        String country = "미국";
+        String country = "USA";
 
         return new MedicineOpenapiResponseDTO(
                 brandName,
@@ -79,7 +79,7 @@ public class MedicineConverter {
 
         String splSetId = getFirstValue(result, "openfda.spl_set_id");
         String imgUrl = fetchImageUrl(splSetId);
-        String country = "미국";
+        String country = "USA";
         String warnings = translate(getFirstValue(result, "warnings"));
 
         boolean isScrapped = false;
@@ -125,7 +125,7 @@ public class MedicineConverter {
 
         String splSetId = getFirstValue(result, "openfda.spl_set_id");
         String imgUrl = fetchImageUrl(splSetId);
-        String country = "미국";
+        String country = "USA";
         String warnings = translate(getFirstValue(result, "warnings"));
 
 
@@ -158,7 +158,7 @@ public class MedicineConverter {
         MedicineCategory categoryEnum = MedicineCategoryMapper.getCategory(purpose, activeIngredient, "", route);
         String splSetId = getFirstValue(result, "openfda.spl_set_id");
         String imgUrl = fetchImageUrl(splSetId);
-        String country = "미국";
+        String country = "USA";
         String category = MedicineCategoryMapper.toKoreanCategory(categoryEnum);
         return new MedicineOpenapiResponseDTO (
                 brandName,

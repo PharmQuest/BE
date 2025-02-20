@@ -66,9 +66,9 @@ public class KoreanMedicineConverter {
         Medicine medicine = new Medicine();
         medicine.setBrandName(dto.getItemName());
         medicine.setGenericName("-");
-        medicine.setPurpose(dto.getEfcyQesitm());
-        medicine.setIndicationsAndUsage(dto.getDepositMethodQesitm());
-        medicine.setDosageAndAdministration(dto.getUseMethodQesitm());
+        medicine.setPurpose(removeNewLines(dto.getEfcyQesitm()));
+        medicine.setIndicationsAndUsage(removeNewLines(dto.getDepositMethodQesitm()));
+        medicine.setDosageAndAdministration(removeNewLines(dto.getUseMethodQesitm()));
         medicine.setSplSetId(dto.getItemSeq() != null ? dto.getItemSeq() : "-");
         medicine.setImgUrl(s3ImageUrl);
 
@@ -81,7 +81,7 @@ public class KoreanMedicineConverter {
 
         medicine.setCategory(category);
         medicine.setCountry("KOREA");
-        medicine.setWarnings(dto.getAtpnQesitm());
+        medicine.setWarnings(removeNewLines(dto.getAtpnQesitm()));
         medicine.setSubstanceName("-");
         medicine.setActiveIngredient("-");
 
@@ -90,6 +90,10 @@ public class KoreanMedicineConverter {
     }
 
 
+
+    private String removeNewLines(String input) {
+        return input != null ? input.replace("\n", "").trim() : "";
+    }
 
 
     /**

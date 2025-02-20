@@ -127,7 +127,7 @@ public class PostCommandServiceImpl implements PostCommandService {
 
         log.info("최상위 댓글 처리");
         List<CommentLike> commentLikeList = commentLikeRepository.findByUserId(userId); // 사용자가 좋아요 누른 댓글 불러옴
-        log.info("여기");
+        
         List<Long> commentIdList = commentLikeList.stream() // 그 댓글들의 Id를 List로 추출
                 .map(commentLike -> commentLike.getComment().getId())
                 .toList();

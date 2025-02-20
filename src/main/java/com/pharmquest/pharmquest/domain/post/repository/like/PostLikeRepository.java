@@ -8,7 +8,6 @@ import java.util.Optional;
 
 public interface PostLikeRepository extends JpaRepository<PostLike, Long>{
 
-    boolean existsByPostIdAndUserId(Long postId, Long userId);
     Optional<PostLike> findByPostIdAndUserId(Long postId, Long userId);
     // 특정 게시물의 좋아요 개수 조회
     int countByPostId(Long postId);

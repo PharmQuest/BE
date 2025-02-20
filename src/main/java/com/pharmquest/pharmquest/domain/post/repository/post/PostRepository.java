@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import java.util.List;
+import java.util.Optional;
 
 public interface PostRepository extends JpaRepository<Post, Long>, PostRepositoryCustom, JpaSpecificationExecutor<Post> {
 
@@ -39,5 +40,21 @@ public interface PostRepository extends JpaRepository<Post, Long>, PostRepositor
     List<Post> findByIdIn(List<Long> ids);
 
     Page<Post> findPostByUserIdOrderByCreatedAtDesc(Long userId, Pageable pageable);
+
+    @Query("SELECT p FROM Post p LEFT JOIN FETCH p.comments WHERE p.id = :postId")
+    Optional<Post> findWithCommentsById(@Param("postId") Long postId);
+
+    @Query("""
+    SELECT p FROM Post p
+    LEFT JOIN FETCH p.comments
+    LEFT JOIN FETCH p.scraps s
+    LEFT JOIN FETCH s.user
+    LEFT JOIN FETCH p.likes l
+    LEFT JOIN FETCH p.reports r
+    LEFT JOIN FETCH p.best b
+    WHERE p.id = :postId
+""")
+    Optional<Post> findWithCommentsScrapsLikesById(@Param("postId") Long postId);
+
 
 }

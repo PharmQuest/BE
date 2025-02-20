@@ -134,7 +134,7 @@ public class MyPageServiceImpl implements MyPageService {
     @Override
     public Page<MyPageResponseDTO.MedicineResponseDto> getScrapMedicines(Long userId, Pageable pageable, String requestCountry) {
 
-        String country = "전체".equals(requestCountry) ? null : requestCountry;
+        String country = "ALL".equals(requestCountry) ? null : requestCountry;
         Page<MedicineScrap> medicinePage = medicineScrapRepository.findMedicineByUserIdAndCountry(userId, country, pageable);
 
         if(medicinePage.isEmpty()) {

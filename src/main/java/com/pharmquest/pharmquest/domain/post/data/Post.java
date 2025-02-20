@@ -13,7 +13,6 @@ import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -63,16 +62,24 @@ public class Post extends BaseEntity {
     private String postImgURL;
 
     // 매핑
+<<<<<<< HEAD
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
     private Set<PostLike> likes = new HashSet<>();
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
     private Set<PostScrap> scraps = new HashSet<>();
+=======
+    @OneToMany(mappedBy = "post", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<PostLike> likes = new ArrayList<>();
+
+    @OneToMany(mappedBy = "post", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<PostScrap> scraps = new ArrayList<>();
+>>>>>>> a5e8990336a6a6afd0f153a6256f7ec09465b679
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
     private Set<PostReport> reports = new HashSet<>();
 
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "post", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Comment> comments = new ArrayList<>();
 
     @OneToOne(mappedBy = "post", cascade = CascadeType.ALL)

@@ -37,9 +37,9 @@ public class TempLoginHandler { // 임시 로그인 Handler
             log.info("신규 임시 유저입니다. 등록을 진행합니다.");
             user = User.builder()
                     .userId(UUID.randomUUID())
-                    .email(UUID.randomUUID() + "@pharmquest.com") // email은 not null 설정 되어있음. 중복되면 로그인이 안 되길래 UUID 박아버림
+                    .email(UUID.randomUUID().toString().substring(0,8) + "@pharmquest.com") // email은 not null 설정 되어있음. 중복되면 로그인이 안 되길래 UUID 박아버림
                     .name(name)
-                    .provider(null)
+                    .provider("local")
                     .providerId(null)
                     .build();
             userRepository.save(user);

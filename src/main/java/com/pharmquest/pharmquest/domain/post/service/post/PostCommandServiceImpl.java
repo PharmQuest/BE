@@ -9,6 +9,7 @@ import com.pharmquest.pharmquest.domain.post.data.enums.PostCategory;
 import com.pharmquest.pharmquest.domain.post.data.mapping.Comment;
 import com.pharmquest.pharmquest.domain.post.repository.bestPost.BestPostRepository;
 import com.pharmquest.pharmquest.domain.post.repository.comment.CommentLikeRepository;
+import com.pharmquest.pharmquest.domain.post.repository.comment.CommentReportRepository;
 import com.pharmquest.pharmquest.domain.post.repository.comment.PostCommentRepository;
 import com.pharmquest.pharmquest.domain.post.repository.like.PostLikeRepository;
 import com.pharmquest.pharmquest.domain.post.repository.post.PostRepository;
@@ -46,6 +47,7 @@ public class PostCommandServiceImpl implements PostCommandService {
     private final PostScrapRepository scrapRepository;
     private final PostCommentRepository commentRepository;
     private final CommentLikeRepository commentLikeRepository;
+    private final CommentReportRepository commentReportRepository;
     private final BestPostRepository bestPostRepository;
     private final PostReportRepository reportRepository;
     private final S3Service s3Service;
@@ -131,17 +133,19 @@ public class PostCommandServiceImpl implements PostCommandService {
                     boolean isCommentLiked = commentLikeRepository.existsByCommentIdAndUserId(comment.getId(), userId);
                     boolean isOwnComment = userId.equals(comment.getUser().getId());
                     boolean isPostAuthor = post.getUser().getId().equals(comment.getUser().getId());
+                    boolean isReportedComment = commentReportRepository.existsByCommentIdAndUserId(comment.getId(), userId);
 
                     List<CommentResponseDTO.CommentDTO> replies = comment.getChildren().stream()
                             .map(child -> {
                                 boolean isChildLiked = commentLikeRepository.existsByCommentIdAndUserId(child.getId(), userId);
                                 boolean isChildOwnComment = userId.equals(child.getUser().getId());
                                 boolean isChildPostAuthor = post.getUser().getId().equals(child.getUser().getId());
-                                return PostCommentConverter.toComment(child, isChildLiked, isChildPostAuthor, isChildOwnComment);
+                                boolean isChildReportedComment = commentReportRepository.existsByCommentIdAndUserId(child.getId(), userId);
+                                return PostCommentConverter.toComment(child, isChildLiked, isChildPostAuthor, isChildOwnComment, isChildReportedComment);
                             })
                             .collect(Collectors.toList());
 
-                    return PostCommentConverter.toComment(comment, isCommentLiked, isPostAuthor, isOwnComment)
+                    return PostCommentConverter.toComment(comment, isCommentLiked, isPostAuthor, isOwnComment, isReportedComment)
                             .toBuilder()
                             .replies(replies)
                             .build();

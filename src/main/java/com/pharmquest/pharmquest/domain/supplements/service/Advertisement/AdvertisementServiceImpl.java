@@ -15,6 +15,7 @@ import java.util.List;
 public class AdvertisementServiceImpl implements AdvertisementService {
     private final AdvertisementRepository advertisementRepository;
 
+    //페이지별 광고 반환(모듈러)
     public List<AdResponseDTO.AdResponseDto> getAdvertisementByPage(int page) {
         List<Advertisement> ads = advertisementRepository.findAll();
         if (ads.isEmpty()) {

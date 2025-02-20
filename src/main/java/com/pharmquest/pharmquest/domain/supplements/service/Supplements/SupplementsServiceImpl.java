@@ -48,7 +48,7 @@ public class SupplementsServiceImpl implements SupplementsService {
         Pageable pageableWithSort = PageRequest.of(
                 pageable.getPageNumber(),
                 pageable.getPageSize(),
-                Sort.by(Sort.Direction.DESC, "scrapCount")
+                Sort.by(Sort.Direction.DESC, "scrapCount").and(Sort.by(Sort.Direction.ASC, "id"))
         );
 
         Page<Supplements> supplementsPage;
@@ -138,7 +138,7 @@ public class SupplementsServiceImpl implements SupplementsService {
         Pageable pageableWithSort = PageRequest.of(
                 pageable.getPageNumber(),
                 pageable.getPageSize(),
-                Sort.by(Sort.Direction.DESC, "scrapCount")
+                Sort.by(Sort.Direction.DESC, "scrapCount").and(Sort.by(Sort.Direction.ASC, "id"))
         );
         Page<Supplements> supplementsPage;
         if (keyword == null) {
@@ -228,6 +228,7 @@ public class SupplementsServiceImpl implements SupplementsService {
         return supplementsConverter.toDetailDto(supplement, userId);
     }
 
+    //영양제 저장(현재 사용 X)
     @Override
     @Transactional
     public boolean saveSupplements() {
@@ -240,6 +241,7 @@ public class SupplementsServiceImpl implements SupplementsService {
         }
     }
 
+    //영양제 저장(현재 사용 X)
     private void saveDailyMedSupplements() {
         List<DailyMedResponseDTO.ExtractedInfo> extractedInfoList = dailyMedService.extractSupplementInfo();
         extractedInfoList.stream()
@@ -281,6 +283,7 @@ public class SupplementsServiceImpl implements SupplementsService {
                 .collect(Collectors.toList());
     }
 
+//영양제 저장(현재 사용 X)
 //    private void saveNaverSupplements() {
 //        List<String> supplementsNames = Arrays.asList(
 //                "한국 인기 영양제"
@@ -320,6 +323,7 @@ public class SupplementsServiceImpl implements SupplementsService {
 //        );
 //    }
 
+    //영양제 저장 시 카테고리 동시 저장(현재 사용 X)
     private void processCateogories(String text, Supplements supplement) {
         Arrays.stream(CategoryKeyword.values())
                 .map(Enum::name)
@@ -338,7 +342,7 @@ public class SupplementsServiceImpl implements SupplementsService {
                 });
     }
 
-
+    //영양제 저장 시 상품명 정제(현재 사용 X)
     private String cleanProductName(String name, Country country) {
         String cleaned = name.replaceAll("\\[?(미국|일본|중국|한국|)\\]?", "")
                 .replaceAll("\\((미국|일본|중국|한국)\\)", "");

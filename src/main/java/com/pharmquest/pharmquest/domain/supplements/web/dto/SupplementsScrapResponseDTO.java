@@ -3,8 +3,7 @@ package com.pharmquest.pharmquest.domain.supplements.web.dto;
 import lombok.Builder;
 import lombok.Getter;
 
-import java.util.List;
-
+//스크랩 결과 dto
 @Getter
 @Builder
 public class SupplementsScrapResponseDTO {

@@ -63,14 +63,14 @@ public class KoreanMedicineConverter {
     public Medicine convertToMedicineEntity(KoreanMedicineResponseDTO dto) {
         Medicine medicine = new Medicine();
         medicine.setBrandName(dto.getItemName());  //  제품명
-        medicine.setGenericName(dto.getItemName());  //
+        medicine.setGenericName("-");  //
         medicine.setPurpose(dto.getEfcyQesitm());  //  효능/효과
         medicine.setIndicationsAndUsage(dto.getEfcyQesitm());  // 효능/효과
         medicine.setDosageAndAdministration(dto.getUseMethodQesitm());  // 사용법
         medicine.setSplSetId(dto.getItemSeq());  // 품목 일련번호
         medicine.setImgUrl(dto.getItemImage());  // 이미지 URL
         medicine.setCategory(dto.getCategory());  // 카테고리
-        medicine.setCountry("한국");  // 국가는 한국으로 설정
+        medicine.setCountry("KOREA");  // 국가는 한국으로 설정
         medicine.setWarnings(dto.getAtpnQesitm());  // 주의사항
 
         // 한국 의약품에는 없는 필드 하이픈 표시

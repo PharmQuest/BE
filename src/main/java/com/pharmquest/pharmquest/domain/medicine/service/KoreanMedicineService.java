@@ -77,7 +77,10 @@ public class KoreanMedicineService {
         return koreanMedicineRepository.fetchMedicineData()
                 .flatMapIterable(responses -> {
                     List<Medicine> medicineList = new ArrayList<>();
-                    int savedCount = 0;  // 저장 개수 추적
+                    int savedCount = 0;
+
+                    // ✅ 카테고리별 검색 키워드 가져오기
+                    String effectKeyword = MedicineCategoryMapper.getEffectKeywordForCategory(category);
 
                     for (String responseBody : responses) {
                         try {
@@ -87,10 +90,28 @@ public class KoreanMedicineService {
                             if (!itemsNode.isArray()) continue;
 
                             for (JsonNode item : itemsNode) {
-                                if (savedCount >= 20) break;
+                                if (savedCount >= 15) break; // ✅ 최대 15개 저장
 
                                 KoreanMedicineResponseDTO dto = koreanMedicineConverter.convertToDTO(item, category);
-                                if (dto != null && isValidKoreanMedicine(dto)) {  // 빈 값이 없는 데이터만 저장
+                                if (dto == null) continue;
+
+                                // ✅ 필터링: `efcyQesitm`(효능)에 해당 카테고리 키워드 포함 여부 확인
+                                String efcyText = item.path("efcyQesitm").asText("");
+                                boolean matchesCategory = effectKeyword != null && efcyText.contains(effectKeyword);
+
+                                if (matchesCategory) {
+                                    // ✅ 유효성 검사: 모든 필드가 올바르게 입력된 경우만 저장
+                                    if (!isValidKoreanMedicine(dto)) {
+                                        log.info("⏭ 유효하지 않은 약품 제외됨: {}", dto.getItemName());
+                                        continue;
+                                    }
+
+                                    // ✅ 중복 방지: 같은 `splSetId`가 이미 존재하는지 확인
+                                    if (medRepository.existsBySplSetId(dto.getItemSeq())) {
+                                        log.info("⏭ 이미 존재하는 약품 (중복 저장 방지): {}", dto.getItemName());
+                                        continue;
+                                    }
+
                                     Medicine medicine = koreanMedicineConverter.convertToMedicineEntity(dto);
                                     medicineList.add(medicine);
                                     savedCount++;
@@ -100,15 +121,17 @@ public class KoreanMedicineService {
                             log.error("❌ JSON 파싱 오류: {}", e.getMessage());
                         }
 
-                        if (savedCount >= 20) break;  //  15개 저장 완료되면 반복 종료
+                        if (savedCount >= 15) break; // ✅ 15개 이상 저장 시 종료
                     }
 
                     return medicineList;
                 })
-                .take(20)
-                .doOnNext(medRepository::save)  // 개별 저장
+                .take(15)
+                .doOnNext(medRepository::save)  // ✅ 개별 저장
                 .then();
     }
+
+
 
     private boolean isValidKoreanMedicine(KoreanMedicineResponseDTO dto) {
         return isValid(dto.getItemName()) &&

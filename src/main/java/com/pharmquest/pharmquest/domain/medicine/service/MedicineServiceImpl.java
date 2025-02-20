@@ -372,31 +372,65 @@ public class MedicineServiceImpl implements MedicineService {
         }
     }
 
+//    @Override
+//    @Transactional(readOnly = true)
+//    public MedicineListPageResponseDTO searchMedicinesByCategoryAndKeyword(Long userId, MedicineCategory category, String keyword, int page, int size) {
+//        try {
+//            Pageable pageable = PageRequest.of(page , size, Sort.by("id").ascending());
+//            Page<Medicine> medicinesPage;
+//
+//            if (category == MedicineCategory.ALL) {
+//                if (keyword != null && !keyword.isEmpty()) {
+//                    medicinesPage = medRepository.findByKeyword(keyword, pageable);
+//                } else {
+//                    medicinesPage = medRepository.findAll(pageable);
+//                }
+//            } else {
+//                if (keyword != null && !keyword.isEmpty()) {
+//                    medicinesPage = medRepository.findByCategoryAndKeyword(category, keyword, pageable);
+//                } else {
+//                    medicinesPage = medRepository.findByCategory(category, pageable);
+//                }
+//            }
+//
+//            long amountCount = medicinesPage.getTotalElements(); // 전체 개수
+//            int amountPage = medicinesPage.getTotalPages();      // 전체 페이지 수
+//            int currentCount = medicinesPage.getNumberOfElements(); // 현재 페이지의 개수
+//            int currentPage = medicinesPage.getNumber() + 1;         //  1부터 시작하도록 변경
+//
+//            List<MedicineResponseDTO> medicines = medicinesPage.getContent().stream()
+//                    .map(medicine -> medicineConverter.convertFromEntity(medicine, userId))
+//                    .collect(Collectors.toList());
+//
+//            return new MedicineListPageResponseDTO(amountCount, amountPage, currentCount, currentPage, medicines);
+//        } catch (Exception e) {
+//            throw new RuntimeException("DB에서 약물 데이터를 검색하는 중 오류 발생", e);
+//        }
+//    }
+
     @Override
     @Transactional(readOnly = true)
     public MedicineListPageResponseDTO searchMedicinesByCategoryAndKeyword(Long userId, MedicineCategory category, String keyword, int page, int size) {
         try {
-            Pageable pageable = PageRequest.of(page , size, Sort.by("id").ascending());
+            Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending());
             Page<Medicine> medicinesPage;
 
-            if (category == MedicineCategory.ALL) {
-                if (keyword != null && !keyword.isEmpty()) {
-                    medicinesPage = medRepository.findByKeyword(keyword, pageable);
-                } else {
-                    medicinesPage = medRepository.findAll(pageable);
-                }
+            // ✅ 키워드가 없는 경우 → 카테고리만 검색
+            if (keyword == null || keyword.trim().isEmpty()) {
+                medicinesPage = (category == MedicineCategory.ALL)
+                        ? medRepository.findAll(pageable)  // 전체 검색
+                        : medRepository.findByCategory(category, pageable);
             } else {
-                if (keyword != null && !keyword.isEmpty()) {
-                    medicinesPage = medRepository.findByCategoryAndKeyword(category, keyword, pageable);
-                } else {
-                    medicinesPage = medRepository.findByCategory(category, pageable);
-                }
+                // ✅ 키워드가 있는 경우 → 카테고리 + 키워드 검색 (빈 결과도 허용)
+                medicinesPage = (category == MedicineCategory.ALL)
+                        ? medRepository.findByKeyword(keyword, pageable)  // 전체에서 키워드 검색
+                        : medRepository.findByCategoryAndKeyword(category, keyword, pageable);
             }
 
-            long amountCount = medicinesPage.getTotalElements(); // 전체 개수
-            int amountPage = medicinesPage.getTotalPages();      // 전체 페이지 수
-            int currentCount = medicinesPage.getNumberOfElements(); // 현재 페이지의 개수
-            int currentPage = medicinesPage.getNumber() + 1;         //  1부터 시작하도록 변경
+            long amountCount = medicinesPage.getTotalElements();
+            int amountPage = medicinesPage.getTotalPages();
+            int currentCount = medicinesPage.getNumberOfElements();
+            int currentPage = medicinesPage.getNumber() + 1;
 
             List<MedicineResponseDTO> medicines = medicinesPage.getContent().stream()
                     .map(medicine -> medicineConverter.convertFromEntity(medicine, userId))
@@ -407,6 +441,8 @@ public class MedicineServiceImpl implements MedicineService {
             throw new RuntimeException("DB에서 약물 데이터를 검색하는 중 오류 발생", e);
         }
     }
+
+
 
     @Override
     @Transactional(readOnly = true)
@@ -415,25 +451,25 @@ public class MedicineServiceImpl implements MedicineService {
             Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending());
             Page<Medicine> medicinesPage;
 
-            // ✅ 키워드가 없는 경우, 기존 카테고리 + 국가 필터 적용
+            // ✅ 키워드가 없는 경우 → 카테고리 + 국가 필터 적용
             if (keyword == null || keyword.trim().isEmpty()) {
                 medicinesPage = (category == MedicineCategory.ALL)
-                        ? medRepository.findByCategoryAndCountry(category, country, pageable)
-                        : medRepository.findByCategory(category, pageable);
+                        ? medRepository.findByCountry(country, pageable) // 전체 조회
+                        : medRepository.findByCategoryAndCountry(category, country, pageable);
             } else {
-                // ✅ 키워드가 있는 경우, 카테고리 + 키워드 + 국가 필터 적용
+                // ✅ 키워드가 있는 경우 → 카테고리 + 키워드 + 국가 필터 적용
                 medicinesPage = medRepository.findByCategoryKeywordAndCountry(category, keyword, country, pageable);
 
-                // ✅ 만약 카테고리 + 키워드 조합에서 결과가 없다면, 카테고리 필터를 제외하고 키워드만 검색
+                // ✅ 해당 카테고리에 데이터가 없을 경우, 기존 카테고리 유지하면서 키워드 재검색하지 않음 (정확한 필터링 유지)
                 if (medicinesPage.isEmpty()) {
-                    medicinesPage = medRepository.findByKeywordAndCountry(keyword, country, pageable);
+                    medicinesPage = medRepository.findByCategoryAndCountry(category, country, pageable);
                 }
             }
 
             long amountCount = medicinesPage.getTotalElements(); // 전체 개수
             int amountPage = medicinesPage.getTotalPages();      // 전체 페이지 수
             int currentCount = medicinesPage.getNumberOfElements(); // 현재 페이지의 개수
-            int currentPage = medicinesPage.getNumber() + 1;         // 1부터 시작하도록 변경
+            int currentPage = medicinesPage.getNumber() + 1;     // 1부터 시작하도록 변경
 
             List<MedicineResponseDTO> medicines = medicinesPage.getContent().stream()
                     .map(medicine -> medicineConverter.convertFromEntity(medicine, userId))
@@ -444,5 +480,6 @@ public class MedicineServiceImpl implements MedicineService {
             throw new RuntimeException("DB에서 약물 데이터를 검색하는 중 오류 발생", e);
         }
     }
+
 
 }

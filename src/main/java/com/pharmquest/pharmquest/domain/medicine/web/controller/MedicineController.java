@@ -150,8 +150,46 @@ public class MedicineController {
         return medRepository.findAll(); // DB에서 전체 데이터 조회
     }
 
-    @Operation(summary = "백엔드 사용o, 프론트 x | 약물 검색 API", description = "백엔드 사용o, 프론트 x | 카테고리 및 키워드를 이용해 DB에서 약물을 검색합니다.")
-    @GetMapping("test/search")
+//    @Operation(summary = "백엔드 사용o, 프론트 x | 약물 검색 API", description = "백엔드 사용o, 프론트 x | 카테고리 및 키워드를 이용해 DB에서 약물을 검색합니다.")
+//    @GetMapping("test/search")
+//    public ResponseEntity<ApiResponse<MedicineListPageResponseDTO>> searchMedicinesByCategoryAndKeyword(
+//            @Parameter(hidden = true) @RequestHeader(value = "Authorization", required = false) String authorizationHeader,
+//            @RequestParam(defaultValue = "ALL") MedicineCategory category,
+//            @RequestParam(defaultValue = "") String keyword,
+//            @RequestParam(defaultValue = "1") int page,
+//            @RequestParam(defaultValue = "10") int size) {
+//        try {
+//            Long userId = (authorizationHeader != null && !authorizationHeader.isEmpty()) ?
+//                    jwtUtil.getUserFromHeader(authorizationHeader).getId() : null;
+//            MedicineListPageResponseDTO medicines = medicineService.searchMedicinesByCategoryAndKeyword(userId, category, keyword, page - 1, size);
+//            return ApiResponse.onSuccess(SuccessStatus.MEDICINE_FETCH_SUCCESS, medicines);
+//        } catch (Exception e) {
+//            return ApiResponse.onFailure(ErrorStatus.MEDICINE_NOT_FOUND);
+//        }
+//    }
+
+//    @Operation(summary = "국가별, 카테고리별, 키워드 검색", description = "DB에서 국가(ALL, 미국, 한국), 카테고리, 키워드를 기반으로 약물을 검색합니다.")
+//    @GetMapping("/search")
+//    public ResponseEntity<ApiResponse<MedicineListPageResponseDTO>> searchMedicinesByCategoryKeywordAndCountry(
+//            @Parameter(hidden = true) @RequestHeader(value = "Authorization", required = false) String authorizationHeader,
+//            @RequestParam(defaultValue = "ALL") MedicineCategory category,
+//            @RequestParam(defaultValue = "ALL") String country,  // 국가 필터 추가
+//            @RequestParam(defaultValue = "") String keyword,
+//            @RequestParam(defaultValue = "1") int page,
+//            @RequestParam(defaultValue = "10") int size) {
+//        try {
+//            Long userId = (authorizationHeader != null && !authorizationHeader.isEmpty())
+//                    ? jwtUtil.getUserFromHeader(authorizationHeader).getId() : null;
+//
+//            MedicineListPageResponseDTO medicines = medicineService.searchMedicinesByCategoryKeywordAndCountry(userId, category, keyword, country, page - 1, size);
+//            return ApiResponse.onSuccess(SuccessStatus.MEDICINE_FETCH_SUCCESS, medicines);
+//        } catch (Exception e) {
+//            return ApiResponse.onFailure(ErrorStatus.MEDICINE_NOT_FOUND);
+//        }
+//    }
+
+    @Operation(summary = "국가별, 카테고리별, 키워드 검색", description = "DB에서 카테고리, 키워드를 기반으로 약물을 검색합니다.")
+    @GetMapping("/search")
     public ResponseEntity<ApiResponse<MedicineListPageResponseDTO>> searchMedicinesByCategoryAndKeyword(
             @Parameter(hidden = true) @RequestHeader(value = "Authorization", required = false) String authorizationHeader,
             @RequestParam(defaultValue = "ALL") MedicineCategory category,
@@ -161,27 +199,8 @@ public class MedicineController {
         try {
             Long userId = (authorizationHeader != null && !authorizationHeader.isEmpty()) ?
                     jwtUtil.getUserFromHeader(authorizationHeader).getId() : null;
+
             MedicineListPageResponseDTO medicines = medicineService.searchMedicinesByCategoryAndKeyword(userId, category, keyword, page - 1, size);
-            return ApiResponse.onSuccess(SuccessStatus.MEDICINE_FETCH_SUCCESS, medicines);
-        } catch (Exception e) {
-            return ApiResponse.onFailure(ErrorStatus.MEDICINE_NOT_FOUND);
-        }
-    }
-
-    @Operation(summary = "국가별, 카테고리별, 키워드 검색", description = "DB에서 국가(ALL, 미국, 한국), 카테고리, 키워드를 기반으로 약물을 검색합니다.")
-    @GetMapping("/search")
-    public ResponseEntity<ApiResponse<MedicineListPageResponseDTO>> searchMedicinesByCategoryKeywordAndCountry(
-            @Parameter(hidden = true) @RequestHeader(value = "Authorization", required = false) String authorizationHeader,
-            @RequestParam(defaultValue = "ALL") MedicineCategory category,
-            @RequestParam(defaultValue = "ALL") String country,  // 국가 필터 추가
-            @RequestParam(defaultValue = "") String keyword,
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        try {
-            Long userId = (authorizationHeader != null && !authorizationHeader.isEmpty())
-                    ? jwtUtil.getUserFromHeader(authorizationHeader).getId() : null;
-
-            MedicineListPageResponseDTO medicines = medicineService.searchMedicinesByCategoryKeywordAndCountry(userId, category, keyword, country, page - 1, size);
             return ApiResponse.onSuccess(SuccessStatus.MEDICINE_FETCH_SUCCESS, medicines);
         } catch (Exception e) {
             return ApiResponse.onFailure(ErrorStatus.MEDICINE_NOT_FOUND);

@@ -14,16 +14,19 @@ public interface MedRepository extends JpaRepository<Medicine, Long> {
     boolean existsBySplSetId(String splSetId);
     Optional<Medicine> findBySplSetIdIgnoreCase(String splSetId);
     Page<Medicine> findByCategory(MedicineCategory category, Pageable pageable);
-    @Query("SELECT m FROM Medicine m WHERE LOWER(m.brandName) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
-            "OR LOWER(m.indicationsAndUsage) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
-            "OR LOWER(m.category) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+
+    @Query("SELECT m FROM Medicine m WHERE m.category = :category " +
+            "AND (LOWER(m.brandName) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+            "OR LOWER(m.genericName) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+            "OR LOWER(m.indicationsAndUsage) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+    Page<Medicine> findByCategoryAndKeyword(MedicineCategory category, String keyword, Pageable pageable);
+
+    @Query("SELECT m FROM Medicine m WHERE " +
+            "(LOWER(m.brandName) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+            "OR LOWER(m.indicationsAndUsage) LIKE LOWER(CONCAT('%', :keyword, '%')))")
     Page<Medicine> findByKeyword(String keyword, Pageable pageable);
 
-    @Query("SELECT m FROM Medicine m WHERE LOWER(m.category) = LOWER(:category) " +
-            "AND (LOWER(m.brandName) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
-            "OR LOWER(m.indicationsAndUsage) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
-            "OR LOWER(m.category) LIKE LOWER(CONCAT('%', :keyword, '%')))")
-    Page<Medicine> findByCategoryAndKeyword(MedicineCategory category, String keyword, Pageable pageable);
+
     Optional<Medicine> findBySplSetId(String splSetId);
 
     @Query("SELECT m FROM Medicine m WHERE (:country = 'ALL' OR LOWER(m.country) = LOWER(:country)) " +
@@ -43,5 +46,8 @@ public interface MedRepository extends JpaRepository<Medicine, Long> {
             "AND (LOWER(m.brandName) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
             "OR LOWER(m.indicationsAndUsage) LIKE LOWER(CONCAT('%', :keyword, '%')))")
     Page<Medicine> findByCategoryKeywordAndCountry(MedicineCategory category, String keyword, String country, Pageable pageable);
+
+    @Query("SELECT m FROM Medicine m WHERE (:country = 'ALL' OR LOWER(m.country) = LOWER(:country))")
+    Page<Medicine> findByCountry(String country, Pageable pageable);
 
 }

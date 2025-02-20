@@ -51,7 +51,7 @@ public class MyPageController {
     public ApiResponse<Page<MyPageResponseDTO.MedicineResponseDto>> getScrappedMedicines(
                                                             @Parameter(hidden = true) @RequestHeader("Authorization") String authorizationHeader,
                                                             @Parameter(description = "페이지 번호") @RequestParam(defaultValue = "1") int page,
-                                                            @Parameter(description = "카테고리: 미국, 한국, 전체") String country) {
+                                                            @Parameter(description = "카테고리: USA, KOREA, ALL") String country) {
 
         Pageable pageable = PageRequest.of(page-1, 10);
         Long userId = jwtUtil.getUserFromHeader(authorizationHeader).getId();

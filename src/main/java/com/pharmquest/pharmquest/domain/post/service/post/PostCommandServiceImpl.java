@@ -133,17 +133,14 @@ public class PostCommandServiceImpl implements PostCommandService {
         );
 
         log.info("최상위 댓글 처리");
-        List<CommentLike> commentLikeList = commentLikeRepository.findByUserId(userId); // 사용자가 좋아요 누른 댓글 불러옴
-        List<Long> likedCommentsIdList = commentLikeList.stream() // 그 댓글들의 Id를 List로 추출
+        List<Long> likedCommentsIdList = commentLikeRepository.findByUserId(userId).stream() // 사용자가 좋아요 누른 게시글들의 Id List
                 .map(commentLike -> commentLike.getComment().getId())
                 .toList();
 
-        List<CommentReport> commentReportList = commentReportRepository.findByUserId(userId);
-        List<Long> reportedCommentIdList = commentReportList.stream()
+        List<Long> reportedCommentIdList = commentReportRepository.findByUserId(userId).stream() // 사용자가 신고한 댓글들
                 .map(commentReport -> commentReport.getComment().getId())
                 .toList();
-
-
+        
         // 최상위 댓글 처리
         List<CommentResponseDTO.CommentDTO> topLevelComments = parentCommentsPage.getContent().stream()
                 .map(comment -> {
@@ -151,7 +148,6 @@ public class PostCommandServiceImpl implements PostCommandService {
                     boolean isCommentLiked = likedCommentsIdList.contains(comment.getId());
                     boolean isOwnComment = userId.equals(comment.getUser().getId());
                     boolean isPostAuthor = post.getUser().getId().equals(comment.getUser().getId());
-//                    boolean isReportedComment = commentReportRepository.existsByCommentIdAndUserId(comment.getId(), userId);
                     boolean isReportedComment = reportedCommentIdList.contains(comment.getId());
 
                     List<CommentResponseDTO.CommentDTO> replies = comment.getChildren().stream()

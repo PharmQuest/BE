@@ -107,12 +107,9 @@ public class OAuthLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHand
         // 액세스 토큰 발급
         String accessToken = jwtUtil.generateAccessToken(user.getUserId(), ACCESS_TOKEN_EXPIRATION_TIME);
 
-        String jsonResponse = String.format("{\"message\": \"로그인 성공!\", \"name\": \"%s\", \"accessToken\": \"%s\", \"refreshToken\": \"%s\"}",
-                name, accessToken, refreshToken);
-
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-        response.setStatus(HttpServletResponse.SC_OK);
-        response.getWriter().write(jsonResponse);
+        // 이름, 액세스 토큰, 리프레쉬 토큰을 담아 리다이렉트
+        String encodedName = URLEncoder.encode(name, "UTF-8");
+        String redirectUri = String.format(REDIRECT_URI, encodedName, accessToken, refreshToken);
+        getRedirectStrategy().sendRedirect(request, response, redirectUri);
     }
 }

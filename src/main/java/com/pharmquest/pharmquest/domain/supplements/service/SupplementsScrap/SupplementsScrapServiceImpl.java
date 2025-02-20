@@ -11,7 +11,6 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -22,6 +21,7 @@ public class SupplementsScrapServiceImpl implements SupplementsScrapService{
     private final UserRepository userRepository;
     private final SupplementsScrapRepository supplementsScrapRepository;
 
+    //스크랩 여부 변경
     @Override
     @Transactional
     public SupplementsScrapResponseDTO changeScrap(Long supplementsId, Long userId) {

@@ -15,9 +15,7 @@ import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Getter
@@ -64,19 +62,16 @@ public class Post extends BaseEntity {
 
     // 매핑
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
-    private Set<PostLike> likes = new HashSet<>();
+    private List<PostLike> likes = new ArrayList<>();
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
-    private Set<PostScrap> scraps = new HashSet<>();
+    private List<PostScrap> scraps = new ArrayList<>();
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
-    private Set<PostReport> reports = new HashSet<>();
+    private List<PostReport> reports = new ArrayList<>();
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
     private List<Comment> comments = new ArrayList<>();
-
-    @OneToOne(mappedBy = "post", cascade = CascadeType.ALL)
-    private BestPost best;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")

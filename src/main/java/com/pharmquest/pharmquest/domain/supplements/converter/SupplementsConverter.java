@@ -22,19 +22,13 @@ public class SupplementsConverter {
     private final SupplementsCategoryRepository supplementsCategoryRepository;
     private final SupplementsRepository supplementsRepository;
 
-//    public static SupplementsResponseDTO.SupplementsDto toSupplementsDto(Supplements supplements) {
-//        return SupplementsResponseDTO.SupplementsDto.builder()
-//                .name(supplements.getName())
-//                .image(supplements.getImage())
-//                .brand(supplements.getBrand())
-//                .build();
-//    }
-
+    //영양제 스크랩 여부 조회
     private boolean isSupplementScrappedByUser(Supplements supplement, Long userId) {
         if (userId == null) return false;
         return supplementsScrapRepository.existsByUserIdAndSupplementsId(userId, supplement.getId());
     }
 
+    //국가명 반환
     private String processCountryName(Country country) {
         if (country == Country.KOREA) {
             return "한국";
@@ -48,14 +42,17 @@ public class SupplementsConverter {
         return "";
     }
 
+    //상품명에서 국가 태그 제거
     private String processProductName(String name) {
         return name.replaceAll("^\\[(한국|미국|일본)\\]\\s*", "");
     }
 
+    //광고명에서 광고 태그 제거
     public String processAdName(String name) {
         return name.replace("[광고]", "").trim();
     }
 
+    //카테고리 상위그룹 반환
     public List<String> findParentGroups(List<String> categories) {
         List<String> result = new ArrayList<>();
         result.add(CategoryGroup.전체.toString());  // 전체는 항상 포함
@@ -69,6 +66,7 @@ public class SupplementsConverter {
         return result;
     }
 
+    //전체 리스트용 형태 컨버터
     public SupplementsResponseDTO.SupplementsDto toDto(Supplements supplement, Long userId, Map<Long, List<String>> categoryMap) {
         List<String> categories = categoryMap.getOrDefault(supplement.getId(), Collections.emptyList());
         List<String> selectCategories = findParentGroups(categories);
@@ -87,6 +85,7 @@ public class SupplementsConverter {
                 .build();
     }
 
+    //검색 결과용 형태 컨버터
     public SupplementsResponseDTO.SupplementsSearchResponseDto toSearchDto(Supplements supplement, Long userId, Map<Long, List<String>> categoryMap) {
         List<String> categories = categoryMap.getOrDefault(supplement.getId(), Collections.emptyList());
         List<String> selectCategories = findParentGroups(categories);
@@ -105,6 +104,7 @@ public class SupplementsConverter {
                 .build();
     }
 
+    //상세정보용 형태 컨버터
     public SupplementsResponseDTO.SupplementsDetailResponseDto toDetailDto(Supplements supplement, Long userId) {
         List<String> categories = supplementsCategoryRepository.findCategoryNamesBySupplementId(supplement.getId());
         List<Supplements> relatedSupplements = supplementsRepository.findRelatedSupplements(supplement.getId(), PageRequest.of(0, 6));

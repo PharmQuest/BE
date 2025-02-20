@@ -3,7 +3,6 @@ package com.pharmquest.pharmquest.domain.supplements.repository;
 import com.pharmquest.pharmquest.domain.post.data.enums.Country;
 import com.pharmquest.pharmquest.domain.supplements.data.Supplements;
 import jakarta.persistence.LockModeType;
-import jakarta.persistence.ManyToMany;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

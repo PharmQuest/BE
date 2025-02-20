@@ -12,13 +12,10 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @Tag(name = "해외 인기 영양제", description = "해외 인기 영양제")
 @RestController
@@ -85,9 +82,6 @@ public class SupplementListController {
         if (authorizationHeader != null && !authorizationHeader.isEmpty()) {
             userId = jwtUtil.getUserFromHeader(authorizationHeader).getId();
         }
-//        if (authroizationHeader == null || authroizationHeader.isEmpty()) {
-//            throw new CommonExceptionHandler(ErrorStatus.AUTHORIZATION_HEADER_NOT_FOUND);
-//        }
 
         SupplementsResponseDTO.SupplementsDetailResponseDto detailResponseDto =
                 supplementsService.getSupplementById(id, userId);

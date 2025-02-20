@@ -18,8 +18,6 @@ public class KoreanMedicineResponseDTO {
     private String intrcQesitm;     // 상호작용 정보
     private String seQesitm;        // 부작용 정보
     private String depositMethodQesitm; // 보관 방법
-    private String openDe;          // 공개일자
-    private String updateDe;        // 수정일자
     private String itemImage;       // 이미지 URL
     private MedicineCategory category;
 }

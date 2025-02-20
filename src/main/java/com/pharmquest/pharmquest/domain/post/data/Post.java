@@ -70,8 +70,8 @@ public class Post extends BaseEntity {
     private Set<PostScrap> scraps = new HashSet<>();
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
-    private List<PostReport> reports = new ArrayList<>();
-
+    private Set<PostReport> reports =  new HashSet<>();
+    
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
     private List<Comment> comments = new ArrayList<>();
     

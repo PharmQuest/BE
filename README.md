@@ -54,8 +54,8 @@
 
 | 이름 | 역할 |
 |------|------|
-|@https://github.com/joamksh | **백엔드 개발**, 인프라 구축, API 연동 |
-| 팀원 A | 프론트엔드 개발 |
-| 팀원 B | 백엔드 및 DB 설계 |
-| 팀원 C | 디자인 및 피그마 |
-| 팀원 D | 테스트 및 QA |
+|@https://github.com/joamksh| 인프라 구축 배포, 상비약 정보 |
+|@https://github.com/lehojun| 로그인 마이페이지 |
+|@https://github.com/heessunny| 커뮤니티 |
+|@https://github.com/ggamnunq| 지도,홈화면 |
+|@https://github.com/rlawjdgns02| 영양제 |

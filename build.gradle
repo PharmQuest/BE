@@ -19,6 +19,11 @@ configurations {
 	}
 }
 
+// B-005: Docker 29(최소 API 1.44)와 호환되도록 Testcontainers만 1.21.4로 올린다.
+// Spring Boot 3.3.7 BOM 기본값은 1.19.8이며, 이 버전은 Docker 29에서 연결이 거부된다.
+// 2.x는 artifact/패키지 이름이 바뀌어(org.testcontainers:mysql -> testcontainers-mysql 등) Boot 3.3.x와 맞지 않는다.
+ext['testcontainers.version'] = '1.21.4'
+
 repositories {
 	mavenCentral()
 	maven { url "https://maven.google.com" }  // Google Maven Repository
@@ -35,6 +40,10 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	// B-005: 테스트 전용 MySQL 컨테이너 (버전은 Spring Boot BOM이 관리)
+	testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+	testImplementation 'org.testcontainers:junit-jupiter'
+	testImplementation 'org.testcontainers:mysql'
 	implementation 'com.fasterxml.jackson.core:jackson-databind'
 
 	// Spring Boot WebFlux (WebClient 사용)

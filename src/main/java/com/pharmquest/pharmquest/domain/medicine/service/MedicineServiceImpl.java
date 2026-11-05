@@ -27,7 +27,9 @@ import reactor.core.publisher.Mono;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
@@ -256,6 +258,8 @@ public class MedicineServiceImpl implements MedicineService {
             String query = MedicineCategoryMapper.getQueryForCategory(category);
 
             List<Medicine> medicinesToSave = new ArrayList<>();
+            // 이 요청에서 저장 후보에 추가된 splSetId (재시도 반복 시 같은 항목의 중복 추가·재변환 방지)
+            Set<String> candidateSplSetIds = new HashSet<>();
             int requestLimit = limit * 3; // 더 많은 데이터 요청
             int retryCount = 0;
 
@@ -276,6 +280,11 @@ public class MedicineServiceImpl implements MedicineService {
                         // 유효한 splSetId가 없으면 DB 검사·변환 대상이 아니다 (원본 필수값 불량과 동일하게 집계)
                         if (splSetId == null) {
                             meterRegistry.counter("medicine.raw.invalid.count").increment();
+                            continue;
+                        }
+
+                        // 이미 이번 요청의 저장 후보인 항목은 DB 조회·변환 없이 건너뛰기
+                        if (candidateSplSetIds.contains(splSetId)) {
                             continue;
                         }
 
@@ -313,6 +322,8 @@ public class MedicineServiceImpl implements MedicineService {
                             medicine.setWarnings(dto.getWarnings());
 
                             medicinesToSave.add(medicine);
+                            // 후보 추가에 성공한 시점에만 기록: 변환·검증에 실패한 항목은 다음 반복에서 재시도 가능
+                            candidateSplSetIds.add(splSetId);
                         }
 
                         if (medicinesToSave.size() >= limit) break;

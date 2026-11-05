@@ -31,9 +31,11 @@
 ## 백로그
 
 - [backlog](backlog.md): P-001에서 의도적으로 제외한 후속 문제
+- [test-environment](test-environment.md): `contextLoads` 실패 현황과 CI 고려사항 (B-005)
 
 ## 관련 원본 문서
 
+- AI 협업 규칙: [AGENTS.md](../../AGENTS.md)
 - 설계 메모 초안(작업 로그 성격): [docs/ai-workflow/P-001-design-memo.md](../ai-workflow/P-001-design-memo.md)
 - 프로젝트 소개와 성능 개선 기록: [README.md](../../README.md)
 

@@ -33,11 +33,46 @@
   - 값을 trim하거나 변환하지 않는다 (DB에 저장되는 값과 같은 규칙이어야 하므로).
 - 경계 조건 테스트 16개: `MedicineConverterExtractSplSetIdTest` **[확인: PASS]**.
 
-## 저장 값과의 일치 [확인: 코드 열람 / 테스트로는 미검증]
+## 저장 값과의 일치 [확인: 코드 열람 / 컨버터 수준은 아래 B-006 절에서 테스트로 확인, 서비스 연결은 미검증]
 
 저장되는 `Medicine.splSetId`는 `MedicineConverter.SaveConvertToDetail`이 `getFirstValue(result, "openfda.spl_set_id")`로 만든 DTO 값이다 (`MedicineServiceImpl.saveMedicinesByCategory`의 `medicine.setSplSetId(dto.getSplSetId())`). `getFirstValue`는 배열이면 첫 요소의 `asText("Unknown")`, 아니면 `asText("Unknown")`이므로, `extractSplSetId`가 null이 아닌 모든 경우에 두 값은 같다.
 
 단, 서비스 테스트에서는 컨버터를 Mock으로 쓰고 DTO를 같은 ID로 만들어 반환하므로 **자동 테스트가 두 값의 일치를 증명하지는 않는다**. 실제 컨버터는 `SaveConvertToDetail`이 필드 주입된 Executor에 의존해 단위 테스트가 어렵다 ([backlog](../backlog.md)).
+
+## 실제 컨버터 일치 검증 (B-006)
+
+상태: **부분 검증 완료**. 테스트: `MedicineConverterSplSetIdParityTest` (13개 **[확인: PASS]**). 실제 `MedicineConverter`로 `SaveConvertToDetail(node, null)`을 실행하고, 번역(입력 그대로 반환)·이미지 조회(null 반환)·Executor(`Runnable::run`, `ReflectionTestUtils`로 주입)만 대체했다. DTO를 테스트가 만들어 주입하지 않는다.
+
+### 정상 입력: 추출값과 DTO `splSetId`가 일치 [확인]
+
+| 입력 | `extractSplSetId` | DTO |
+|---|---|---|
+| `["abc"]` | `abc` | `abc` |
+| `"abc"` | `abc` | `abc` |
+| `[" Ab-1 "]` | `" Ab-1 "` | `" Ab-1 "` (양쪽 모두 trim하지 않음) |
+| `["A","B"]` | `A` | `A` (첫 요소) |
+
+### 무효 입력: 실제 컨버터가 내는 값 [확인: 관찰, 테스트가 고정하지 않음]
+
+| 입력 | `extractSplSetId` | 실제 `SaveConvertToDetail` |
+|---|---|---|
+| 필드 누락 / `null` / `[null]` / `"Unknown"` | `null` | DTO `"Unknown"` |
+| 공백 `"   "` | `null` | DTO `"   "` (공백 그대로) |
+| 객체 `{"a":1}` | `null` | DTO `""` |
+| `["","x"]` | `null` | DTO `""` (첫 요소만 봄) |
+| 빈 배열 `[]` | `null` | **`NullPointerException`** (`getFirstValue`의 `get(0)`, B-002와 같은 원인) |
+
+테스트가 단언하는 것은 "무효 입력에서 `extractSplSetId`가 `null`"뿐이고, 컨버터의 결과·예외는 출력만 한다. 현재의 `Unknown`/공백/빈 문자열/NPE 동작을 정상으로 고정하지 않는다.
+
+### 서비스 사전 필터가 필요한 이유
+
+컨버터 자체는 무효 ID를 거부하지 않는다. `"Unknown"`, 공백, 빈 문자열이 저장 가능한 값처럼 DTO에 담기고, 빈 배열은 예외를 던진다. `isValidSaveMedicineDetail`도 `splSetId`를 검사하지 않는다. 따라서 `extractSplSetId == null`인 항목을 **변환 이전에** 걸러내는 서비스 필터(P-001/P-002)가 유일한 방어선이다.
+
+### 증명한 범위와 못 한 범위
+
+- **증명**: 정상 4종에서 컨버터 내부의 추출 규칙과 저장 DTO 규칙이 같다. 필터가 거르는 무효 입력의 목록.
+- **미증명**: 서비스가 추출한 ID로 DB를 조회하고 **같은 값**을 `Medicine`에 저장하는 연결(서비스 테스트는 컨버터가 Mock). 실제 DB 컬럼에 저장된 값(길이·collation, B-007), JPA flush·커밋. 번역·이미지·스레드풀의 실제 동작.
+- **위험**: 두 규칙은 여전히 별개 구현이다. 한쪽만 바뀌면 이 테스트의 정상 입력 단언이 깨져 감지하지만, 테스트 표에 없는 입력은 잡지 못한다. 일원화(B안)는 별도 설계 결정 대상이다.
 
 ## 아직 해결하지 않은 문제
 

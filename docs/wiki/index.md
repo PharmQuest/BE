@@ -13,6 +13,7 @@
 | ID | 제목 | 상태 | 문서 |
 |---|---|---|---|
 | P-001 | `saveMedicinesByCategory` 재시도 루프의 중복 추가와 splSetId 추출 오류 | 구현·테스트 완료, 로컬 커밋됨 (`88b9378`, `0a9c1ca`) | [P-001-retry-duplicate](problems/P-001-retry-duplicate.md) |
+| P-002 | `saveOtherMedicines`의 splSetId 추출 오류와 요청 내 중복 저장 (P-001 지식 재사용) | 구현·테스트 완료, 로컬 커밋됨 (`fbd33cc`) | [P-002-save-other-medicines](problems/P-002-save-other-medicines.md) |
 
 ## 개념 (concepts)
 

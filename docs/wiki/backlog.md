@@ -4,7 +4,7 @@
 
 | ID | 문제 | 근거 | 영향 | 제안 방향 |
 |---|---|---|---|---|
-| B-001 | `saveOtherMedicines`의 식별자 추출 패턴 | **[확인: 코드 열람]** `MedicineServiceImpl.saveOtherMedicines`가 `result.at("/openfda/spl_set_id").asText("Unknown")`를 사용. 같은 컨테이너 노드 문제([jsonnode-id-extraction](concepts/jsonnode-id-extraction.md))가 있을 것으로 추정되나 **실행은 하지 않음** | DB 중복 검사가 `""`로 수행될 수 있음 | `extractSplSetId` 재사용. 이 메서드는 `@Transactional` 안에서 외부 호출·건별 `save()`를 하는 등 별도 정리 필요 |
+| B-001 | `saveOtherMedicines`의 식별자 추출 패턴 (**P-002에서 처리**: [P-002-save-other-medicines](problems/P-002-save-other-medicines.md)) | **[확인: 코드 열람]** `MedicineServiceImpl.saveOtherMedicines`가 `result.at("/openfda/spl_set_id").asText("Unknown")`를 사용. 같은 컨테이너 노드 문제([jsonnode-id-extraction](concepts/jsonnode-id-extraction.md))가 있을 것으로 추정되나 **실행은 하지 않음** | DB 중복 검사가 `""`로 수행될 수 있음 | `extractSplSetId` 재사용. 이 메서드는 `@Transactional` 안에서 외부 호출·건별 `save()`를 하는 등 별도 정리 필요 |
 | B-002 | 다른 필드의 빈 배열 NPE | **[확인]** `JsonNodeSplSetIdExtractionTest` 특성화 테스트: `{"brand_name":[]}`에서 `hasRequiredRawFields`가 NPE. 원인은 `MedicineConverter.getFirstValue`의 `valueNode.get(0).asText(...)` | 요청 전체 실패 | `path(0)` 사용 + 해당 항목만 제외. 고치면 특성화 테스트의 기대값도 의도적으로 바꿔야 함 |
 | B-003 | 재시도 시 동일 페이지 반복 요청 | **[확인: 코드 열람]** 루프가 같은 `query`/`requestLimit`으로 재요청하고 `skip`이 없음. P-001은 중복만 막았을 뿐 재시도가 새 데이터를 가져오지는 않음 | 번역·이미지 호출 낭비(영구 탈락 항목), limit 미달 시 3회 반복 후 실패 | `skip` 페이지네이션(FDA `skip` 한도 확인 필요) 또는 재시도 정책 변경 |
 | B-004 | DB unique 제약과 동시 요청 중복 | **[가설]** `Medicine.splSetId`에 `@Column(unique=...)`가 없고 DDL은 저장소에서 확인 불가(`src/main/resources` 부재). 요청 단위 Set은 동시 요청을 막지 못함([request-deduplication](concepts/request-deduplication.md)) | 동시 `POST /medicine/save` 시 중복 행 가능, 운영 DB의 기존 중복 데이터 여부 미확인 | 운영 DB의 중복 조사 → unique 제약 + 예외 처리. DDL 접근 필요 |

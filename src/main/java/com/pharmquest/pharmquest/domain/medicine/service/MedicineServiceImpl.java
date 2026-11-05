@@ -271,7 +271,13 @@ public class MedicineServiceImpl implements MedicineService {
 
                 if (results.isArray()) {
                     for (JsonNode result : results) {
-                        String splSetId = result.at("/openfda/spl_set_id").asText("Unknown");
+                        String splSetId = MedicineConverter.extractSplSetId(result);
+
+                        // 유효한 splSetId가 없으면 DB 검사·변환 대상이 아니다 (원본 필수값 불량과 동일하게 집계)
+                        if (splSetId == null) {
+                            meterRegistry.counter("medicine.raw.invalid.count").increment();
+                            continue;
+                        }
 
                         //  이미 존재하는 데이터는 건너뛰기
                         if (medRepository.existsBySplSetId(splSetId)) {

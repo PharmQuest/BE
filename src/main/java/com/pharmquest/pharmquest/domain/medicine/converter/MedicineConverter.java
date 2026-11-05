@@ -388,6 +388,29 @@ public class MedicineConverter {
         );
     }
 
+    /**
+     * openFDA 응답에서 spl_set_id를 추출한다. spl_set_id는 배열로 오므로 첫 요소를 사용한다
+     * (getFirstValue / SaveConvertToDetail의 splSetId와 같은 규칙).
+     * 필드 누락, 빈 배열, null, 빈 문자열/공백, "Unknown"이면 유효한 ID가 아니므로 null을 반환한다.
+     */
+    public static String extractSplSetId(JsonNode result) {
+        if (result == null) {
+            return null;
+        }
+        JsonNode node = result.at("/openfda/spl_set_id");
+        if (node.isArray()) {
+            node = node.path(0);
+        }
+        if (node.isMissingNode() || node.isNull() || !node.isValueNode()) {
+            return null;
+        }
+        String value = node.asText();
+        if (value == null || value.isBlank() || value.equalsIgnoreCase("Unknown")) {
+            return null;
+        }
+        return value;
+    }
+
     private String getFirstValue(JsonNode node, String path) {
         JsonNode valueNode = node.at("/" + path.replace('.', '/'));
         return valueNode.isArray() ? valueNode.get(0).asText("Unknown") : valueNode.asText("Unknown");

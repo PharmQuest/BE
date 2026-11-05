@@ -358,6 +358,8 @@ public class MedicineServiceImpl implements MedicineService {
             }
 
             List<Medicine> savedMedicines = new ArrayList<>();
+            // 이번 호출에서 save()가 정상 반환된 splSetId (DB 커밋 완료를 의미하지 않음)
+            Set<String> savedSplSetIds = new HashSet<>();
             int requestLimit = 10;  // 한 번 요청할 최대 개수
             int retryCount = 0;
             int totalFetched = 0;  // 가져온 전체 개수
@@ -369,7 +371,15 @@ public class MedicineServiceImpl implements MedicineService {
 
                 if (results.isArray()) {
                     for (JsonNode result : results) {
-                        String splSetId = result.at("/openfda/spl_set_id").asText("Unknown");
+                        String splSetId = MedicineConverter.extractSplSetId(result);
+                        if (splSetId == null) {
+                            meterRegistry.counter("medicine.raw.invalid.count").increment();
+                            continue;
+                        }
+
+                        if (savedSplSetIds.contains(splSetId)) {
+                            continue;
+                        }
 
                         if (medRepository.existsBySplSetId(splSetId)) {
                             continue;
@@ -393,6 +403,7 @@ public class MedicineServiceImpl implements MedicineService {
                             medicine.setWarnings(dto.getWarnings());
 
                             savedMedicines.add(medRepository.save(medicine));
+                            savedSplSetIds.add(splSetId);
                         }
 
                         if (savedMedicines.size() >= limit) break;

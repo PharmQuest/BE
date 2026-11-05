@@ -1,9 +1,62 @@
 # 테스트 환경 현황과 `contextLoads` 실패 (backlog B-005)
 
 - 관련: [backlog](backlog.md) · [P-001-retry-duplicate](problems/P-001-retry-duplicate.md) · [AGENTS.md](../../AGENTS.md)
-- 상태: **기록만 함. 환경은 수정하지 않았다.**
+- 상태: **Phase 1 구현·검증 완료 (Testcontainers MySQL, 로컬 실행)**. 아래 "B-005 Phase 1 결과"가 현재 상태이고, 그 뒤의 "현재 확인된 사실" 이하는 **구현 전(변경 전) 기록**이다.
 
-## 현재 확인된 사실
+## B-005 Phase 1 결과 [확인: 로컬 실행]
+
+### 구성
+
+| 항목 | 내용 |
+|---|---|
+| DB | Testcontainers `mysql:8.0` 컨테이너. DataSource는 `@ServiceConnection`으로 이 컨테이너에서만 연결 정보를 받는다 (`support/MySqlContainerTestConfig`) |
+| 설정 | `src/test/resources/application.yml`: 더미 값(`.invalid` 주소, 가짜 키)만. **`spring.datasource.url`은 정의하지 않는다** (컨테이너 없이는 DataSource가 만들어지지 않아 원격 DB로 우회 불가). 테스트 클래스패스에서 `src/main/resources/application.yml`보다 먼저 발견되어 대체된다 [가설: 이 PC에는 main 쪽 파일이 없어 섞이는 경우를 직접 확인하지 못함] |
+| 프로파일 | `@ActiveProfiles("test")` |
+| 안전장치 | `PharmquestApplicationTests.dataSourceUsesTestcontainerOnly`: Hikari JDBC URL이 컨테이너 URL과 같은지 검사 |
+| 스키마 | `ddl-auto: create-drop` (엔티티 기준 임시 스키마) |
+| 외부 호출 | 컨텍스트 로드 중 S3·번역·FDA·OAuth 호출 없음 [확인: 로그에서 외부 도메인 0건] |
+
+### 버전
+
+- Spring Boot 3.3.7, Testcontainers **1.21.4**, docker-java 3.4.2, MySQL 이미지 `mysql:8.0`.
+- **MySQL 이미지 버전은 운영 버전을 모르는 채 임의로 고른 값이다.** 운영 버전이 확인되면 맞춘다.
+
+### Docker 29 호환 문제와 해결
+
+- 증상 [확인]: Docker Desktop 29.8.2(API 1.56, 최소 1.40, 실제 거부 기준은 1.44)에서 Spring Boot 3.3.7 BOM 기본값 Testcontainers 1.19.8(docker-java 3.3.6)이 `BadRequestException (Status 400 ...)`으로 Docker 환경을 찾지 못했다. 통합 테스트가 **SKIPPED**로 보고되어 성공으로 오인될 수 있었다.
+- 해결 [확인]: `build.gradle`에 `ext['testcontainers.version'] = '1.21.4'`로 Testcontainers만 올렸다. 환경변수·`~/.docker-java.properties` 없이 통과한다.
+- 선택하지 않은 방법: Testcontainers 2.x는 `org.testcontainers:mysql`이 `testcontainers-mysql`로, 컨테이너 클래스가 `org.testcontainers.mysql` 패키지로 바뀌어 Boot 3.3.x와 맞지 않는다고 판단했다 [확인: 2.0.0 릴리스 노트, 적용은 시도하지 않음]. `api.version` 강제(`JAVA_TOOL_OPTIONS`, `.docker-java.properties`)는 JVM·사용자 전역 설정이라 채택하지 않았다.
+- 1.21.4가 Docker 29를 지원한다는 근거는 릴리스 노트의 "recent Docker Engine changes" 문구와 위 실제 실행이다. 공식 문서에서 정확한 수정 내용은 확인하지 못했다.
+
+### SKIPPED 오인 방지 (`@RequiresDocker`)
+
+- `support/RequiresDocker` + `DockerAvailableCondition`: Docker를 쓸 수 없으면 기본은 **SKIPPED** (사유 `NOT RUN: ...`), 환경변수 `REQUIRE_DOCKER=true`이면 **FAILED**.
+- 실제 확인 [확인]: Docker와 클라이언트 API를 비호환(`-Dapi.version=1.32`)으로 만들었을 때, 환경변수 없음 → `skipped=2`·빌드 성공(종료코드 0), `REQUIRE_DOCKER=true` → 실패(종료코드 1).
+- 주의: 빌드가 성공(종료코드 0)이어도 통합 테스트가 SKIPPED일 수 있다. 테스트 리포트의 skipped 수를 확인해야 한다.
+
+### 실행 명령
+
+| 목적 | 명령 (JDK 17 필요) |
+|---|---|
+| 전체 (Docker 있으면 통합 포함, 없으면 통합 SKIPPED) | `./gradlew test` |
+| 통합 테스트만 | `./gradlew test --tests "*PharmquestApplicationTests"` |
+| CI(통합 필수) | `REQUIRE_DOCKER=true ./gradlew test` |
+| 단위 테스트만 | 현재 태그 필터가 없어 별도 명령 없음. `@Tag("integration")`은 붙어 있다 (필터 추가는 build.gradle 변경) |
+
+### 결과
+
+- 전체 **59개 PASS** (단위 57 + 통합 2: `contextLoads`, `dataSourceUsesTestcontainerOnly`), 환경변수 없이 실행.
+- 기존 단위 57개의 결과는 변경 전과 같다. 컨텍스트 생성은 컨테이너 기동 포함 약 1분.
+- 이전의 "전체 45개" 기록은 당시 기준이다. 현재는 59개다.
+
+### 아직 검증하지 않은 것
+
+- JPA 저장·조회, flush, 커밋·롤백 (Phase 1 범위 밖).
+- **운영 DB와 운영 DDL**: 임시 스키마(`create-drop`)는 운영 DDL과 같다는 보장이 없다. `Medicine.splSetId`의 unique 제약(B-004), collation(B-007)은 운영 DDL이 필요하다.
+- 운영 MySQL 버전.
+- CI(`ubuntu-latest`)에서의 실행. `dev_deploy.yml`은 수정하지 않았다.
+
+## 현재 확인된 사실 (구현 전 기록)
 
 | 항목 | 내용 | 근거 |
 |---|---|---|

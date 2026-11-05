@@ -77,5 +77,8 @@
 ## 아직 해결하지 않은 문제
 
 - **[확인]** 다른 필드의 빈 배열에서 `getFirstValue`가 NPE를 던진다 (`JsonNodeSplSetIdExtractionTest`의 특성화 테스트가 현재 동작을 고정). `hasRequiredRawFields`에서 발생하면 요청 전체가 실패한다.
-- **[확인: 코드 열람]** `saveOtherMedicines`는 여전히 `result.at("/openfda/spl_set_id").asText("Unknown")`를 쓴다.
+- **[정정]** `saveOtherMedicines`의 식별자 추출 ([P-002](../problems/P-002-save-other-medicines.md), 커밋 `fbd33cc`):
+  - P-002 이전: `result.at("/openfda/spl_set_id").asText("Unknown")`을 사용했다 (위 표의 컨테이너 노드 문제 대상) [확인: `fbd33cc` diff].
+  - 현재: `MedicineConverter.extractSplSetId(result)`를 재사용하고, 무효 ID(`null`)는 건너뛴다 [확인: 현재 코드 `MedicineServiceImpl.saveOtherMedicines`].
+  - 이 항목은 해결되었다 (backlog B-001).
 - **[가설]** 실제 openFDA 응답에서 빈 배열이 오는 빈도.

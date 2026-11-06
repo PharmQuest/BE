@@ -49,6 +49,44 @@
 - 기존 단위 57개의 결과는 변경 전과 같다. 컨텍스트 생성은 컨테이너 기동 포함 약 1분.
 - 이전의 "전체 45개" 기록은 당시 기준이다. 현재는 59개다.
 
+### CI 통합 테스트 강제와 설정 격리 (B-008, B-009) [로컬 검증만, 실제 CI 미실행]
+
+**`dev_deploy.yml` 변경 (build job):**
+
+| 이전 | 이후 |
+|---|---|
+| `application.yml` 생성 → `build` 한 단계 | `chmod` → **`test`**(`REQUIRE_DOCKER=true`) → **통합 테스트 실행 확인** → `application.yml` 생성 → `build -x test` |
+| 테스트가 운영 설정 파일(시크릿)과 같은 클래스패스에서 실행 | 테스트 단계에는 `src/main/resources/application.yml`이 아직 없다 (jar에 넣을 파일은 테스트 뒤에 생성) |
+| Docker 불가 시 통합 테스트 SKIPPED, 빌드 성공 | `REQUIRE_DOCKER=true`로 FAILED. 추가로 "통합 테스트 실행 확인" 단계가 **`PharmquestApplicationTests`와 `TestConfigIsolationTests` 두 클래스** 각각의 리포트 누락, 실행 0개, `skipped`≥1이면 실패시키고, 전체 리포트에서도 `skipped`≥1을 찾는다 (테스트 개수는 고정하지 않는다) |
+| 테스트 실패 시 배포 | `deploy`는 `needs: build`이므로 test 단계 실패 시 실행되지 않는다 [확인: 워크플로 구조] |
+
+**설정 우선순위 재현 [확인: 로컬 실행]** — 실제 시크릿이 아닌 SENTINEL 값으로 임시 `src/main/resources/application.yml`을 만들어 실행했다 (실행 후 삭제, 작업 트리 정리 확인):
+
+- 클래스패스 순서: `build/resources/test/application.yml`이 `build/resources/main/application.yml`보다 먼저다.
+- 같은 키(`jwt.secret`, `fda.api.api-key` 등)는 테스트 더미 값이 선택되었다.
+- main에만 있는 키(`spring.datasource.url/username/password`, `server.port`, 임의 키)는 모두 **null** — 같은 이름의 파일이라 main 쪽은 로드되지 않는다.
+- 위험한 main 값(`ddl-auto: validate`, 별도 OAuth 등록)도 영향을 주지 않았다. 테스트 로그에 SENTINEL 문자열은 0건.
+- 새 상시 테스트 `TestConfigIsolationTests`(4개): `test` 프로파일 명시 활성화, 더미 값 15개 일치, `application-test.*` 파일 부재, OAuth 등록이 `test` 하나뿐이며 `localhost.invalid`. (`PharmquestApplicationTests`의 DataSource가 컨테이너 URL인지 검사는 기존대로.)
+
+**로컬 검증 결과 [확인]:**
+
+| 조건 | 결과 |
+|---|---|
+| Docker 실행, 환경변수 없음 | 전체 **63 PASS**, 0 FAIL, 0 SKIPPED (단위 57 + 통합 6) |
+| `REQUIRE_DOCKER=true`, 통합만 | 6 PASS |
+| 비호환 시뮬레이션(`-Dapi.version=1.32`), 환경변수 없음 | 통합 6 SKIPPED, 종료코드 0 → "실행 확인" 스크립트가 종료코드 1로 막음 |
+| 비호환 시뮬레이션 + `REQUIRE_DOCKER=true` | 통합 FAILED, 종료코드 1 |
+| 워크플로 YAML | SnakeYAML로 파싱 성공. build job 단계 순서: `test`(5) → 확인(6) → `application.yml` 생성(8) → `build -x test`(9). 어떤 단계에도 `if:`/`continue-on-error`가 없어 앞 단계 실패 시 뒤 단계(빌드·배포)는 실행되지 않는다 |
+| 확인 스크립트 변형 (워크플로의 `run` 블록을 파싱해 그대로 실행, 정상 결과 복사본) | 정상 → 통과, Isolation 리포트 누락 → 실패, Isolation 0개 → 실패, Isolation skipped=1 → 실패, Application 리포트 누락 → 실패 (모두 종료코드 1) |
+
+**확인하지 못한 CI 환경 사항 [가설]:**
+
+- `ubuntu-latest`에서 Docker 사용 및 Testcontainers 1.21.4 동작, `mysql:8.0` 이미지 받기.
+- 실제 `APPLICATION_YML` 시크릿 내용과의 상호작용 (테스트 단계에서는 파일이 없고, 우선순위는 위 재현으로 확인).
+- `gradle/gradle-build-action@v2`가 `env`를 테스트 JVM에 전달하는지, 결과 경로(`build/test-results/test`)가 CI에서도 같은지.
+- 환경변수(`SPRING_*` 등)가 CI 러너에 설정되어 있을 가능성 (DataSource는 `@ServiceConnection`이 우선하지만 다른 키는 환경변수가 yml보다 우선한다).
+- 트리거가 `main` push뿐이라 `dev`/PR에서는 테스트가 돌지 않는다 (변경하지 않음).
+
 ### 아직 검증하지 않은 것
 
 - JPA 저장·조회, flush, 커밋·롤백 (Phase 1 범위 밖).

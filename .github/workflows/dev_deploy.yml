@@ -20,21 +20,43 @@ jobs:
       - name: Delete Gradle Cache  # Gradle 캐시 삭제
         run: rm -rf ~/.gradle/caches ~/.gradle/wrapper
 
+      - name: Grant execute permission for gradlew  # Gradle 실행 권한 부여
+        run: chmod +x gradlew
+
+      # 테스트는 APPLICATION_YML을 만들기 전에 실행한다. 테스트 클래스패스에 운영 설정이 아예 없게 하기 위함이다.
+      # REQUIRE_DOCKER=true: Docker를 쓸 수 없으면 통합 테스트를 SKIP하지 않고 실패시킨다.
+      - name: Test with Gradle  # 테스트 (실패 시 이후 단계와 deploy job이 실행되지 않는다)
+        uses: gradle/gradle-build-action@v2
+        env:
+          REQUIRE_DOCKER: "true"
+        with:
+          arguments: test --stacktrace
+          cache-disabled: true
+
+      - name: Verify integration tests actually ran  # 통합 테스트 클래스가 실행됐고 SKIPPED가 없는지 확인
+        shell: bash
+        run: |
+          for cls in PharmquestApplicationTests TestConfigIsolationTests; do
+            report="build/test-results/test/TEST-com.pharmquest.pharmquest.${cls}.xml"
+            if [ ! -f "$report" ]; then echo "통합 테스트 결과가 없다: $report"; exit 1; fi
+            if ! grep -qE '<testsuite [^>]*tests="[1-9][0-9]*"' "$report"; then echo "$cls: 실행된 테스트가 0개다"; exit 1; fi
+            if ! grep -qE '<testsuite [^>]*skipped="0"' "$report"; then echo "$cls: SKIPPED된 테스트가 있다"; exit 1; fi
+          done
+          if grep -lE '<testsuite [^>]*skipped="[1-9]' build/test-results/test/*.xml; then echo "SKIPPED된 테스트가 있다"; exit 1; fi
+          echo "통합 테스트 클래스가 모두 실행됐고 SKIPPED가 없다"
+
       - name: Ensure resources directory exists
         run: mkdir -p ./src/main/resources
 
-      - name: Make application.yml  # application.yml 설정
+      - name: Make application.yml  # application.yml 설정 (배포용 jar에 포함, 테스트 이후에 생성)
         run: |
           echo "${{ secrets.APPLICATION_YML }}" > ./src/main/resources/application.yml
         shell: bash
 
-      - name: Grant execute permission for gradlew  # Gradle 실행 권한 부여
-        run: chmod +x gradlew
-
-      - name: Build with Gradle  # Gradle 빌드 실행
+      - name: Build with Gradle  # 테스트는 위에서 이미 실행했으므로 jar만 만든다
         uses: gradle/gradle-build-action@v2
         with:
-          arguments: build --stacktrace
+          arguments: build -x test --stacktrace
           cache-disabled: true  #  Gradle 캐시 비활성화
 
       - name: Upload build artifact  # 빌드된 JAR 파일 업로드

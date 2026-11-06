@@ -16,6 +16,7 @@
 | B-010 | 테스트 DB 저장·조회 및 롤백 검증 | **[확인]** Phase 1은 컨텍스트 로드와 DataSource 주소만 검증. JPA 저장·조회, flush, 커밋·롤백은 미검증 (P-001/P-002의 '미검증' 항목) | `saveOtherMedicines`의 건별 `save()`·`IDENTITY`·롤백 동작을 증명하지 못함 | `MedRepository` 저장·조회 테스트, `@Transactional` 롤백 테스트 (Phase 2) |
 | B-011 | 운영 MySQL 버전 및 DDL 확인 | **[확인]** 테스트 이미지 `mysql:8.0`은 운영 버전을 모른 채 고른 값, 스키마는 `create-drop`(엔티티 기준) | 운영 DDL과 다를 수 있음. B-004(unique), B-007(collation) 검증 불가 | 운영 버전 확인 후 이미지 태그 조정, 운영 DDL을 읽기 전용으로 확보해 스키마 비교 (운영 접근 승인 필요) |
 | B-012 | 통합 테스트 실행 시간과 Docker 이미지 캐시 개선 | **[확인]** 컨텍스트 생성은 컨테이너 기동 포함 약 1분. CI는 Gradle 캐시를 지워 의존성을 매번 내려받음 | 빌드 시간 증가 | 컨테이너 재사용, 이미지 캐시, 통합 테스트 태그 분리 검토 |
+| B-013 (**로컬 구현·검증 완료, 실제 GitHub Actions 미실행**) | 배포 없는 PR 테스트 워크플로 | **[확인]** `.github/workflows/pr_test.yml`(`pull_request`→`main`,`dev`, `contents: read`, 시크릿 없음, `REQUIRE_DOCKER=true`, 공용 `scripts/verify-tests.sh`, 실패 시 리포트 업로드, `concurrency`로 이전 실행 취소). `dev_deploy.yml`의 확인 로직도 같은 스크립트로 교체 ([test-environment](test-environment.md)) | **[가설]** 실제 러너에서의 Docker·Testcontainers 1.21.4·`mysql:8.0` 동작, 액션 버전 지원, 소요 시간. `dev_deploy.yml`은 여전히 지원 종료 가능성이 있는 `checkout@v3`/`setup-java@v3`/`gradle-build-action@v2`를 쓴다(변경 안 함) | push 후 안전한 절차로 첫 실행 확인, 브랜치 보호의 필수 상태 검사 지정은 별도 결정 |
 
 ## B-005: 외부 DB 없이 `contextLoads`를 확인하는 방법
 

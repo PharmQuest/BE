@@ -87,6 +87,47 @@
 - 환경변수(`SPRING_*` 등)가 CI 러너에 설정되어 있을 가능성 (DataSource는 `@ServiceConnection`이 우선하지만 다른 키는 환경변수가 yml보다 우선한다).
 - 트리거가 `main` push뿐이라 `dev`/PR에서는 테스트가 돌지 않는다 (변경하지 않음).
 
+### PR 테스트 워크플로와 공용 검증 스크립트 (B-013) [로컬 검증만, 실제 GitHub Actions 미실행]
+
+**구조:**
+
+| 파일 | 역할 |
+|---|---|
+| `scripts/verify-tests.sh` | 테스트 리포트(JUnit XML) 검사. `bash scripts/verify-tests.sh [결과 디렉터리]`. 실패 원인을 모두 출력하고 `exit 1` |
+| `.github/workflows/pr_test.yml` (신규) | `pull_request`(대상 `main`, `dev`) → checkout → JDK 17 → `./gradlew test`(`REQUIRE_DOCKER=true`) → `verify-tests.sh` → 실패 시 리포트 업로드. 배포·시크릿 없음, `permissions: contents: read`, `concurrency`(PR 번호별, 이전 실행 취소), `timeout-minutes: 20` |
+| `.github/workflows/dev_deploy.yml` | 확인 단계의 인라인 스크립트를 `bash scripts/verify-tests.sh` 호출로 교체. 트리거(`push` `main`), deploy job, 단계 순서는 그대로 |
+| `.gitattributes` | `*.sh text eol=lf` 추가 (Windows 체크아웃에서도 스크립트가 LF 유지) |
+
+**`verify-tests.sh` 검사 (이전 인라인 스크립트와 같거나 더 강하다):** 필수 클래스 `PharmquestApplicationTests`, `TestConfigIsolationTests` 각각 (1) 리포트 존재 (2) 실행 ≥ 1 (3) `skipped=0` (이전과 동일), 전체 리포트 `skipped=0` (이전과 동일), 추가로 (4) 필수 클래스의 failures/errors=0 (5) 리포트 형식 읽기 실패 감지 (6) 결과 디렉터리 없음/빈 디렉터리 감지. 누락 시 원인 후보와 존재하는 리포트 목록을 출력한다. 테스트 개수는 고정하지 않는다.
+
+**액션 버전 검토:**
+
+- `pr_test.yml`은 `actions/checkout@v4`, `actions/setup-java@v4`, `actions/upload-artifact@v4`를 쓰고 Gradle은 `./gradlew`를 직접 실행한다(별도 Gradle 액션 없음).
+- 릴리스 페이지에서 확인한 것: checkout은 v7.0.1, setup-java는 v6.2.0이 최신이며 setup-java v4는 "deprecation warning 추가" 상태. 따라서 v4는 **동작은 하지만 최신이 아니다** [확인: 릴리스 페이지]. 각 버전의 Node 런타임 요구사항은 확인하지 못했다 [가설].
+- `gradle/gradle-build-action`은 `gradle/actions/setup-gradle`로 대체되었다고 문서에 명시되어 있다 [확인: 공식 저장소]. `dev_deploy.yml`의 `checkout@v3`, `setup-java@v3`, `gradle-build-action@v2`는 이번에 바꾸지 않았다. 갱신은 별도 작업이다.
+
+**로컬 검증 결과 [확인]:**
+
+| 항목 | 결과 |
+|---|---|
+| 두 워크플로 YAML | SnakeYAML 파싱 성공. `dev_deploy.yml`의 `on`(`push`→`main`), `deploy` job(`needs: build`), 시크릿 사용, 단계 순서 변화 없음. `git diff`상 변경은 확인 단계 한 곳 |
+| `REQUIRE_DOCKER=true` 전체 테스트 | 63 PASS, 0 FAIL, 0 SKIPPED (종료코드 0) |
+| 공통 스크립트, 실제 결과 | 종료코드 0 |
+| 스크립트 변형 | Isolation 리포트 누락·0개·skipped=1·failures=1, 다른 클래스 skipped=2, 형식 깨짐, 디렉터리 없음, 빈 디렉터리 → 모두 종료코드 1과 원인 메시지 |
+| 비호환 시뮬레이션(`-Dapi.version=1.32`), 환경변수 없음 | Gradle 종료코드 0, 통합 SKIPPED → 스크립트 종료코드 1 |
+| 비호환 시뮬레이션 + `REQUIRE_DOCKER=true` | Gradle 종료코드 1 |
+
+**실제 GitHub Actions 실행 후 확인할 항목 [미확인]:**
+
+1. PR 생성 시 `PR Test`가 실행되는지, `dev_deploy.yml`(push `main`만)이 실행되지 않는지.
+2. `ubuntu-latest`에서 Docker 사용, Testcontainers 1.21.4 연결, `mysql:8.0` 이미지 받기, 통합 테스트 6개 실행.
+3. `verify-tests.sh` 통과 (`ubuntu`의 `grep`/`sed`/`bash`에서 같은 결과인지), 리포트 경로 `build/test-results/test`.
+4. `setup-java@v4`, `upload-artifact@v4`, `checkout@v4`의 경고 여부, 소요 시간(컨테이너 기동 포함).
+5. 같은 PR에 새 커밋을 올리면 이전 실행이 취소되는지.
+6. 실패 시 `test-reports` 아티팩트가 올라오는지.
+7. 포크 PR에서의 동작(시크릿 없음).
+8. `main` 푸시 시 `dev_deploy.yml`의 새 확인 단계(스크립트 호출) 동작.
+
 ### 아직 검증하지 않은 것
 
 - JPA 저장·조회, flush, 커밋·롤백 (Phase 1 범위 밖).
